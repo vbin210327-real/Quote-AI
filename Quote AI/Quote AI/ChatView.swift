@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Auth
 
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
@@ -88,6 +89,10 @@ struct ChatView: View {
             .navigationTitle("Quote AI")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    ProfileButton()
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         viewModel.clearChat()
@@ -96,6 +101,95 @@ struct ChatView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+struct ProfileButton: View {
+    @StateObject private var supabaseManager = SupabaseManager.shared
+    @State private var showingProfile = false
+    
+    var body: some View {
+        Button(action: {
+            showingProfile = true
+        }) {
+            Image(systemName: "person.circle.fill")
+                .font(.title2)
+        }
+        .sheet(isPresented: $showingProfile) {
+            ProfileView()
+        }
+    }
+}
+
+struct ProfileView: View {
+    @StateObject private var supabaseManager = SupabaseManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var isSigningOut = false
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    if let email = supabaseManager.currentUser?.email {
+                        HStack {
+                            Text("Email")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(email)
+                        }
+                    }
+                    
+                    if let userId = supabaseManager.currentUser?.id {
+                        HStack {
+                            Text("User ID")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(userId.uuidString.prefix(8) + "...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Section {
+                    Button(action: {
+                        handleSignOut()
+                    }) {
+                        HStack {
+                            if isSigningOut {
+                                ProgressView()
+                                    .padding(.trailing, 8)
+                            }
+                            Text("Sign Out")
+                                .foregroundColor(.red)
+                        }
+                    }
+                    .disabled(isSigningOut)
+                }
+            }
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func handleSignOut() {
+        isSigningOut = true
+        Task {
+            do {
+                try await supabaseManager.signOut()
+                dismiss()
+            } catch {
+                print("Error signing out: \(error)")
+            }
+            isSigningOut = false
         }
     }
 }

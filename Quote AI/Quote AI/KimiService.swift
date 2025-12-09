@@ -46,11 +46,28 @@ class KimiService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(Config.kimiAPIKey)", forHTTPHeaderField: "Authorization")
 
+        // Build dynamic system prompt based on user preferences
+        let preferences = UserPreferences.shared
+        let dynamicPrompt = """
+        \(Config.systemPrompt)
+
+        The user's name is \(preferences.userName).
+        They prefer a \(preferences.quoteTone.rawValue) tone of voice (\(preferences.quoteTone.description)).
+        Their current focus is \(preferences.userFocus.rawValue) (\(preferences.userFocus.description)).
+
+        IMPORTANT - Generation-based tone adjustment:
+        The user is from the \(preferences.userGeneration.rawValue) generation (born \(preferences.userBirthYear)).
+        \(preferences.userGeneration.toneModifier)
+
+        Respond with short, impactful quotes and brief, personalized advice that aligns with this tone, focus, and generational context.
+        Always address the user by name occasionally, but not in every message.
+        """
+
         // Prepare request body
         let kimiRequest = KimiRequest(
             model: Config.modelName,
             messages: [
-                KimiMessage(role: "system", content: Config.systemPrompt),
+                KimiMessage(role: "system", content: dynamicPrompt),
                 KimiMessage(role: "user", content: userMessage)
             ],
             temperature: 0.7,

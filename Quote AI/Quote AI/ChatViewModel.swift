@@ -19,9 +19,14 @@ class ChatViewModel: ObservableObject {
     private let kimiService = KimiService.shared
 
     init() {
-        // Add welcome message
+        // Add personalized welcome message
+        let userName = UserPreferences.shared.userName
+        let welcomeContent = userName.isEmpty 
+            ? "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
+            : "Hi \(userName)! I'm ready to help. Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
+            
         let welcomeMessage = ChatMessage(
-            content: "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you.",
+            content: welcomeContent,
             isUser: false
         )
         messages.append(welcomeMessage)
@@ -72,9 +77,14 @@ class ChatViewModel: ObservableObject {
 
     func clearChat() {
         messages.removeAll()
-        // Re-add welcome message
+        // Re-add personalized welcome message
+        let userName = UserPreferences.shared.userName
+        let welcomeContent = userName.isEmpty 
+            ? "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
+            : "Hi \(userName)! I'm ready to help. Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
+            
         let welcomeMessage = ChatMessage(
-            content: "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you.",
+            content: welcomeContent,
             isUser: false
         )
         messages.append(welcomeMessage)
