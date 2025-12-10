@@ -18,6 +18,7 @@ struct OnboardingView: View {
     @State private var isSigningIn = false
     @State private var errorMessage: String?
     @State private var navigationCounter = 0
+    @State private var setupLoadingComplete = false
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -27,69 +28,79 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Navigation & Progress
-                HStack(spacing: 16) {
-                    // Back Button - Always visible
-                    Button(action: {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        if currentStep > 0 {
-                            withAnimation {
-                                currentStep -= 1
-                                navigationCounter += 1
+                // Top Navigation & Progress - Hidden during setup loading step
+                if currentStep != 10 {
+                    HStack(spacing: 16) {
+                        // Back Button - Always visible
+                        Button(action: {
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                            if currentStep > 0 {
+                                withAnimation {
+                                    // Skip loading step (10) when going back from sign-in (11)
+                                    if currentStep == 11 {
+                                        currentStep = 9 // Go directly to personalize page
+                                        setupLoadingComplete = false // Reset loading state
+                                    } else {
+                                        currentStep -= 1
+                                    }
+                                    navigationCounter += 1
+                                }
+                            } else {
+                                // On first step, go back to Welcome
+                                onGoBack?()
                             }
-                        } else {
-                            // On first step, go back to Welcome
-                            onGoBack?()
+                        }) {
+                            Image(systemName: "arrow.left")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(width: 44, height: 44)
                         }
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.black)
-                            .frame(width: 44, height: 44)
-                    }
-                    
-                    // Linear Progress Bar
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            // Track
-                            Capsule()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 4)
-                            
-                            // Fill
-                            Capsule()
-                                .fill(Color.black)
-                                .frame(width: geometry.size.width * (CGFloat(currentStep + 1) / 11.0), height: 4)
-                                .animation(.spring(), value: currentStep)
+
+                        // Linear Progress Bar
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                // Track
+                                Capsule()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 4)
+
+                                // Fill
+                                Capsule()
+                                    .fill(Color.black)
+                                    .frame(width: geometry.size.width * (CGFloat(currentStep + 1) / 12.0), height: 4)
+                                    .animation(.spring(), value: currentStep)
+                            }
+                            .frame(height: 4)
+                            .frame(maxHeight: .infinity, alignment: .center)
                         }
                         .frame(height: 4)
-                        .frame(maxHeight: .infinity, alignment: .center)
                     }
-                    .frame(height: 4)
+                    .frame(height: 44)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
                 }
-                .frame(height: 44)
-                .padding(.horizontal, 24)
-                .padding(.top, 10)
                 
-                // Title and Subtitle (dynamic based on step)
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(stepTitle)
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? nil : 1)
-                        .minimumScaleFactor(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? 1.0 : 0.5)
-                        .fixedSize(horizontal: false, vertical: true)
-                    
-                    Text(stepSubtitle)
-                        .font(.system(size: 17))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.leading)
+                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step
+                if currentStep != 10 {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(stepTitle)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? nil : 1)
+                            .minimumScaleFactor(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? 1.0 : 0.5)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(stepSubtitle)
+                            .font(.system(size: 17))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 0)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 24)
-                .padding(.top, 0)
 
                 Spacer()
 
@@ -125,6 +136,9 @@ struct OnboardingView: View {
                     case 9:
                         personalizeStep
                             .id("personalize-\(navigationCounter)")
+                    case 10:
+                        setupLoadingStep
+                            .id("setup-\(navigationCounter)")
                     default:
                         signInStep
                     }
@@ -134,6 +148,7 @@ struct OnboardingView: View {
                 Spacer()
                 
                 // Continue Button - Same position as Get Started in WelcomeView
+                // Hide for setup loading step (10) which shows its own button, and sign-in step (11)
                 if currentStep < 10 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
@@ -152,6 +167,29 @@ struct OnboardingView: View {
                     .disabled((currentStep == 0 && selectedGender.isEmpty) || (currentStep == 1 && nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
                     .opacity((currentStep == 0 && selectedGender.isEmpty) || (currentStep == 1 && nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ? 0.5 : 1.0)
                     .padding(.bottom, 20)
+                }
+
+                // "Let's get started" button for setup loading step (10)
+                if currentStep == 10 && setupLoadingComplete {
+                    Button(action: {
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.impactOccurred()
+                        withAnimation {
+                            currentStep = 11
+                            navigationCounter += 1
+                        }
+                    }) {
+                        Text("Let's get started")
+                            .font(.system(size: 18, weight: .semibold))
+                            .italic()
+                            .foregroundColor(.white)
+                            .frame(width: UIScreen.main.bounds.width - 40)
+                            .frame(height: 60)
+                            .background(Color.black)
+                            .cornerRadius(30)
+                    }
+                    .padding(.bottom, 20)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
         }
@@ -179,23 +217,25 @@ struct OnboardingView: View {
         case 7: return "Quote AI will bring out the best in you."
         case 8: return "Pick a personality for your Quote AI experience."
         case 9: return ""
-        default: return "Sign In"
+        case 10: return ""
+        default: return "Save your progress"
         }
     }
 
     // Dynamic subtitle based on current step
     var stepSubtitle: String {
         switch currentStep {
-        case 0: return "This will be used to calibrate your custom plan"
-        case 1: return "This will be used to calibrate your custom plan"
-        case 2: return "This will be used to calibrate your custom plan"
+        case 0: return "This will be used to personalize Quote AI for you"
+        case 1: return "This will be used to personalize Quote AI for you"
+        case 2: return "This will be used to personalize Quote AI for you"
         case 3: return ""
         case 4: return ""
         case 5: return ""
         case 6: return ""
         case 7: return ""
-        case 8: return "This will be used to calibrate your custom plan"
+        case 8: return "This will be used to personalize Quote AI for you"
         case 9: return ""
+        case 10: return ""
         default: return ""
         }
     }
@@ -290,7 +330,15 @@ struct OnboardingView: View {
         )
     }
 
-    // Step 10: Sign In
+    // Step 10: Setup Loading
+    var setupLoadingStep: some View {
+        SetupLoadingStepView(
+            isActive: .constant(currentStep == 10),
+            isLoadingComplete: $setupLoadingComplete
+        )
+    }
+
+    // Step 11: Sign In
     var signInStep: some View {
         VStack(spacing: 30) {
             Text("One last step.")
@@ -1415,87 +1463,87 @@ struct MindsetChartStepView: View {
 struct PersonalizeStepView: View {
     @Binding var isActive: Bool
     @State private var showContent = false
-    @State private var leftHandOffset: CGFloat = -50
-    @State private var rightHandOffset: CGFloat = 50
-    @State private var leftHandRotation: Double = 25
-    @State private var rightHandRotation: Double = -25
-    @State private var handsScale: CGFloat = 1.0
-    @State private var showImpactLines = false
 
     var body: some View {
-        VStack(spacing: 30) {
-            Spacer()
+        ScrollView {
+            VStack(spacing: 24) {
+                // Clapping hands scene - static, no animation
+                clapScene
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : 24)
+                    .animation(
+                        .spring(response: 0.7, dampingFraction: 0.8, blendDuration: 0)
+                        .delay(0.05),
+                        value: showContent
+                    )
 
-            // Animated Clap Hands - Using 3D Apple emoji style
-            ZStack {
-                // Impact lines that appear on clap
-                ForEach(0..<3) { i in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.orange.opacity(0.8))
-                        .frame(width: 5, height: 18)
-                        .offset(y: -90)
-                        .rotationEffect(.degrees(Double(i - 1) * 25))
-                        .opacity(showImpactLines ? 1 : 0)
-                        .scaleEffect(showImpactLines ? 1 : 0.5)
+                // Text
+                VStack(spacing: 8) {
+                    Text("Now let's personalize")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.black)
+
+                    Text("Quote AI for you")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.black)
                 }
+                .multilineTextAlignment(.center)
+                .offset(y: showContent ? 0 : 20)
+                .opacity(showContent ? 1 : 0)
+                .animation(
+                    .spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)
+                    .delay(0.1),
+                    value: showContent
+                )
 
-                // Left hand (3D emoji, flipped)
-                Image("LeftHand")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-                    .rotationEffect(.degrees(leftHandRotation))
-                    .offset(x: leftHandOffset)
-                    .scaleEffect(handsScale)
+                // Privacy + security reassurance card
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.8))
+                            .frame(width: 38, height: 38)
+                            .shadow(color: .black.opacity(0.08), radius: 6, x: 0, y: 3)
 
-                // Right hand (3D emoji)
-                Image("RightHand")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-                    .rotationEffect(.degrees(rightHandRotation))
-                    .offset(x: rightHandOffset)
-                    .scaleEffect(handsScale)
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.black)
+                    }
+
+                    VStack(spacing: 6) {
+                        Text("Your privacy and security matter to us.")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+                        Text("We keep your info private and only use it to tailor your experience.")
+                            .font(.system(size: 15))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .padding(.vertical, 18)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .background(Color.gray.opacity(0.12))
+                .cornerRadius(16)
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 10)
+                .animation(
+                    .spring(response: 0.6, dampingFraction: 0.9, blendDuration: 0)
+                    .delay(0.2),
+                    value: showContent
+                )
+
+                Spacer(minLength: 12)
             }
-            .offset(y: showContent ? 0 : 50)
-            .opacity(showContent ? 1 : 0)
-            .animation(
-                .spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0)
-                .delay(0.1),
-                value: showContent
-            )
-
-            // Text
-            VStack(spacing: 8) {
-                Text("Now let's personalize")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
-
-                Text("Quote AI for you")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
-            }
-            .multilineTextAlignment(.center)
-            .offset(y: showContent ? 0 : 30)
-            .opacity(showContent ? 1 : 0)
-            .animation(
-                .spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)
-                .delay(0.3),
-                value: showContent
-            )
-
-            Spacer()
-            Spacer()
+            .padding(.horizontal, 24)
+            .padding(.top, 10)
+            .padding(.bottom, 30)
         }
-        .padding(.horizontal, 24)
         .onChange(of: isActive) { active in
             if active {
-                resetState()
+                showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     showContent = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    startClapAnimation()
                 }
             }
         }
@@ -1504,86 +1552,279 @@ struct PersonalizeStepView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     showContent = true
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    startClapAnimation()
+            }
+        }
+    }
+
+    private var clapScene: some View {
+        let ringSize: CGFloat = 260
+        return ZStack {
+            // Thin gradient ring matching the progress bar colors
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: Color(red: 0.65, green: 0.88, blue: 0.82), location: 0.0),  // Mint
+                            .init(color: Color(red: 0.98, green: 0.78, blue: 0.65), location: 0.5),  // Peach
+                            .init(color: Color(red: 0.65, green: 0.88, blue: 0.82), location: 1.0)   // Mint
+                        ]),
+                        center: .center
+                    ),
+                    lineWidth: 4
+                )
+                .frame(width: ringSize, height: ringSize)
+                .opacity(0.7)
+
+            // Small decorative dots around the ring
+            ForEach(0..<12) { i in
+                Rectangle()
+                    .fill(Color.black.opacity(0.6))
+                    .frame(width: 4, height: 4)
+                    .rotationEffect(.degrees(45))
+                    .offset(y: -ringSize / 2 + 25)
+                    .rotationEffect(.degrees(Double(i) * 30))
+            }
+
+            // Clapping hands image - static
+            Image("ClapHands")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 200, height: 200)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct SetupLoadingStepView: View {
+    @Binding var isActive: Bool
+    @Binding var isLoadingComplete: Bool
+
+    @State private var progress: Double = 0
+    @State private var currentStatusText = "Analyzing your preferences..."
+    @State private var showContent = false
+
+    // Setup items that will appear with checkmarks
+    private let setupItems = [
+        "Personalized quotes",
+        "Daily motivation schedule",
+        "Theme preferences",
+        "Notification settings"
+    ]
+
+    @State private var completedItems: Set<Int> = []
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Percentage display
+            Text("\(Int(progress * 100))%")
+                .font(.system(size: 72, weight: .bold))
+                .foregroundColor(.black)
+                .opacity(showContent ? 1 : 0)
+                .animation(.easeOut(duration: 0.5), value: showContent)
+
+            // Title text
+            Text("We're setting up\nQuote AI for you")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .padding(.top, 16)
+                .opacity(showContent ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.1), value: showContent)
+
+            // Progress bar with gradient
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Track background
+                    Capsule()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 8)
+
+                    // Gradient fill - mint/cyan to peach/coral
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color(red: 0.65, green: 0.88, blue: 0.82), // Soft mint/cyan
+                                    Color(red: 0.98, green: 0.78, blue: 0.65), // Peach/coral
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: geometry.size.width * progress, height: 8)
+                        .animation(.easeInOut(duration: 0.3), value: progress)
                 }
             }
+            .frame(height: 8)
+            .padding(.horizontal, 40)
+            .padding(.top, 32)
+            .opacity(showContent ? 1 : 0)
+            .animation(.easeOut(duration: 0.5).delay(0.2), value: showContent)
+
+            // Status text
+            Text(currentStatusText)
+                .font(.system(size: 16))
+                .foregroundColor(.gray)
+                .padding(.top, 16)
+                .opacity(showContent ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.3), value: showContent)
+
+            Spacer()
+
+            // Setup items list
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Setting up for you")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.black)
+
+                ForEach(Array(setupItems.enumerated()), id: \.offset) { index, item in
+                    HStack(spacing: 12) {
+                        Text("•")
+                            .font(.system(size: 16))
+                            .foregroundColor(.black)
+
+                        Text(item)
+                            .font(.system(size: 16))
+                            .foregroundColor(.black)
+
+                        Spacer()
+
+                        if completedItems.contains(index) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black)
+                                    .frame(width: 24, height: 24)
+
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 24)
+            .opacity(showContent ? 1 : 0)
+            .animation(.easeOut(duration: 0.5).delay(0.4), value: showContent)
+
+            Spacer()
         }
-    }
-
-    private func resetState() {
-        showContent = false
-        leftHandOffset = -50
-        rightHandOffset = 50
-        leftHandRotation = 25
-        rightHandRotation = -25
-        handsScale = 1.0
-        showImpactLines = false
-    }
-
-    private func startClapAnimation() {
-        // Phase 1: Hands come together (CLAP!)
-        withAnimation(.easeIn(duration: 0.12)) {
-            leftHandOffset = 0
-            rightHandOffset = 0
-            leftHandRotation = 8
-            rightHandRotation = -8
-            handsScale = 1.08
-        }
-
-        // Show impact lines at the moment of clap
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(.easeOut(duration: 0.08)) {
-                showImpactLines = true
+        .onChange(of: isActive) { active in
+            if active {
+                startLoadingAnimation()
+            } else {
+                // Reset state when leaving
+                progress = 0
+                completedItems = []
+                showContent = false
+                isLoadingComplete = false
             }
         }
-
-        // Phase 2: Hands bounce apart
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation(.easeOut(duration: 0.15)) {
-                leftHandOffset = -35
-                rightHandOffset = 35
-                leftHandRotation = 20
-                rightHandRotation = -20
-                handsScale = 1.0
-                showImpactLines = false
-            }
-        }
-
-        // Phase 3: Second clap - hands come together again
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-            withAnimation(.easeIn(duration: 0.12)) {
-                leftHandOffset = 0
-                rightHandOffset = 0
-                leftHandRotation = 8
-                rightHandRotation = -8
-                handsScale = 1.08
-            }
-        }
-
-        // Show impact lines for second clap
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-            withAnimation(.easeOut(duration: 0.08)) {
-                showImpactLines = true
-            }
-        }
-
-        // Phase 4: Hands bounce apart again
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
-            withAnimation(.easeOut(duration: 0.18)) {
-                leftHandOffset = -50
-                rightHandOffset = 50
-                leftHandRotation = 25
-                rightHandRotation = -25
-                handsScale = 1.0
-                showImpactLines = false
-            }
-        }
-
-        // Repeat the animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+        .onAppear {
             if isActive {
-                startClapAnimation()
+                startLoadingAnimation()
+            }
+        }
+    }
+
+    private func startLoadingAnimation() {
+        showContent = false
+        progress = 0
+        completedItems = []
+        isLoadingComplete = false
+        currentStatusText = "Analyzing your preferences..."
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            showContent = true
+        }
+
+        // Increment 1% at a time, with variable delays
+        // Slower near the end (90-100%)
+        var accumulatedTime: Double = 0.5 // Start delay
+
+        for i in 1...100 {
+            // Calculate delay for each percentage point
+            let delayForThisStep: Double
+
+            if i <= 50 {
+                // 0-50%: Normal speed (~0.08s per %)
+                delayForThisStep = 0.08
+            } else if i <= 75 {
+                // 50-75%: Slightly slower (~0.10s per %)
+                delayForThisStep = 0.10
+            } else if i <= 85 {
+                // 75-85%: Slower (~0.15s per %)
+                delayForThisStep = 0.15
+            } else if i <= 92 {
+                // 85-92%: Even slower (~0.25s per %)
+                delayForThisStep = 0.25
+            } else if i <= 97 {
+                // 92-97%: Very slow (~0.4s per %)
+                delayForThisStep = 0.40
+            } else {
+                // 97-100%: Crawling (~0.6s per %)
+                delayForThisStep = 0.60
+            }
+
+            accumulatedTime += delayForThisStep
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + accumulatedTime) {
+                // Update progress 1% at a time
+                progress = Double(i) / 100.0
+
+                // Update status text and checkmarks based on progress with haptic feedback
+                if i == 25 && !completedItems.contains(0) {
+                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        completedItems.insert(0)
+                    }
+                    // Haptic feedback when item completes
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                    currentStatusText = "Creating your quote collection..."
+                }
+                if i == 50 && !completedItems.contains(1) {
+                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        completedItems.insert(1)
+                    }
+                    // Haptic feedback when item completes
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                    currentStatusText = "Configuring your schedule..."
+                }
+                if i == 75 && !completedItems.contains(2) {
+                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        completedItems.insert(2)
+                    }
+                    // Haptic feedback when item completes
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                    currentStatusText = "Applying final touches..."
+                }
+                if i == 95 && !completedItems.contains(3) {
+                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        completedItems.insert(3)
+                    }
+                    // Haptic feedback when item completes - slightly stronger for final item
+                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                    impact.impactOccurred()
+                    currentStatusText = "All done!"
+                }
+
+                // Signal loading complete at 100%
+                if i == 100 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation {
+                            isLoadingComplete = true
+                        }
+                        // Success haptic when button appears
+                        let notification = UINotificationFeedbackGenerator()
+                        notification.notificationOccurred(.success)
+                    }
+                }
             }
         }
     }
