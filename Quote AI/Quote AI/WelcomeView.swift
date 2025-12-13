@@ -15,6 +15,10 @@ struct WelcomeView: View {
     @State private var isSigningIn = false
     @State private var errorMessage: String?
     
+    // Animation States
+    @State private var startMotivateAnimation = false
+    @State private var startSubtitleAnimation = false
+    
     var body: some View {
         ZStack {
             // Background Image
@@ -41,26 +45,46 @@ struct WelcomeView: View {
                 VStack(spacing: 0) {
                     // "Quote to motivate" with strikethrough on "motivate"
                     HStack(spacing: 0) {
-                        Text("Quote to ")
-                            .font(.system(size: 36, weight: .bold))
-                            .italic()
-                            .foregroundColor(Color(hex: "EAEAEA"))
+                        TypewriterView(
+                            text: "Quote to ",
+                            font: .system(size: 36, weight: .bold),
+                            textColor: Color(hex: "EAEAEA"),
+                            isItalic: true,
+                            speed: 0.1,
+                            isActive: true, // First one starts immediately
+                            onComplete: {
+                                startMotivateAnimation = true
+                            }
+                        )
                         
-                        Text("motivate")
-                            .font(.system(size: 36, weight: .bold))
-                            .italic()
-                            .foregroundColor(Color.gray.opacity(0.6))
-                            .strikethrough(true, color: Color.gray.opacity(0.8))
+                        TypewriterView(
+                            text: "motivate",
+                            font: .system(size: 36, weight: .bold),
+                            textColor: Color.gray.opacity(0.6),
+                            isItalic: true,
+                            isStrikethrough: true,
+                            strikeColor: Color.gray.opacity(0.8),
+                            speed: 0.1,
+                            isActive: startMotivateAnimation, // Waits for "Quote to "
+                            onComplete: {
+                                startSubtitleAnimation = true
+                            }
+                        )
                     }
                     .multilineTextAlignment(.center)
                     
-                    Text("become the best\nversion of yourself")
-                        .font(.system(size: 36, weight: .bold))
-                        .italic()
-                        .foregroundColor(Color(hex: "EAEAEA"))
-                        .multilineTextAlignment(.center)
-                        .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
-                        .padding(.top, 4)
+                    TypewriterView(
+                        text: "become the best\nversion of yourself",
+                        font: .system(size: 36, weight: .bold),
+                        textColor: Color(hex: "EAEAEA"),
+                        isItalic: true,
+                        speed: 0.05,
+                        startDelay: 0.2, // Slight pause after "motivate"
+                        isActive: startSubtitleAnimation // Waits for "motivate"
+                    )
+                    .multilineTextAlignment(.center)
+                    .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
+                    .padding(.top, 4)
                 }
                 .padding(.bottom, 150) // Adjust spacing to match design
                 

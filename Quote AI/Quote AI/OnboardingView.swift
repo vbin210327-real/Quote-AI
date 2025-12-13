@@ -19,6 +19,7 @@ struct OnboardingView: View {
     @State private var errorMessage: String?
     @State private var navigationCounter = 0
     @State private var setupLoadingComplete = false
+    @State private var animateSuccessIcon = false
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -33,7 +34,7 @@ struct OnboardingView: View {
                     HStack(spacing: 16) {
                         // Back Button - Always visible
                         Button(action: {
-                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            let impact = UIImpactFeedbackGenerator(style: .light)
                             impact.impactOccurred()
                             if currentStep > 0 {
                                 withAnimation {
@@ -86,8 +87,8 @@ struct OnboardingView: View {
                     .padding(.top, 10)
                 }
                 
-                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step
-                if currentStep != 10 {
+                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (10) and setup complete step (11)
+                if currentStep != 10 && currentStep != 11 {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(stepTitle)
                             .font(.system(size: 32, weight: .bold))
@@ -107,7 +108,9 @@ struct OnboardingView: View {
                     .padding(.top, 0)
                 }
 
-                Spacer()
+                if currentStep != 11 {
+                    Spacer()
+                }
 
                 // Content Steps - Custom container (no swipe navigation)
                 Group {
@@ -156,7 +159,9 @@ struct OnboardingView: View {
                 }
                 .animation(.easeInOut(duration: 0.3), value: currentStep)
 
-                Spacer()
+                if currentStep != 11 {
+                    Spacer()
+                }
                 
                 // Continue Button - Same position as Get Started in WelcomeView
                 // Hide for setup loading step (10) which shows its own button, and sign-in step (11)
@@ -360,9 +365,36 @@ struct OnboardingView: View {
     var setupCompleteStep: some View {
         ScrollView {
             VStack(spacing: 22) {
-                Spacer(minLength: 0)
+
+                // Removed Spacer(minLength: 0) to allow top alignment
+                // Removed Spacer(minLength: 0) and Color.clear for max top alignment
 
                 VStack(spacing: 4) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(hex: "1C1C1E")) // Dark gray/black background
+                            .frame(width: 80, height: 80)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 32, weight: .bold)) // Thick checkmark
+                            .foregroundColor(Color(hex: "E4CFAA")) // Beige color
+                    }
+                    .scaleEffect(animateSuccessIcon ? 1.0 : 0.001)
+                    .opacity(animateSuccessIcon ? 1 : 0)
+                    .animation(
+                        .spring(response: 0.6, dampingFraction: 0.5, blendDuration: 0),
+                        value: animateSuccessIcon
+                    )
+                    .padding(.bottom, 16)
+                    .onAppear {
+                        // Reset first in case we come back
+                        animateSuccessIcon = false
+                        // Trigger animation after slight delay for visual impact
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            animateSuccessIcon = true
+                        }
+                    }
+
                     Text("Congratulations")
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
