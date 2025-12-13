@@ -28,7 +28,7 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top Navigation & Progress - Hidden during setup loading step
+                // Top Navigation & Progress - Hidden only during setup loading step
                 if currentStep != 10 {
                     HStack(spacing: 16) {
                         // Back Button - Always visible
@@ -37,8 +37,8 @@ struct OnboardingView: View {
                             impact.impactOccurred()
                             if currentStep > 0 {
                                 withAnimation {
-                                    // Skip loading step (10) when going back from sign-in (11)
-                                    if currentStep == 11 {
+                                    // Skip loading (10) and congrats (11) when going back from sign-in (12) or congrats (11)
+                                    if currentStep >= 11 {
                                         currentStep = 9 // Go directly to personalize page
                                         setupLoadingComplete = false // Reset loading state
                                     } else {
@@ -59,6 +59,11 @@ struct OnboardingView: View {
 
                         // Linear Progress Bar
                         GeometryReader { geometry in
+                            let totalSteps: CGFloat = 12 // sign-in (step 12) is the final step
+                            let clampedStep = min(max(CGFloat(currentStep), 0), totalSteps)
+                            // Ensure first page shows some progress, but only fill to 100% on final step.
+                            let minimum = 1 / totalSteps
+                            let progressRatio = min(1, max(minimum, clampedStep / totalSteps))
                             ZStack(alignment: .leading) {
                                 // Track
                                 Capsule()
@@ -68,7 +73,7 @@ struct OnboardingView: View {
                                 // Fill
                                 Capsule()
                                     .fill(Color.black)
-                                    .frame(width: geometry.size.width * (CGFloat(currentStep + 1) / 12.0), height: 4)
+                                    .frame(width: geometry.size.width * progressRatio, height: 4)
                                     .animation(.spring(), value: currentStep)
                             }
                             .frame(height: 4)
@@ -139,6 +144,12 @@ struct OnboardingView: View {
                     case 10:
                         setupLoadingStep
                             .id("setup-\(navigationCounter)")
+                    case 11:
+                        setupCompleteStep
+                            .id("complete-\(navigationCounter)")
+                    case 12:
+                        signInStep
+                            .id("signin-\(navigationCounter)")
                     default:
                         signInStep
                     }
@@ -169,19 +180,17 @@ struct OnboardingView: View {
                     .padding(.bottom, 20)
                 }
 
-                // "Let's get started" button for setup loading step (10)
-                if currentStep == 10 && setupLoadingComplete {
+                if currentStep == 11 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
                         withAnimation {
-                            currentStep = 11
+                            currentStep = 12
                             navigationCounter += 1
                         }
                     }) {
-                        Text("Let's get started")
+                        Text("Let's get started!")
                             .font(.system(size: 18, weight: .semibold))
-                            .italic()
                             .foregroundColor(.white)
                             .frame(width: UIScreen.main.bounds.width - 40)
                             .frame(height: 60)
@@ -196,6 +205,13 @@ struct OnboardingView: View {
         .onAppear {
             selectedGender = preferences.userGender
             nameInput = preferences.userName
+        }
+        .onChange(of: setupLoadingComplete) { complete in
+            guard complete, currentStep == 10 else { return }
+            withAnimation {
+                currentStep = 11
+                navigationCounter += 1
+            }
         }
         .onChange(of: supabaseManager.isAuthenticated) { isAuthenticated in
             if isAuthenticated {
@@ -214,11 +230,13 @@ struct OnboardingView: View {
         case 4: return "What is currently draining your energy?"
         case 5: return "What are you seeking?"
         case 6: return "What's your biggest obstacle right now?"
-        case 7: return "Quote AI will bring out the best in you."
+        case 7: return "Leverage Quote AI for results that matter."
         case 8: return "Pick a personality for your Quote AI experience."
         case 9: return ""
         case 10: return ""
-        default: return "Save your progress"
+        case 11: return ""
+        case 12: return "Save your progress"
+        default: return ""
         }
     }
 
@@ -238,6 +256,14 @@ struct OnboardingView: View {
         case 10: return ""
         default: return ""
         }
+    }
+
+    private var transformationDateString: String {
+        let calendar = Calendar.current
+        let threeMonthsLater = calendar.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        return formatter.string(from: threeMonthsLater)
     }
     // Step 0: Gender - Use GenderStepView
     var genderStep: some View {
@@ -328,6 +354,86 @@ struct OnboardingView: View {
         PersonalizeStepView(
             isActive: .constant(currentStep == 9)
         )
+    }
+
+    // Step 11: Setup Complete
+    var setupCompleteStep: some View {
+        ScrollView {
+            VStack(spacing: 22) {
+                Spacer(minLength: 0)
+
+                VStack(spacing: 4) {
+                    Text("Congratulations")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+
+                    Text("your custom Quote AI is ready!")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                VStack(spacing: 16) {
+                    Text("You have huge potential to become a completely unrecognizable version of yourself by \(transformationDateString).")
+                        .font(.system(size: 17))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(transformationDateString)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(Color(.systemGray6))
+                        .clipShape(Capsule())
+                }
+
+                VStack(spacing: 16) {
+                    Text("Your Quote AI is tuned with your preferences, energy, and goals.")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+
+                    VStack(spacing: 14) {
+                        completionRow(title: "Personalized prompts", detail: "Built from your answers.")
+                        completionRow(title: "Motivation cadence", detail: "Scheduled for your flow.")
+                        completionRow(title: "Tone & persona", detail: "Matched to your vibe.")
+                    }
+                    .padding(18)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .background(Color(.systemGray6).opacity(0.65))
+                    .cornerRadius(18)
+                }
+
+                Spacer(minLength: 12)
+            }
+            .padding(.horizontal, 24)
+        }
+    }
+
+    @ViewBuilder
+    private func completionRow(title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(Color.black)
+                .frame(width: 10, height: 10)
+                .padding(.top, 6)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+
+                Text(detail)
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+            }
+
+            Spacer()
+        }
     }
 
     // Step 10: Setup Loading
@@ -1827,5 +1933,14 @@ struct SetupLoadingStepView: View {
                 }
             }
         }
+    }
+}
+
+/// Circular rendering of the provided check icon with its background masked away.
+struct ReadyCheckIconView: View {
+    var body: some View {
+        Image("SetupReadyIcon")
+            .resizable()
+            .scaledToFit()
     }
 }
