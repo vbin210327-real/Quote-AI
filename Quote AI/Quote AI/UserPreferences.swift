@@ -217,6 +217,12 @@ class UserPreferences: ObservableObject {
             UserDefaults.standard.set(hasSeenWelcome, forKey: "hasSeenWelcome")
         }
     }
+
+    @Published var hasPlayedWelcomeIntro: Bool {
+        didSet {
+            UserDefaults.standard.set(hasPlayedWelcomeIntro, forKey: "hasPlayedWelcomeIntro")
+        }
+    }
     private init() {
         self.userName = UserDefaults.standard.string(forKey: "userName") ?? ""
         self.userGender = UserDefaults.standard.string(forKey: "userGender") ?? ""
@@ -265,6 +271,7 @@ class UserPreferences: ObservableObject {
 
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         self.hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
+        self.hasPlayedWelcomeIntro = UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
     }
     
     func completeOnboarding() {
