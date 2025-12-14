@@ -408,7 +408,7 @@ struct OnboardingView: View {
                 }
 
                 VStack(spacing: 16) {
-                    Text("You have huge potential to become a completely unrecognizable version of yourself by \(transformationDateString).")
+                    Text("You have huge potential to become a completely unrecognizable version of yourself by:")
                         .font(.system(size: 17))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
@@ -424,15 +424,15 @@ struct OnboardingView: View {
                 }
 
                 VStack(spacing: 16) {
-                    Text("Your Quote AI is tuned with your preferences, energy, and goals.")
+                    Text("Why Quote AI can help you get there")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.black)
                         .multilineTextAlignment(.center)
 
                     VStack(spacing: 14) {
-                        completionRow(title: "Personalized prompts", detail: "Built from your answers.")
-                        completionRow(title: "Motivation cadence", detail: "Scheduled for your flow.")
-                        completionRow(title: "Tone & persona", detail: "Matched to your vibe.")
+                        completionRow(title: "Built from your inputs", detail: "It uses your goals and barriers to generate quotes that actually fit you.")
+                        completionRow(title: "Energy-matched motivation", detail: "The tone and intensity adapt to how you feel today.")
+                        completionRow(title: "Action, not just inspiration", detail: "You get a clear next step so momentum keeps building.")
                     }
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .center)
