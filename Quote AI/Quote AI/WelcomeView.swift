@@ -14,28 +14,41 @@ struct WelcomeView: View {
     @State private var showSignInSheet = false
     @State private var isSigningIn = false
     @State private var errorMessage: String?
+
+    private static let backgroundUIImage: UIImage? = UIImage(named: "welcome_background")
+    private static let googleLogoUIImage: UIImage? = UIImage(named: "google_logo")
     
     // Animation States
+    @State private var showMissionStatement = false
+    @State private var startQuoteToAnimation = false
+    @State private var showRestOfContent = false
     @State private var startMotivateAnimation = false
     @State private var startSubtitleAnimation = false
+    @State private var motivateTextColor = Color(hex: "EAEAEA")
+    @State private var motivateIsStrikethrough = false
     
     var body: some View {
         ZStack {
             // Background Image
-            if let bgPath = Bundle.main.path(forResource: "welcome_background", ofType: "png"),
-               let uiImage = UIImage(contentsOfFile: bgPath) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+            Group {
+                if let uiImage = Self.backgroundUIImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient if image fails
+                    LinearGradient(
+                        colors: [Color.black, Color.blue.opacity(0.5), Color.white],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
                     .ignoresSafeArea()
-            } else {
-                // Fallback gradient if image fails
-                LinearGradient(
-                    colors: [Color.black, Color.blue.opacity(0.5), Color.white],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                }
+            }
+            // Prevent background from participating in text animations (avoids flicker/flash).
+            .transaction { transaction in
+                transaction.animation = nil
             }
             
             VStack(spacing: 0) {
@@ -51,7 +64,7 @@ struct WelcomeView: View {
                             textColor: Color(hex: "EAEAEA"),
                             isItalic: true,
                             speed: 0.1,
-                            isActive: true, // First one starts immediately
+                            isActive: startQuoteToAnimation, // Starts after initial fade-in
                             onComplete: {
                                 startMotivateAnimation = true
                             }
@@ -60,14 +73,27 @@ struct WelcomeView: View {
                         TypewriterView(
                             text: "motivate",
                             font: .system(size: 36, weight: .bold),
-                            textColor: Color.gray.opacity(0.6),
+                            textColor: motivateTextColor,
                             isItalic: true,
-                            isStrikethrough: true,
+                            isStrikethrough: motivateIsStrikethrough,
                             strikeColor: Color.gray.opacity(0.8),
                             speed: 0.1,
                             isActive: startMotivateAnimation, // Waits for "Quote to "
                             onComplete: {
-                                startSubtitleAnimation = true
+                                // Sequence: Reveal -> Strikethrough -> Gray -> Next Line
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    withAnimation(.easeOut(duration: 0.25)) {
+                                        motivateIsStrikethrough = true
+                                    }
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                    withAnimation(.easeInOut(duration: 0.5)) {
+                                        motivateTextColor = Color.gray.opacity(0.6)
+                                    }
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                                    startSubtitleAnimation = true
+                                }
                             }
                         )
                     }
@@ -80,50 +106,76 @@ struct WelcomeView: View {
                         isItalic: true,
                         speed: 0.05,
                         startDelay: 0.2, // Slight pause after "motivate"
-                        isActive: startSubtitleAnimation // Waits for "motivate"
+                        isActive: startSubtitleAnimation, // Waits for "motivate"
+                        onComplete: {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                withAnimation(.spring(response: 0.55, dampingFraction: 0.9)) {
+                                    showRestOfContent = true
+                                }
+                            }
+                        }
                     )
                     .multilineTextAlignment(.center)
                     .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
                     .padding(.top, 4)
                 }
-                .padding(.bottom, 150) // Adjust spacing to match design
-                
-                // Get Started Button
-                Button(action: {
-                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                    impact.impactOccurred()
-                    onGetStarted()
-                }) {
-                    Text("Get Started")
-                        .font(.system(size: 18, weight: .semibold))
-                        .italic()
-                        .foregroundColor(.white)
-                        .frame(width: UIScreen.main.bounds.width - 40)
-                        .frame(height: 60)
-                        .background(Color.black)
-                        .cornerRadius(30)
-                }
-                
-                // Already have an account text
-                HStack(spacing: 4) {
-                    Text("Already have an account?")
-                        .font(.system(size: 15))
-                        .foregroundColor(.black)
-                    
+                .padding(.bottom, 150) // Keep original position (reserve space for bottom content)
+                .opacity(showMissionStatement ? 1 : 0)
+                .animation(.easeOut(duration: 0.35), value: showMissionStatement)
+
+                VStack(spacing: 0) {
+                    // Get Started Button
                     Button(action: {
-                        showSignInSheet = true
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.impactOccurred()
+                        onGetStarted()
                     }) {
-                        Text("Sign In")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.black)
+                        Text("Get Started")
+                            .font(.system(size: 18, weight: .semibold))
+                            .italic()
+                            .foregroundColor(.white)
+                            .frame(width: UIScreen.main.bounds.width - 40)
+                            .frame(height: 60)
+                            .background(Color.black)
+                            .cornerRadius(30)
                     }
+                    
+                    // Already have an account text
+                    HStack(spacing: 4) {
+                        Text("Already have an account?")
+                            .font(.system(size: 15))
+                            .foregroundColor(.black)
+                        
+                        Button(action: {
+                            showSignInSheet = true
+                        }) {
+                            Text("Sign In")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                        }
+                    }
+                    .padding(.top, 16)
+                    .padding(.bottom, 20)
                 }
-                .padding(.top, 16)
-                .padding(.bottom, 20)
+                // Keep space reserved from the start to avoid mission statement jumping position.
+                .opacity(showRestOfContent ? 1 : 0)
+                .offset(y: showRestOfContent ? 0 : 18)
+                .blur(radius: showRestOfContent ? 0 : 6)
+                .animation(.easeOut(duration: 0.6).delay(0.05), value: showRestOfContent)
+                .allowsHitTesting(showRestOfContent)
+                .accessibilityHidden(!showRestOfContent)
             }
         }
         .sheet(isPresented: $showSignInSheet) {
             signInSheet
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.easeOut(duration: 0.35)) {
+                    showMissionStatement = true
+                }
+                startQuoteToAnimation = true
+            }
         }
     }
     
@@ -138,8 +190,7 @@ struct WelcomeView: View {
                     handleGoogleSignIn()
                 }) {
                     HStack {
-                        if let logoPath = Bundle.main.path(forResource: "google_logo", ofType: "png"),
-                           let uiImage = UIImage(contentsOfFile: logoPath) {
+                        if let uiImage = Self.googleLogoUIImage {
                             Image(uiImage: uiImage)
                                 .resizable()
                                 .renderingMode(.original)

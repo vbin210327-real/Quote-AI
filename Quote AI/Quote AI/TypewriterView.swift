@@ -24,7 +24,32 @@ struct TypewriterView: View {
     @State private var hasStartedTyping: Bool = false
     
     var body: some View {
-        Text(attributedText)
+        // Build text using native concatenation to support smooth property animations
+        let visibleString = String(text.prefix(revealedCount))
+        let invisibleString = String(text.dropFirst(revealedCount))
+        
+        // Ensure font metrics match exactly for both parts
+        let effectiveFont = isItalic ? font.italic() : font
+        
+        let visibleText = Text(visibleString)
+            .font(effectiveFont)
+        
+        let invisibleText = Text(invisibleString)
+            .font(effectiveFont)
+            .foregroundColor(.clear)
+
+        return (visibleText + invisibleText)
+            .foregroundColor(textColor) // Smoothly animates color changes
+            .overlay(
+                // Strikethrough line overlay (No GeometryReader to prevent layout flicker)
+                Rectangle()
+                    .fill(strikeColor)
+                    .frame(height: 2)
+                    .offset(y: 1) // Fine-tune vertical position
+                    .scaleEffect(x: isStrikethrough ? 1 : 0, y: 1, anchor: .leading)
+                    .opacity(isStrikethrough ? 1 : 0)
+                    .animation(.easeOut(duration: 0.25), value: isStrikethrough)
+            )
             .onChange(of: isActive) { active in
                 if active && !hasStartedTyping {
                     startAnimationSequence()
@@ -40,39 +65,7 @@ struct TypewriterView: View {
             }
     }
     
-    private var attributedText: AttributedString {
-        var container = AttributedString(text)
-        container.font = font
-        if isItalic {
-            container.inlinePresentationIntent = .emphasized // mostly maps to italic
-        }
-        
-        // Convert string index to AttributedString index is non-trivial if done naively,
-        // but since we just initialized from string, characters match 1:1 generally.
-        // Easier way: Build it from two substrings.
-        
-        let characters = Array(text)
-        let visiblePart = String(characters.prefix(revealedCount))
-        let invisiblePart = String(characters.dropFirst(revealedCount))
-        
-        var visibleAttr = AttributedString(visiblePart)
-        visibleAttr.font = font
-        /// Note: .italic() modifier on Text works, but for AttributedString we set properties.
-        /// However, SwiftUI Text(AttributedString) might ignore view modifiers if attributes are unset?
-        /// Best to apply attributes directly.
-        if isItalic { visibleAttr.font = font.italic() }
-        visibleAttr.foregroundColor = textColor
-        if isStrikethrough {
-            visibleAttr.strikethroughStyle = Text.LineStyle(pattern: .solid, color: strikeColor)
-        }
-
-        var invisibleAttr = AttributedString(invisiblePart)
-        invisibleAttr.font = font
-        if isItalic { invisibleAttr.font = font.italic() }
-        invisibleAttr.foregroundColor = .clear
-
-        return visibleAttr + invisibleAttr
-    }
+    // attributedText property removed as it caused re-render glitches
     
     private func startAnimationSequence() {
         hasStartedTyping = true

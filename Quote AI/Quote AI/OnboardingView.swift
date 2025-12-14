@@ -1601,6 +1601,7 @@ struct MindsetChartStepView: View {
 struct PersonalizeStepView: View {
     @Binding var isActive: Bool
     @State private var showContent = false
+    @State private var revealProgress: CGFloat = 0.0
 
     var body: some View {
         ScrollView {
@@ -1723,11 +1724,32 @@ struct PersonalizeStepView: View {
                     .rotationEffect(.degrees(Double(i) * 30))
             }
 
-            // Clapping hands image - static
+            // Clapping hands image - sequential reveal animation
             Image("ClapHands")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 200, height: 200)
+                // Mask for left-to-right reveal using scale
+                .mask(
+                    Rectangle()
+                        .scaleEffect(x: revealProgress, y: 1, anchor: .leading)
+                )
+                .onAppear {
+                    // Reset
+                    revealProgress = 0
+                    
+                    // Step 1: Reveal Left Hand (approx 45%) - Adjusted to avoid right hand overlap
+                    withAnimation(.easeInOut(duration: 1.2)) {
+                        revealProgress = 0.45
+                    }
+                    
+                    // Step 2: Reveal Right Hand (Rest) after delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                        withAnimation(.easeInOut(duration: 0.8)) {
+                            revealProgress = 1.0
+                        }
+                    }
+                }
         }
         .frame(maxWidth: .infinity)
     }
