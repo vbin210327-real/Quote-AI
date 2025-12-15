@@ -16,10 +16,10 @@ enum QuoteTone: String, CaseIterable, Codable {
     
     var description: String {
         switch self {
-        case .gentle: return "You are doing your best, and that is enough."
-        case .toughLove: return "Stop making excuses. Get to work."
-        case .philosophical: return "We suffer more in imagination than in reality."
-        case .realist: return "Motivation is overrated; consistency is compound interest. Your current feeling is temporary data, not a permanent directive"
+        case .gentle: return "Warm, nurturing, and reassuring. Focus on comfort and emotional support."
+        case .toughLove: return "Direct, no-nonsense, and challenging. Push the user to take action. Be blunt."
+        case .philosophical: return "Deep, contemplative, and thought-provoking. Reference philosophy, existentialism, stoicism. Make them think."
+        case .realist: return "Practical, grounded, and honest. Focus on facts and actionable steps. Skip the fluff."
         }
     }
     
@@ -174,9 +174,9 @@ enum ChatBackground: String, CaseIterable, Codable {
 
     var assetName: String {
         switch self {
-        case .orbit: return "ChatBackgroundOrbit"
+        case .orbit: return "ChatBackgroundDepths"
         case .summit: return "ChatBackgroundSummit"
-        case .depths: return "ChatBackgroundDepths"
+        case .depths: return "ChatBackgroundOrbit"
         case .ascent: return "ChatBackgroundStairs"
         }
     }

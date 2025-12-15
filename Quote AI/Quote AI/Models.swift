@@ -34,9 +34,22 @@ struct KimiRequest: Codable {
     }
 }
 
+// For API requests (simple structure)
 struct KimiMessage: Codable {
     let role: String
     let content: String
+}
+
+// For API responses (includes reasoning_content for thinking models)
+struct KimiResponseMessage: Codable {
+    let role: String
+    let content: String?
+    let reasoningContent: String?
+
+    enum CodingKeys: String, CodingKey {
+        case role, content
+        case reasoningContent = "reasoning_content"
+    }
 }
 
 // MARK: - Kimi API Response Models
@@ -46,7 +59,7 @@ struct KimiResponse: Codable {
 }
 
 struct KimiChoice: Codable {
-    let message: KimiMessage
+    let message: KimiResponseMessage
     let finishReason: String?
 
     enum CodingKeys: String, CodingKey {

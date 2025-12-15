@@ -88,13 +88,14 @@ struct OnboardingView: View {
                 // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (11) and setup complete step (12)
                 if currentStep != 11 && currentStep != 12 {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(stepTitle)
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.leading)
-                            .lineLimit(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 || currentStep == 9 ? nil : 1)
-                            .minimumScaleFactor(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 || currentStep == 9 ? 1.0 : 0.5)
-                            .fixedSize(horizontal: false, vertical: true)
+	                        Text(stepTitle)
+	                            .font(.system(size: 32, weight: .bold))
+	                            .foregroundColor(.black)
+	                            .multilineTextAlignment(.leading)
+	                            .lineLimit(currentStep == 8 ? 2 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? nil : 1))
+	                            .minimumScaleFactor(currentStep == 8 ? 0.75 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? 1.0 : 0.5))
+	                            .allowsTightening(currentStep == 8)
+	                            .fixedSize(horizontal: false, vertical: true)
 
                         Text(stepSubtitle)
                             .font(.system(size: 17))
@@ -237,7 +238,7 @@ struct OnboardingView: View {
         case 5: return "What are you seeking?"
         case 6: return "What's your biggest obstacle right now?"
         case 7: return "Leverage Quote AI for results that matter."
-        case 8: return "Choose your chat background."
+	        case 8: return "What kind of\u{00A0}background\ndo you like?"
         case 9: return "Pick a personality for your Quote AI experience."
         case 10: return ""
         case 11: return ""
@@ -1687,7 +1688,6 @@ struct MindsetChartStepView: View {
 struct PersonalizeStepView: View {
     @Binding var isActive: Bool
     @State private var showContent = false
-    @State private var revealProgress: CGFloat = 0.0
 
     var body: some View {
         ScrollView {
@@ -1810,32 +1810,11 @@ struct PersonalizeStepView: View {
                     .rotationEffect(.degrees(Double(i) * 30))
             }
 
-            // Clapping hands image - sequential reveal animation
+            // Clapping hands image - static
             Image("ClapHands")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 200, height: 200)
-                // Mask for left-to-right reveal using scale
-                .mask(
-                    Rectangle()
-                        .scaleEffect(x: revealProgress, y: 1, anchor: .leading)
-                )
-                .onAppear {
-                    // Reset
-                    revealProgress = 0
-                    
-                    // Step 1: Reveal Left Hand (approx 45%) - Adjusted to avoid right hand overlap
-                    withAnimation(.easeInOut(duration: 1.2)) {
-                        revealProgress = 0.45
-                    }
-                    
-                    // Step 2: Reveal Right Hand (Rest) after delay
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                        withAnimation(.easeInOut(duration: 0.8)) {
-                            revealProgress = 1.0
-                        }
-                    }
-                }
         }
         .frame(maxWidth: .infinity)
     }
@@ -1858,6 +1837,7 @@ struct SetupLoadingStepView: View {
     ]
 
     @State private var completedItems: Set<Int> = []
+    @State private var visibleItemsCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -1950,12 +1930,14 @@ struct SetupLoadingStepView: View {
                             .transition(.scale.combined(with: .opacity))
                         }
                     }
+                    // Only show items that are "visible" based on the counter
+                    .offset(y: index < visibleItemsCount ? 0 : 20)
+                    .opacity(index < visibleItemsCount ? 1 : 0)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: visibleItemsCount)
                 }
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 24)
-            .opacity(showContent ? 1 : 0)
-            .animation(.easeOut(duration: 0.5).delay(0.4), value: showContent)
 
             Spacer()
         }
@@ -1981,11 +1963,16 @@ struct SetupLoadingStepView: View {
         showContent = false
         progress = 0
         completedItems = []
+        visibleItemsCount = 0 // Reset
         isLoadingComplete = false
         currentStatusText = "Analyzing your preferences..."
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             showContent = true
+            // Show the first item immediately with the title
+            withAnimation {
+                visibleItemsCount = 1
+            }
         }
 
         // Increment 1% at a time, with variable delays
@@ -2024,8 +2011,10 @@ struct SetupLoadingStepView: View {
 
                 // Update status text and checkmarks based on progress with haptic feedback
                 if i == 25 && !completedItems.contains(0) {
-                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         completedItems.insert(0)
+                        // Reveal next item
+                        visibleItemsCount = 2
                     }
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
@@ -2033,8 +2022,10 @@ struct SetupLoadingStepView: View {
                     currentStatusText = "Creating your quote collection..."
                 }
                 if i == 50 && !completedItems.contains(1) {
-                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         completedItems.insert(1)
+                        // Reveal next item
+                        visibleItemsCount = 3
                     }
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
@@ -2042,8 +2033,10 @@ struct SetupLoadingStepView: View {
                     currentStatusText = "Configuring your schedule..."
                 }
                 if i == 75 && !completedItems.contains(2) {
-                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         completedItems.insert(2)
+                        // Reveal next item
+                        visibleItemsCount = 4
                     }
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)

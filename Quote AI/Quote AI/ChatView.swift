@@ -16,6 +16,33 @@ struct ChatView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Custom header with subtle divider
+                VStack(spacing: 0) {
+                    HStack {
+                        ProfileButton()
+
+                        Spacer()
+
+                        Text("Quote AI")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        // Invisible spacer to balance the profile button
+                        Color.clear
+                            .frame(width: 32, height: 32)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+
+                    // Subtle divider line
+                    Rectangle()
+                        .fill(Color.white.opacity(0.15))
+                        .frame(height: 0.5)
+                }
+                .background(Color.black.opacity(0.2))
+
                 // Chat messages
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -83,21 +110,16 @@ struct ChatView: View {
                     Button(action: {
                         viewModel.sendMessage()
                     }) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 32))
-                            .foregroundStyle(
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.black)
+                            .frame(width: 32, height: 32)
+                            .background(
                                 viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                                ? LinearGradient(
-                                    colors: [Color.white.opacity(0.5), Color.white.opacity(0.5)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                : LinearGradient(
-                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                                ? Color.white.opacity(0.5)
+                                : Color.white
                             )
+                            .clipShape(Circle())
                     }
                     .disabled(viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
                 }
@@ -106,14 +128,7 @@ struct ChatView: View {
             .background(
                 ChatBackgroundView(background: preferences.chatBackground)
             )
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .navigationTitle("Quote AI")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    ProfileButton()
-                }
-            }
+            .navigationBarHidden(true)
         }
     }
 }
@@ -125,6 +140,7 @@ private struct ChatBackgroundView: View {
         Image(background.assetName)
             .resizable()
             .scaledToFill()
+            .id(background.assetName)
             .ignoresSafeArea()
             .overlay(
                 LinearGradient(
@@ -247,11 +263,7 @@ struct MessageBubble: View {
                     .padding(message.isUser ? 12 : 0)
                     .background(
                         message.isUser
-                        ? AnyShapeStyle(LinearGradient(
-                            colors: [Color(hex: "667eea").opacity(0.85), Color(hex: "764ba2").opacity(0.85)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
+                        ? AnyShapeStyle(Color.white.opacity(0.25)) 
                         : AnyShapeStyle(Color.clear)
                     )
                     .foregroundColor(.white)
@@ -273,7 +285,7 @@ struct LoadingIndicator: View {
     
     var body: some View {
         HStack {
-            Text("Quoting")
+            Text("Quoting...")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(Color.gray)
                 .overlay(
@@ -290,7 +302,7 @@ struct LoadingIndicator: View {
                             .offset(x: geo.size.width * shimmerOffset)
                     }
                     .mask(
-                        Text("Quoting")
+                        Text("Quoting...")
                             .font(.system(size: 16, weight: .medium))
                     )
                 )

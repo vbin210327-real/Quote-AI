@@ -51,16 +51,11 @@ class KimiService {
         let dynamicPrompt = """
         \(Config.systemPrompt)
 
-        The user's name is \(preferences.userName).
-        They prefer a \(preferences.quoteTone.rawValue) tone of voice (\(preferences.quoteTone.description)).
-        Their current focus is \(preferences.userFocus.rawValue) (\(preferences.userFocus.description)).
+        USER: \(preferences.userName)
+        TONE: \(preferences.quoteTone.rawValue) - \(preferences.quoteTone.description)
 
-        IMPORTANT - Generation-based tone adjustment:
-        The user is from the \(preferences.userGeneration.rawValue) generation (born \(preferences.userBirthYear)).
-        \(preferences.userGeneration.toneModifier)
-
-        Respond with short, impactful quotes and brief, personalized advice that aligns with this tone, focus, and generational context.
-        Always address the user by name occasionally, but not in every message.
+        YOUR RESPONSE MUST embody the \(preferences.quoteTone.rawValue) tone completely. This is non-negotiable.
+        Use their name sparingly (not every message).
         """
 
         // Prepare request body
@@ -71,7 +66,7 @@ class KimiService {
                 KimiMessage(role: "user", content: userMessage)
             ],
             temperature: 0.7,
-            maxTokens: 200
+            maxTokens: 300
         )
 
         do {
@@ -100,12 +95,17 @@ class KimiService {
         // Decode response
         do {
             let kimiResponse = try JSONDecoder().decode(KimiResponse.self, from: data)
-            guard let quote = kimiResponse.choices.first?.message.content else {
+            // For thinking models, content contains the final answer
+            guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
                 throw KimiServiceError.invalidResponse
             }
             return quote
-        } catch {
-            throw KimiServiceError.decodingError(error)
+        } catch let decodingError {
+            // Print raw response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Raw API response: \(responseString)")
+            }
+            throw KimiServiceError.decodingError(decodingError)
         }
     }
 }
