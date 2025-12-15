@@ -27,10 +27,10 @@ struct OnboardingView: View {
             // White Background
             Color.white
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 // Top Navigation & Progress - Hidden only during setup loading step
-                if currentStep != 10 {
+                if currentStep != 11 {
                     HStack(spacing: 16) {
                         // Back Button - Always visible
                         Button(action: {
@@ -38,9 +38,9 @@ struct OnboardingView: View {
                             impact.impactOccurred()
                             if currentStep > 0 {
                                 withAnimation {
-                                    // Skip loading (10) and congrats (11) when going back from sign-in (12) or congrats (11)
-                                    if currentStep >= 11 {
-                                        currentStep = 9 // Go directly to personalize page
+                                    // Skip loading (11) and congrats (12) when going back from sign-in (13) or congrats (12)
+                                    if currentStep >= 12 {
+                                        currentStep = 10 // Go directly to personalize page
                                         setupLoadingComplete = false // Reset loading state
                                     } else {
                                         currentStep -= 1
@@ -60,11 +60,9 @@ struct OnboardingView: View {
 
                         // Linear Progress Bar
                         GeometryReader { geometry in
-                            let totalSteps: CGFloat = 12 // sign-in (step 12) is the final step
-                            let clampedStep = min(max(CGFloat(currentStep), 0), totalSteps)
-                            // Ensure first page shows some progress, but only fill to 100% on final step.
-                            let minimum = 1 / totalSteps
-                            let progressRatio = min(1, max(minimum, clampedStep / totalSteps))
+                            let totalSteps: CGFloat = 14 // steps 0-13 = 14 total steps
+                            // Add 1 so step 0 shows 1/14, step 1 shows 2/14, etc.
+                            let progressRatio = min(1, CGFloat(currentStep + 1) / totalSteps)
                             ZStack(alignment: .leading) {
                                 // Track
                                 Capsule()
@@ -87,15 +85,15 @@ struct OnboardingView: View {
                     .padding(.top, 10)
                 }
                 
-                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (10) and setup complete step (11)
-                if currentStep != 10 && currentStep != 11 {
+                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (11) and setup complete step (12)
+                if currentStep != 11 && currentStep != 12 {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(stepTitle)
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.leading)
-                            .lineLimit(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? nil : 1)
-                            .minimumScaleFactor(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 ? 1.0 : 0.5)
+                            .lineLimit(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 || currentStep == 9 ? nil : 1)
+                            .minimumScaleFactor(currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 8 || currentStep == 9 ? 1.0 : 0.5)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text(stepSubtitle)
@@ -108,7 +106,7 @@ struct OnboardingView: View {
                     .padding(.top, 0)
                 }
 
-                if currentStep != 11 {
+                if currentStep != 12 {
                     Spacer()
                 }
 
@@ -139,18 +137,21 @@ struct OnboardingView: View {
                         mindsetChartStep
                             .id("mindset-\(navigationCounter)")
                     case 8:
+                        chatBackgroundStep
+                            .id("chatbg-\(navigationCounter)")
+                    case 9:
                         toneStep
                             .id("tone-\(navigationCounter)")
-                    case 9:
+                    case 10:
                         personalizeStep
                             .id("personalize-\(navigationCounter)")
-                    case 10:
+                    case 11:
                         setupLoadingStep
                             .id("setup-\(navigationCounter)")
-                    case 11:
+                    case 12:
                         setupCompleteStep
                             .id("complete-\(navigationCounter)")
-                    case 12:
+                    case 13:
                         signInStep
                             .id("signin-\(navigationCounter)")
                     default:
@@ -159,13 +160,13 @@ struct OnboardingView: View {
                 }
                 .animation(.easeInOut(duration: 0.3), value: currentStep)
 
-                if currentStep != 11 {
+                if currentStep != 12 {
                     Spacer()
                 }
                 
                 // Continue Button - Same position as Get Started in WelcomeView
-                // Hide for setup loading step (10) which shows its own button, and sign-in step (11)
-                if currentStep < 10 {
+                // Hide for setup loading step (11) which shows its own button, and sign-in step (13)
+                if currentStep < 11 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
@@ -185,12 +186,12 @@ struct OnboardingView: View {
                     .padding(.bottom, 20)
                 }
 
-                if currentStep == 11 {
+                if currentStep == 12 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
                         withAnimation {
-                            currentStep = 12
+                            currentStep = 13
                             navigationCounter += 1
                         }
                     }) {
@@ -212,9 +213,9 @@ struct OnboardingView: View {
             nameInput = preferences.userName
         }
         .onChange(of: setupLoadingComplete) { complete in
-            guard complete, currentStep == 10 else { return }
+            guard complete, currentStep == 11 else { return }
             withAnimation {
-                currentStep = 11
+                currentStep = 12
                 navigationCounter += 1
             }
         }
@@ -224,7 +225,7 @@ struct OnboardingView: View {
             }
         }
     }
-    
+
     // Dynamic title based on current step
     var stepTitle: String {
         switch currentStep {
@@ -236,11 +237,12 @@ struct OnboardingView: View {
         case 5: return "What are you seeking?"
         case 6: return "What's your biggest obstacle right now?"
         case 7: return "Leverage Quote AI for results that matter."
-        case 8: return "Pick a personality for your Quote AI experience."
-        case 9: return ""
+        case 8: return "Choose your chat background."
+        case 9: return "Pick a personality for your Quote AI experience."
         case 10: return ""
         case 11: return ""
-        case 12: return "Save your progress"
+        case 12: return ""
+        case 13: return "Save your progress"
         default: return ""
         }
     }
@@ -257,8 +259,10 @@ struct OnboardingView: View {
         case 6: return ""
         case 7: return ""
         case 8: return "This will be used to personalize Quote AI for you"
-        case 9: return ""
+        case 9: return "This will be used to personalize Quote AI for you"
         case 10: return ""
+        case 11: return ""
+        case 12: return ""
         default: return ""
         }
     }
@@ -280,23 +284,37 @@ struct OnboardingView: View {
     
     // Step 1: Name
     var nameStep: some View {
-        VStack(spacing: 24) {
-            TextField("Your Name", text: $nameInput)
-                .font(.title3)
-                .multilineTextAlignment(.center)
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-                .foregroundColor(.black)
-                .accentColor(.black)
-                .padding(.horizontal, 40)
-                .submitLabel(.next)
-                .onSubmit {
-                    if !nameInput.isEmpty {
-                        nextStep()
-                    }
+        ZStack {
+            // Invisible tap area to dismiss keyboard
+            Color.white.opacity(0.001)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onTapGesture {
+                    hideKeyboard()
                 }
+
+            VStack(spacing: 24) {
+                TextField("Your Name", text: $nameInput)
+                    .font(.title3)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .foregroundColor(.black)
+                    .accentColor(.black)
+                    .padding(.horizontal, 40)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        if !nameInput.isEmpty {
+                            nextStep()
+                        }
+                    }
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     // Step 2: Birth Year - Use BirthYearStepView
@@ -346,18 +364,26 @@ struct OnboardingView: View {
         )
     }
 
-    // Step 8: Tone - Use ToneStepView
+    // Step 8: Chat Background
+    var chatBackgroundStep: some View {
+        ChatBackgroundStepView(
+            isActive: .constant(currentStep == 8),
+            selectedBackground: $preferences.chatBackground
+        )
+    }
+
+    // Step 9: Tone - Use ToneStepView
     var toneStep: some View {
         ToneStepView(
-            isActive: .constant(currentStep == 8),
+            isActive: .constant(currentStep == 9),
             selectedTone: $preferences.quoteTone
         )
     }
 
-    // Step 9: Personalize
+    // Step 10: Personalize
     var personalizeStep: some View {
         PersonalizeStepView(
-            isActive: .constant(currentStep == 9)
+            isActive: .constant(currentStep == 10)
         )
     }
 
@@ -468,15 +494,15 @@ struct OnboardingView: View {
         }
     }
 
-    // Step 10: Setup Loading
+    // Step 11: Setup Loading
     var setupLoadingStep: some View {
         SetupLoadingStepView(
-            isActive: .constant(currentStep == 10),
+            isActive: .constant(currentStep == 11),
             isLoadingComplete: $setupLoadingComplete
         )
     }
 
-    // Step 11: Sign In
+    // Step 13: Sign In
     var signInStep: some View {
         VStack(spacing: 30) {
             Text("One last step.")
@@ -557,7 +583,7 @@ struct OnboardingView: View {
                 // Birth year is already bound to preferences, just move on
                 currentStep += 1
                 navigationCounter += 1
-            } else if currentStep < 10 {
+            } else if currentStep < 11 {
                 currentStep += 1
                 navigationCounter += 1
             }
@@ -671,6 +697,66 @@ struct ToneStepView: View {
                 .animation(
                     .spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)
                     .delay(0.1 + Double(index) * 0.15),
+                    value: showContent
+                )
+            }
+        }
+        .padding(.horizontal, 24)
+        .onChange(of: isActive) { active in
+            if active {
+                showContent = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showContent = true
+                }
+            }
+        }
+        .onAppear {
+            if isActive {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showContent = true
+                }
+            }
+        }
+    }
+}
+
+struct ChatBackgroundStepView: View {
+    @Binding var isActive: Bool
+    @Binding var selectedBackground: ChatBackground
+    @State private var showContent = false
+
+    var body: some View {
+        VStack(spacing: 16) {
+            ForEach(Array(ChatBackground.allCases.enumerated()), id: \.element) { index, background in
+                Button(action: {
+                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                    impact.impactOccurred()
+                    selectedBackground = background
+                }) {
+                    HStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(background.displayName)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(selectedBackground == background ? .white : .black)
+
+                            Text(background.description)
+                                .font(.system(size: 14))
+                                .foregroundColor(selectedBackground == background ? .white.opacity(0.8) : .gray)
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 22)
+                    .background(selectedBackground == background ? Color.black : Color.gray.opacity(0.1))
+                    .cornerRadius(16)
+                }
+                .offset(y: showContent ? 0 : 100)
+                .opacity(showContent ? 1 : 0)
+                .animation(
+                    .spring(response: 0.6, dampingFraction: 0.85, blendDuration: 0)
+                    .delay(0.1 + Double(index) * 0.12),
                     value: showContent
                 )
             }

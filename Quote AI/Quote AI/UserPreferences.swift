@@ -166,6 +166,40 @@ enum UserGeneration: String, CaseIterable, Codable {
     }
 }
 
+enum ChatBackground: String, CaseIterable, Codable {
+    case orbit = "orbit"
+    case summit = "summit"
+    case depths = "depths"
+    case ascent = "ascent"
+
+    var assetName: String {
+        switch self {
+        case .orbit: return "ChatBackgroundOrbit"
+        case .summit: return "ChatBackgroundSummit"
+        case .depths: return "ChatBackgroundDepths"
+        case .ascent: return "ChatBackgroundStairs"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .orbit: return "Orbital Night"
+        case .summit: return "Summit Trail"
+        case .depths: return "Blue Depths"
+        case .ascent: return "Monochrome Ascent"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .orbit: return "Calm, focused, infinite."
+        case .summit: return "Clear air, steady progress."
+        case .depths: return "Deep work, quiet clarity."
+        case .ascent: return "Minimal, disciplined, sharp."
+        }
+    }
+}
+
 class UserPreferences: ObservableObject {
     static let shared = UserPreferences()
     
@@ -223,6 +257,12 @@ class UserPreferences: ObservableObject {
             UserDefaults.standard.set(hasPlayedWelcomeIntro, forKey: "hasPlayedWelcomeIntro")
         }
     }
+
+    @Published var chatBackground: ChatBackground {
+        didSet {
+            UserDefaults.standard.set(chatBackground.rawValue, forKey: "chatBackground")
+        }
+    }
     private init() {
         self.userName = UserDefaults.standard.string(forKey: "userName") ?? ""
         self.userGender = UserDefaults.standard.string(forKey: "userGender") ?? ""
@@ -272,6 +312,13 @@ class UserPreferences: ObservableObject {
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         self.hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
         self.hasPlayedWelcomeIntro = UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
+
+        if let storedBackground = UserDefaults.standard.string(forKey: "chatBackground"),
+           let background = ChatBackground(rawValue: storedBackground) {
+            self.chatBackground = background
+        } else {
+            self.chatBackground = .orbit
+        }
     }
     
     func completeOnboarding() {

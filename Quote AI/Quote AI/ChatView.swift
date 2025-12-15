@@ -10,6 +10,7 @@ import Auth
 
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
+    @StateObject private var preferences = UserPreferences.shared
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -30,11 +31,27 @@ struct ChatView: View {
                         }
                         .padding()
                     }
+                    .scrollDismissesKeyboard(.interactively)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
+                    .onTapGesture {
+                        isInputFocused = false
+                    }
                     .onChange(of: viewModel.messages.count) { _ in
                         // Scroll to bottom when new message arrives
                         if let lastMessage = viewModel.messages.last {
                             withAnimation {
                                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
+                        }
+                    }
+                    .onChange(of: isInputFocused) { focused in
+                        // Scroll to bottom when keyboard appears or disappears
+                        if let lastMessage = viewModel.messages.last {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation {
+                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                }
                             }
                         }
                     }
@@ -54,10 +71,11 @@ struct ChatView: View {
                     TextField("What's on your mind?", text: $viewModel.currentInput, axis: .vertical)
                         .textFieldStyle(.plain)
                         .padding(12)
-                        .background(Color(.systemGray6))
+                        .background(Color.white.opacity(0.15))
                         .cornerRadius(20)
                         .lineLimit(1...5)
                         .focused($isInputFocused)
+                        .foregroundColor(.white)
                         .onSubmit {
                             viewModel.sendMessage()
                         }
@@ -70,7 +88,7 @@ struct ChatView: View {
                             .foregroundStyle(
                                 viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
                                 ? LinearGradient(
-                                    colors: [Color.gray, Color.gray],
+                                    colors: [Color.white.opacity(0.5), Color.white.opacity(0.5)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
@@ -84,24 +102,44 @@ struct ChatView: View {
                     .disabled(viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
                 }
                 .padding()
-                .background(Color(.systemBackground))
             }
+            .background(
+                ChatBackgroundView(background: preferences.chatBackground)
+            )
+            .toolbarBackground(.hidden, for: .navigationBar)
             .navigationTitle("Quote AI")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     ProfileButton()
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        viewModel.clearChat()
-                    }) {
-                        Image(systemName: "trash")
-                    }
-                }
             }
         }
+    }
+}
+
+private struct ChatBackgroundView: View {
+    let background: ChatBackground
+
+    var body: some View {
+        Image(background.assetName)
+            .resizable()
+            .scaledToFill()
+            .ignoresSafeArea()
+            .overlay(
+                LinearGradient(
+                    colors: [
+                        Color.black.opacity(0.25),
+                        Color.black.opacity(0.1),
+                        Color.black.opacity(0.25)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .transaction { transaction in
+                transaction.animation = nil
+            }
     }
 }
 
@@ -206,24 +244,22 @@ struct MessageBubble: View {
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                 Text(message.content)
                     .font(.body)
-                    .padding(12)
+                    .padding(message.isUser ? 12 : 0)
                     .background(
                         message.isUser
-                        ? LinearGradient(
-                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                        ? AnyShapeStyle(LinearGradient(
+                            colors: [Color(hex: "667eea").opacity(0.85), Color(hex: "764ba2").opacity(0.85)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
-                        )
-                        : LinearGradient(
-                            colors: [Color(.systemGray5)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+                        ))
+                        : AnyShapeStyle(Color.clear)
                     )
-                    .foregroundColor(message.isUser ? .white : .primary)
-                    .cornerRadius(18)
+                    .foregroundColor(.white)
+                    .cornerRadius(message.isUser ? 18 : 0)
                     .italic(!message.isUser)
+                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
             }
+            .padding(.horizontal, message.isUser ? 0 : 4)
 
             if !message.isUser {
                 Spacer(minLength: 50)
@@ -240,7 +276,7 @@ struct LoadingIndicator: View {
             HStack(spacing: 8) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(Color.gray)
+                        .fill(Color.white)
                         .frame(width: 8, height: 8)
                         .scaleEffect(animating ? 1.0 : 0.5)
                         .animation(
@@ -252,7 +288,7 @@ struct LoadingIndicator: View {
                 }
             }
             .padding(12)
-            .background(Color(.systemGray5))
+            .background(Color.white.opacity(0.2))
             .cornerRadius(18)
             .onAppear {
                 animating = true
