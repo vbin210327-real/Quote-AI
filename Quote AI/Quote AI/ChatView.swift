@@ -46,10 +46,10 @@ struct ChatView: View {
                         }
                     }
                     .onChange(of: isInputFocused) { focused in
-                        // Scroll to bottom when keyboard appears or disappears
-                        if let lastMessage = viewModel.messages.last {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                withAnimation {
+                        // Only scroll when keyboard appears, let SwiftUI handle dismiss
+                        if focused, let lastMessage = viewModel.messages.last {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                withAnimation(.easeOut(duration: 0.25)) {
                                     proxy.scrollTo(lastMessage.id, anchor: .bottom)
                                 }
                             }
@@ -269,33 +269,41 @@ struct MessageBubble: View {
 }
 
 struct LoadingIndicator: View {
-    @State private var animating = false
-
+    @State private var shimmerOffset: CGFloat = -1.0
+    
     var body: some View {
         HStack {
-            HStack(spacing: 8) {
-                ForEach(0..<3) { index in
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 8, height: 8)
-                        .scaleEffect(animating ? 1.0 : 0.5)
-                        .animation(
-                            Animation.easeInOut(duration: 0.6)
-                                .repeatForever()
-                                .delay(Double(index) * 0.2),
-                            value: animating
-                        )
+            Text("Quoting")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Color.gray)
+                .overlay(
+                    GeometryReader { geo in
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.clear, .white.opacity(0.6), .clear],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geo.size.width / 2)
+                            .offset(x: geo.size.width * shimmerOffset)
+                    }
+                    .mask(
+                        Text("Quoting")
+                            .font(.system(size: 16, weight: .medium))
+                    )
+                )
+                .padding(.leading, 4) // Align with bubbles
+                .onAppear {
+                    withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+                        shimmerOffset = 2.0
+                    }
                 }
-            }
-            .padding(12)
-            .background(Color.white.opacity(0.2))
-            .cornerRadius(18)
-            .onAppear {
-                animating = true
-            }
-
-            Spacer(minLength: 50)
+            
+            Spacer()
         }
+        .padding(.vertical, 8)
     }
 }
 
