@@ -12,6 +12,7 @@ xcuserdata/
 ## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
 build/
 DerivedData/
+DerivedDataBuild/
 *.moved-aside
 *.pbxuser
 !default.pbxuser
@@ -95,3 +96,4 @@ iOSInjectionProject/
 Config.swift
 
 .DS_Store
+.sandbox_home/

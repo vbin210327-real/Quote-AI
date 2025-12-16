@@ -167,35 +167,39 @@ enum UserGeneration: String, CaseIterable, Codable {
 }
 
 enum ChatBackground: String, CaseIterable, Codable {
-    case orbit = "orbit"
     case summit = "summit"
-    case depths = "depths"
     case ascent = "ascent"
+    case defaultBackground = "default"
+
+    var icon: String {
+        switch self {
+        case .summit: return "mountain.2.fill"
+        case .ascent: return "stairs"
+        case .defaultBackground: return "circle.grid.2x2.fill"
+        }
+    }
 
     var assetName: String {
         switch self {
-        case .orbit: return "ChatBackgroundDepths"
         case .summit: return "ChatBackgroundSummit"
-        case .depths: return "ChatBackgroundOrbit"
         case .ascent: return "ChatBackgroundStairs"
+        case .defaultBackground: return "default_background"
         }
     }
 
     var displayName: String {
         switch self {
-        case .orbit: return "Orbital Night"
-        case .summit: return "Summit Trail"
-        case .depths: return "Blue Depths"
-        case .ascent: return "Monochrome Ascent"
+        case .summit: return "Icy Peak"
+        case .ascent: return "Shadow Staircase"
+        case .defaultBackground: return "Default"
         }
     }
 
     var description: String {
         switch self {
-        case .orbit: return "Calm, focused, infinite."
-        case .summit: return "Clear air, steady progress."
-        case .depths: return "Deep work, quiet clarity."
-        case .ascent: return "Minimal, disciplined, sharp."
+        case .summit: return ""
+        case .ascent: return ""
+        case .defaultBackground: return ""
         }
     }
 }
@@ -317,7 +321,7 @@ class UserPreferences: ObservableObject {
            let background = ChatBackground(rawValue: storedBackground) {
             self.chatBackground = background
         } else {
-            self.chatBackground = .orbit
+            self.chatBackground = .defaultBackground
         }
     }
     

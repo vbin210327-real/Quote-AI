@@ -23,12 +23,7 @@ struct WelcomeView: View {
     @State private var didConfigureAppearance = false
     @State private var shouldPlayIntroAnimation = !UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
     @State private var showMissionStatement = UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
-    @State private var startQuoteToAnimation = false
     @State private var showRestOfContent = UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
-    @State private var startMotivateAnimation = false
-    @State private var startSubtitleAnimation = false
-    @State private var motivateTextColor = Color(hex: "EAEAEA")
-    @State private var motivateIsStrikethrough = false
     
     var body: some View {
         ZStack {
@@ -59,92 +54,14 @@ struct WelcomeView: View {
                 
                 // Mission Statement
                 VStack(spacing: 0) {
-                    // "Quote to motivate" with strikethrough on "motivate"
-                    HStack(spacing: 0) {
-                        if shouldPlayIntroAnimation {
-                            TypewriterView(
-                                text: "Quote to ",
-                                font: .system(size: 36, weight: .bold),
-                                textColor: Color(hex: "EAEAEA"),
-                                isItalic: true,
-                                speed: 0.1,
-                                isActive: startQuoteToAnimation, // Starts after initial fade-in
-                                onComplete: {
-                                    startMotivateAnimation = true
-                                }
-                            )
-                            
-                            TypewriterView(
-                                text: "motivate",
-                                font: .system(size: 36, weight: .bold),
-                                textColor: motivateTextColor,
-                                isItalic: true,
-                                isStrikethrough: motivateIsStrikethrough,
-                                strikeColor: Color.gray.opacity(0.8),
-                                speed: 0.1,
-                                isActive: startMotivateAnimation, // Waits for "Quote to "
-                                onComplete: {
-                                    // Sequence: Reveal -> Strikethrough -> Gray -> Next Line
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        withAnimation(.easeOut(duration: 0.25)) {
-                                            motivateIsStrikethrough = true
-                                        }
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                                        withAnimation(.easeInOut(duration: 0.5)) {
-                                            motivateTextColor = Color.gray.opacity(0.6)
-                                        }
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-                                        startSubtitleAnimation = true
-                                    }
-                                }
-                            )
-                        } else {
-                            Text("Quote to ")
-                                .font(.system(size: 36, weight: .bold))
-                                .italic()
-                                .foregroundColor(Color(hex: "EAEAEA"))
-                            
-                            Text("motivate")
-                                .font(.system(size: 36, weight: .bold))
-                                .italic()
-                                .foregroundColor(Color.gray.opacity(0.6))
-                                .strikethrough(true, color: Color.gray.opacity(0.8))
-                        }
-                    }
-                    .multilineTextAlignment(.center)
-                    
-                    Group {
-                        if shouldPlayIntroAnimation {
-                            TypewriterView(
-                                text: "become the best\nversion of yourself",
-                                font: .system(size: 36, weight: .bold),
-                                textColor: Color(hex: "EAEAEA"),
-                                isItalic: true,
-                                speed: 0.05,
-                                startDelay: 0.2, // Slight pause after "motivate"
-                                isActive: startSubtitleAnimation, // Waits for "motivate"
-                                onComplete: {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                        withAnimation(.spring(response: 0.55, dampingFraction: 0.9)) {
-                                            showRestOfContent = true
-                                        }
-                                    }
-                                }
-                            )
-                        } else {
-                            Text("become the best\nversion of yourself")
-                                .font(.system(size: 36, weight: .bold))
-                                .italic()
-                        }
-                    }
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(Color(hex: "EAEAEA"))
-                    .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
-                    .padding(.top, 4)
+                    Text("Wisdom customized\nfor your journey")
+                        .font(.system(size: 36, weight: .bold))
+                        .italic()
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
                 }
-                .padding(.bottom, 150) // Keep original position (reserve space for bottom content)
+                .padding(.bottom, 20) // Keep original position (reserve space for bottom content)
                 .opacity(showMissionStatement ? 1 : 0)
                 .animation(shouldPlayIntroAnimation ? .easeOut(duration: 0.35) : nil, value: showMissionStatement)
 
@@ -200,11 +117,19 @@ struct WelcomeView: View {
             
             if shouldPlayIntroAnimation {
                 userPreferences.hasPlayedWelcomeIntro = true
+                
+                // 1. Text fades in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     withAnimation(.easeOut(duration: 0.35)) {
                         showMissionStatement = true
                     }
-                    startQuoteToAnimation = true
+                }
+                
+                // 2. Buttons fade in shortly after
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                     withAnimation(.easeOut(duration: 0.6)) {
+                         showRestOfContent = true
+                     }
                 }
             }
         }

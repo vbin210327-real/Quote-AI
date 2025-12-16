@@ -434,38 +434,36 @@ struct OnboardingView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                VStack(spacing: 16) {
-                    Text("You have huge potential to become a completely unrecognizable version of yourself by:")
-                        .font(.system(size: 17))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
 
-                    Text(transformationDateString)
-                        .font(.system(size: 16, weight: .semibold))
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Get the most out of Quote AI:")
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 10)
-                        .background(Color(.systemGray6))
-                        .clipShape(Capsule())
-                }
+                        .padding(.bottom, 4)
 
-                VStack(spacing: 16) {
-                    Text("Why Quote AI can help you get there")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.center)
-
-                    VStack(spacing: 14) {
-                        completionRow(title: "Built from your inputs", detail: "It uses your goals and barriers to generate quotes that actually fit you.")
-                        completionRow(title: "Energy-matched motivation", detail: "The tone and intensity adapt to how you feel today.")
-                        completionRow(title: "Action, not just inspiration", detail: "You get a clear next step so momentum keeps building.")
+                    ForEach(["Open it at least once a day",
+                             "Tell it what’s on your mind",
+                             "Save the quotes that hit you",
+                             "Re-read them when you feel stuck"], id: \.self) { tip in
+                        HStack(alignment: .top, spacing: 12) {
+                            Circle()
+                                .fill(Color.black)
+                                .frame(width: 6, height: 6)
+                                .padding(.top, 8)
+                            
+                            Text(tip)
+                                .font(.system(size: 16))
+                                .foregroundColor(.black.opacity(0.8))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
-                    .padding(18)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .background(Color(.systemGray6).opacity(0.65))
-                    .cornerRadius(18)
                 }
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.systemGray6).opacity(0.5))
+                .cornerRadius(20)
+                .padding(.top, 20)
 
                 Spacer(minLength: 12)
             }
@@ -473,33 +471,14 @@ struct OnboardingView: View {
         }
     }
 
-    @ViewBuilder
-    private func completionRow(title: String, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Circle()
-                .fill(Color.black)
-                .frame(width: 10, height: 10)
-                .padding(.top, 6)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
-
-                Text(detail)
-                    .font(.system(size: 15))
-                    .foregroundColor(.gray)
-            }
-
-            Spacer()
-        }
-    }
 
     // Step 11: Setup Loading
     var setupLoadingStep: some View {
         SetupLoadingStepView(
             isActive: .constant(currentStep == 11),
-            isLoadingComplete: $setupLoadingComplete
+            isLoadingComplete: $setupLoadingComplete,
+            preferences: preferences
         )
     }
 
@@ -734,23 +713,41 @@ struct ChatBackgroundStepView: View {
                     impact.impactOccurred()
                     selectedBackground = background
                 }) {
-                    HStack(spacing: 0) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(background.displayName)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(selectedBackground == background ? .white : .black)
+                    HStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 44, height: 44)
 
-                            Text(background.description)
-                                .font(.system(size: 14))
-                                .foregroundColor(selectedBackground == background ? .white.opacity(0.8) : .gray)
-                                .multilineTextAlignment(.leading)
+                            Image(systemName: background.icon)
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.black)
+                        }
+
+                        Group {
+                            if background.description.isEmpty {
+                                Text(background.displayName)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(selectedBackground == background ? .white : .black)
+                            } else {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(background.displayName)
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(selectedBackground == background ? .white : .black)
+
+                                    Text(background.description)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(selectedBackground == background ? .white.opacity(0.8) : .gray)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
                         }
 
                         Spacer()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 22)
-                    .background(selectedBackground == background ? Color.black : Color.gray.opacity(0.1))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
+                    .background(selectedBackground == background ? Color.black : Color.gray.opacity(0.08))
                     .cornerRadius(16)
                 }
                 .offset(y: showContent ? 0 : 100)
@@ -1823,18 +1820,20 @@ struct PersonalizeStepView: View {
 struct SetupLoadingStepView: View {
     @Binding var isActive: Bool
     @Binding var isLoadingComplete: Bool
+    @ObservedObject var preferences: UserPreferences
 
-    @State private var progress: Double = 0
-    @State private var currentStatusText = "Analyzing your preferences..."
-    @State private var showContent = false
+	@State private var progress: Double = 0
+	@State private var currentStatusText = "Saving your profile..."
+	@State private var showContent = false
 
-    // Setup items that will appear with checkmarks
-    private let setupItems = [
-        "Personalized quotes",
-        "Daily motivation schedule",
-        "Theme preferences",
-        "Notification settings"
-    ]
+    private var setupItems: [String] {
+        [
+            "Saving your profile",
+            "Tuning your language",
+            "Applying chat background",
+            "Setting your quote voice"
+        ]
+    }
 
     @State private var completedItems: Set<Int> = []
     @State private var visibleItemsCount = 0
@@ -1965,7 +1964,7 @@ struct SetupLoadingStepView: View {
         completedItems = []
         visibleItemsCount = 0 // Reset
         isLoadingComplete = false
-        currentStatusText = "Analyzing your preferences..."
+        currentStatusText = "Saving your profile..."
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             showContent = true
@@ -2019,7 +2018,7 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Creating your quote collection..."
+                    currentStatusText = "Tuning your language..."
                 }
                 if i == 50 && !completedItems.contains(1) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -2030,7 +2029,7 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Configuring your schedule..."
+                    currentStatusText = "Applying chat background..."
                 }
                 if i == 75 && !completedItems.contains(2) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -2041,7 +2040,7 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Applying final touches..."
+                    currentStatusText = "Setting your quote voice..."
                 }
                 if i == 95 && !completedItems.contains(3) {
                     _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {

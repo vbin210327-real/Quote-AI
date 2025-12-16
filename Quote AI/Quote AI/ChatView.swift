@@ -73,11 +73,18 @@ struct ChatView: View {
                         }
                     }
                     .onChange(of: isInputFocused) { focused in
-                        // Only scroll when keyboard appears, let SwiftUI handle dismiss
-                        if focused, let lastMessage = viewModel.messages.last {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                withAnimation(.easeOut(duration: 0.25)) {
+                        if let lastMessage = viewModel.messages.last {
+                            if focused {
+                                // Keyboard appearing - scroll after a short delay
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                                     proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                }
+                            } else {
+                                // Keyboard dismissing - scroll after keyboard starts hiding
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation(.easeOut(duration: 0.2)) {
+                                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                    }
                                 }
                             }
                         }
@@ -137,25 +144,30 @@ private struct ChatBackgroundView: View {
     let background: ChatBackground
 
     var body: some View {
-        Image(background.assetName)
-            .resizable()
-            .scaledToFill()
-            .id(background.assetName)
-            .ignoresSafeArea()
-            .overlay(
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(0.25),
-                        Color.black.opacity(0.1),
-                        Color.black.opacity(0.25)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
+        if background == .defaultBackground {
+            Color(UIColor.systemBackground)
+                .ignoresSafeArea()
+        } else {
+            Image(background.assetName)
+                .resizable()
+                .scaledToFill()
+                .id(background.assetName)
+                .ignoresSafeArea()
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            Color.black.opacity(0.25),
+                            Color.black.opacity(0.1),
+                            Color.black.opacity(0.25)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
                 )
-            )
-            .transaction { transaction in
-                transaction.animation = nil
-            }
+                .transaction { transaction in
+                    transaction.animation = nil
+                }
+        }
     }
 }
 
