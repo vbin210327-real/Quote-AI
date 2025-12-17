@@ -12,6 +12,7 @@ struct OnboardingView: View {
     var onGoBack: (() -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var localization = LocalizationManager.shared
     @State private var currentStep = 0
     @State private var selectedGender = ""
     @State private var nameInput = ""
@@ -173,7 +174,7 @@ struct OnboardingView: View {
                         impact.impactOccurred()
                         nextStep()
                     }) {
-                        Text("Continue")
+                        Text(localization.string(for: "onboarding.continue"))
                             .font(.system(size: 18, weight: .semibold))
                             .italic()
                             .foregroundColor(.white)
@@ -196,7 +197,7 @@ struct OnboardingView: View {
                             navigationCounter += 1
                         }
                     }) {
-                        Text("Let's get started!")
+                        Text(localization.string(for: "onboarding.letsGetStarted"))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: UIScreen.main.bounds.width - 40)
@@ -230,20 +231,20 @@ struct OnboardingView: View {
     // Dynamic title based on current step
     var stepTitle: String {
         switch currentStep {
-        case 0: return "What is your gender?"
-        case 1: return "What should we call you?"
-        case 2: return "When were you born?"
-        case 3: return "How is your mental energy right now?"
-        case 4: return "What is currently draining your energy?"
-        case 5: return "What are you seeking?"
-        case 6: return "What's your biggest obstacle right now?"
-        case 7: return "Leverage Quote AI for results that matter."
-	        case 8: return "What kind of\u{00A0}background\ndo you like?"
-        case 9: return "Pick a personality for your Quote AI experience."
+        case 0: return localization.string(for: "onboarding.gender.title")
+        case 1: return localization.string(for: "onboarding.name.title")
+        case 2: return localization.string(for: "onboarding.birthYear.title")
+        case 3: return localization.string(for: "onboarding.mentalEnergy.title")
+        case 4: return localization.string(for: "onboarding.energyDrain.title")
+        case 5: return localization.string(for: "onboarding.focus.title")
+        case 6: return localization.string(for: "onboarding.barrier.title")
+        case 7: return localization.string(for: "onboarding.mindset.title")
+        case 8: return localization.string(for: "onboarding.background.title")
+        case 9: return localization.string(for: "onboarding.tone.title")
         case 10: return ""
         case 11: return ""
         case 12: return ""
-        case 13: return "Save your progress"
+        case 13: return localization.string(for: "onboarding.saveProgress.title")
         default: return ""
         }
     }
@@ -251,16 +252,16 @@ struct OnboardingView: View {
     // Dynamic subtitle based on current step
     var stepSubtitle: String {
         switch currentStep {
-        case 0: return "This will be used to personalize Quote AI for you"
-        case 1: return "This will be used to personalize Quote AI for you"
-        case 2: return "This will be used to personalize Quote AI for you"
+        case 0: return localization.string(for: "onboarding.personalize.subtitle")
+        case 1: return localization.string(for: "onboarding.personalize.subtitle")
+        case 2: return localization.string(for: "onboarding.personalize.subtitle")
         case 3: return ""
         case 4: return ""
         case 5: return ""
         case 6: return ""
         case 7: return ""
-        case 8: return "This will be used to personalize Quote AI for you"
-        case 9: return "This will be used to personalize Quote AI for you"
+        case 8: return localization.string(for: "onboarding.personalize.subtitle")
+        case 9: return localization.string(for: "onboarding.personalize.subtitle")
         case 10: return ""
         case 11: return ""
         case 12: return ""
@@ -294,7 +295,7 @@ struct OnboardingView: View {
                 }
 
             VStack(spacing: 24) {
-                TextField("Your Name", text: $nameInput)
+                TextField(localization.string(for: "onboarding.name.placeholder"), text: $nameInput)
                     .font(.title3)
                     .multilineTextAlignment(.center)
                     .padding()
@@ -422,12 +423,12 @@ struct OnboardingView: View {
                         }
                     }
 
-                    Text("Congratulations")
+                    Text(localization.string(for: "complete.congratulations"))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
                         .multilineTextAlignment(.center)
 
-                    Text("your custom Quote AI is ready!")
+                    Text(localization.string(for: "complete.ready"))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
                         .multilineTextAlignment(.center)
@@ -437,21 +438,21 @@ struct OnboardingView: View {
 
 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Get the most out of Quote AI:")
+                    Text(localization.string(for: "complete.tips.title"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
                         .padding(.bottom, 4)
 
-                    ForEach(["Open it at least once a day",
-                             "Tell it what’s on your mind",
-                             "Save the quotes that hit you",
-                             "Re-read them when you feel stuck"], id: \.self) { tip in
+                    ForEach([localization.string(for: "complete.tip1"),
+                             localization.string(for: "complete.tip2"),
+                             localization.string(for: "complete.tip3"),
+                             localization.string(for: "complete.tip4")], id: \.self) { tip in
                         HStack(alignment: .top, spacing: 12) {
                             Circle()
                                 .fill(Color.black)
                                 .frame(width: 6, height: 6)
                                 .padding(.top, 8)
-                            
+
                             Text(tip)
                                 .font(.system(size: 16))
                                 .foregroundColor(.black.opacity(0.8))
@@ -485,11 +486,11 @@ struct OnboardingView: View {
     // Step 13: Sign In
     var signInStep: some View {
         VStack(spacing: 30) {
-            Text("One last step.")
+            Text(localization.string(for: "signIn.oneLastStep"))
                 .font(.title2)
                 .foregroundColor(.white.opacity(0.8))
-            
-            Text("Save your profile to start.")
+
+            Text(localization.string(for: "signIn.saveProfile"))
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
@@ -509,8 +510,8 @@ struct OnboardingView: View {
                         } else {
                             GoogleLogoView(size: 24)
                         }
-                        
-                        Text("Continue with Google")
+
+                        Text(localization.string(for: "signIn.continueWithGoogle"))
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
@@ -540,7 +541,7 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 32)
             
-            Text("By continuing, you agree to our Terms of Service and Privacy Policy")
+            Text(localization.string(for: "signIn.termsAgreement"))
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -654,8 +655,18 @@ struct SelectionCard: View {
 struct ToneStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedTone: QuoteTone
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
-    
+
+    private func localizedTone(_ tone: QuoteTone) -> String {
+        switch tone {
+        case .gentle: return localization.string(for: "tone.gentle")
+        case .toughLove: return localization.string(for: "tone.toughLove")
+        case .philosophical: return localization.string(for: "tone.philosophical")
+        case .realist: return localization.string(for: "tone.realist")
+        }
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             ForEach(Array(QuoteTone.allCases.enumerated()), id: \.element) { index, tone in
@@ -664,7 +675,7 @@ struct ToneStepView: View {
                     impact.impactOccurred()
                     selectedTone = tone
                 }) {
-                    Text(tone.rawValue)
+                    Text(localizedTone(tone))
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(selectedTone == tone ? .white : .black)
                         .frame(maxWidth: .infinity)
@@ -703,7 +714,16 @@ struct ToneStepView: View {
 struct ChatBackgroundStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedBackground: ChatBackground
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
+
+    private func localizedBackground(_ background: ChatBackground) -> String {
+        switch background {
+        case .summit: return localization.string(for: "background.summit")
+        case .ascent: return localization.string(for: "background.ascent")
+        case .defaultBackground: return localization.string(for: "background.default")
+        }
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -724,24 +744,9 @@ struct ChatBackgroundStepView: View {
                                 .foregroundColor(.black)
                         }
 
-                        Group {
-                            if background.description.isEmpty {
-                                Text(background.displayName)
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(selectedBackground == background ? .white : .black)
-                            } else {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(background.displayName)
-                                        .font(.system(size: 18, weight: .semibold))
-                                        .foregroundColor(selectedBackground == background ? .white : .black)
-
-                                    Text(background.description)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(selectedBackground == background ? .white.opacity(0.8) : .gray)
-                                        .multilineTextAlignment(.leading)
-                                }
-                            }
-                        }
+                        Text(localizedBackground(background))
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(selectedBackground == background ? .white : .black)
 
                         Spacer()
                     }
@@ -781,8 +786,18 @@ struct ChatBackgroundStepView: View {
 struct FocusStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedFocus: UserFocus
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
-    
+
+    private func localizedFocus(_ focus: UserFocus) -> String {
+        switch focus {
+        case .anxiety: return localization.string(for: "focus.anxiety")
+        case .innerPeace: return localization.string(for: "focus.innerPeace")
+        case .perspective: return localization.string(for: "focus.perspective")
+        case .confidence: return localization.string(for: "focus.confidence")
+        }
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             ForEach(Array(UserFocus.allCases.enumerated()), id: \.element) { index, focus in
@@ -797,13 +812,13 @@ struct FocusStepView: View {
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 44, height: 44)
-                            
+
                             Image(systemName: focus.icon)
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.black)
                         }
-                        
-                        Text(focus.rawValue)
+
+                        Text(localizedFocus(focus))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(selectedFocus == focus ? .white : .black)
                         
@@ -845,8 +860,19 @@ struct FocusStepView: View {
 struct BarrierStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedBarrier: UserBarrier
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
-    
+
+    private func localizedBarrier(_ barrier: UserBarrier) -> String {
+        switch barrier {
+        case .procrastination: return localization.string(for: "barrier.procrastination")
+        case .selfDoubt: return localization.string(for: "barrier.selfDoubt")
+        case .burnout: return localization.string(for: "barrier.burnout")
+        case .lackOfClarity: return localization.string(for: "barrier.lackOfClarity")
+        case .externalFactors: return localization.string(for: "barrier.externalFactors")
+        }
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             ForEach(Array(UserBarrier.allCases.enumerated()), id: \.element) { index, barrier in
@@ -861,13 +887,13 @@ struct BarrierStepView: View {
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 44, height: 44)
-                            
+
                             Image(systemName: barrier.icon)
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.black)
                         }
-                        
-                        Text(barrier.rawValue)
+
+                        Text(localizedBarrier(barrier))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(selectedBarrier == barrier ? .white : .black)
                         
@@ -909,8 +935,18 @@ struct BarrierStepView: View {
 struct EnergyDrainStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedEnergyDrain: UserEnergyDrain
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
-    
+
+    private func localizedEnergyDrain(_ energyDrain: UserEnergyDrain) -> String {
+        switch energyDrain {
+        case .career: return localization.string(for: "energyDrain.career")
+        case .relationship: return localization.string(for: "energyDrain.relationship")
+        case .mediaNews: return localization.string(for: "energyDrain.mediaNews")
+        case .healthFitness: return localization.string(for: "energyDrain.healthFitness")
+        }
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             ForEach(Array(UserEnergyDrain.allCases.enumerated()), id: \.element) { index, energyDrain in
@@ -925,13 +961,13 @@ struct EnergyDrainStepView: View {
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 44, height: 44)
-                            
+
                             Image(systemName: energyDrain.icon)
                                 .font(.system(size: 18, weight: .medium))
                                 .foregroundColor(.black)
                         }
-                        
-                        Text(energyDrain.rawValue)
+
+                        Text(localizedEnergyDrain(energyDrain))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(selectedEnergyDrain == energyDrain ? .white : .black)
                         
@@ -973,24 +1009,31 @@ struct EnergyDrainStepView: View {
 struct GenderStepView: View {
     @Binding var isActive: Bool
     @Binding var selectedGender: String
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
-    
-    private let genderOptions = ["Male", "Female", "Other"]
+
+    private var genderOptions: [(key: String, display: String)] {
+        [
+            ("Male", localization.string(for: "gender.male")),
+            ("Female", localization.string(for: "gender.female")),
+            ("Other", localization.string(for: "gender.other"))
+        ]
+    }
     
     var body: some View {
         VStack(spacing: 16) {
-            ForEach(Array(genderOptions.enumerated()), id: \.element) { index, gender in
+            ForEach(Array(genderOptions.enumerated()), id: \.offset) { index, gender in
                 Button(action: {
                     let impact = UIImpactFeedbackGenerator(style: .medium)
                     impact.impactOccurred()
-                    selectedGender = gender
+                    selectedGender = gender.key
                 }) {
-                    Text(gender)
+                    Text(gender.display)
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(selectedGender == gender ? .white : .black)
+                        .foregroundColor(selectedGender == gender.key ? .white : .black)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 22)
-                        .background(selectedGender == gender ? Color.black : Color.gray.opacity(0.1))
+                        .background(selectedGender == gender.key ? Color.black : Color.gray.opacity(0.1))
                         .cornerRadius(16)
                 }
                 .offset(y: showContent ? 0 : 100)
@@ -1024,6 +1067,7 @@ struct GenderStepView: View {
 struct MentalEnergyStepView: View {
     @Binding var isActive: Bool
     @Binding var mentalEnergy: Double
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
     @State private var wavePhase: CGFloat = 0
 
@@ -1038,11 +1082,11 @@ struct MentalEnergyStepView: View {
 
     private var currentEnergyTitle: String {
         switch energyState {
-        case 0: return "Exhausted"
-        case 1: return "Drained"
-        case 2: return "Neutral"
-        case 3: return "Fresh"
-        default: return "Energized"
+        case 0: return localization.string(for: "mentalEnergy.exhausted")
+        case 1: return localization.string(for: "mentalEnergy.drained")
+        case 2: return localization.string(for: "mentalEnergy.neutral")
+        case 3: return localization.string(for: "mentalEnergy.fresh")
+        default: return localization.string(for: "mentalEnergy.energized")
         }
     }
 
@@ -1212,19 +1256,19 @@ struct MentalEnergyStepView: View {
 
                 // Labels below slider
                 HStack {
-                    Text("Low")
+                    Text(localization.string(for: "mentalEnergy.low"))
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
 
                     Spacer()
 
-                    Text("Medium")
+                    Text(localization.string(for: "mentalEnergy.medium"))
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
 
                     Spacer()
 
-                    Text("High")
+                    Text(localization.string(for: "mentalEnergy.high"))
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
                 }
@@ -1466,6 +1510,7 @@ struct BirthYearStepView: View {
 
 struct MindsetChartStepView: View {
     @Binding var isActive: Bool
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
     @State private var animateChart = false
 
@@ -1476,7 +1521,7 @@ struct MindsetChartStepView: View {
             // Chart Card
             VStack(alignment: .leading, spacing: 16) {
                 // Chart Title
-                Text("Your mindset")
+                Text(localization.string(for: "mindsetChart.title"))
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.black)
 
@@ -1529,7 +1574,7 @@ struct MindsetChartStepView: View {
                         .animation(.easeOut(duration: 1.2).delay(0.3), value: animateChart)
 
                         // "Without Quote AI" label next to Morandi Blue line
-                        Text("Without Quote AI")
+                        Text(localization.string(for: "mindsetChart.withoutQuoteAI"))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(red: 0.55, green: 0.65, blue: 0.80)) // Light Morandi Blue
                             .position(x: width - 60, y: startY - 18)
@@ -1550,7 +1595,7 @@ struct MindsetChartStepView: View {
                         .animation(.easeOut(duration: 1.2).delay(0.3), value: animateChart)
 
                         // "With Quote AI" label next to black line
-                        Text("With Quote AI")
+                        Text(localization.string(for: "mindsetChart.withQuoteAI"))
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.black)
                             .position(x: width - 52, y: height * 0.05)
@@ -1626,17 +1671,17 @@ struct MindsetChartStepView: View {
 
                 // Month labels
                 HStack {
-                    Text("Month 1")
+                    Text(localization.string(for: "mindsetChart.month1"))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.black)
                     Spacer()
-                    Text("Month 3")
+                    Text(localization.string(for: "mindsetChart.month3"))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.black)
                 }
 
                 // Subtext quote
-                Text("You can't fix a broken mind with the same broken mind.")
+                Text(localization.string(for: "mindsetChart.quote"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
@@ -1684,6 +1729,7 @@ struct MindsetChartStepView: View {
 
 struct PersonalizeStepView: View {
     @Binding var isActive: Bool
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
     var body: some View {
@@ -1701,11 +1747,11 @@ struct PersonalizeStepView: View {
 
                 // Text
                 VStack(spacing: 8) {
-                    Text("Now let's personalize")
+                    Text(localization.string(for: "personalize.title"))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
 
-                    Text("Quote AI for you")
+                    Text(localization.string(for: "personalize.subtitle"))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.black)
                 }
@@ -1732,11 +1778,11 @@ struct PersonalizeStepView: View {
                     }
 
                     VStack(spacing: 6) {
-                        Text("Your privacy and security matter to us.")
+                        Text(localization.string(for: "personalize.privacy.title"))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
-                        Text("We keep your info private and only use it to tailor your experience.")
+                        Text(localization.string(for: "personalize.privacy.subtitle"))
                             .font(.system(size: 15))
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
@@ -1821,17 +1867,18 @@ struct SetupLoadingStepView: View {
     @Binding var isActive: Bool
     @Binding var isLoadingComplete: Bool
     @ObservedObject var preferences: UserPreferences
+    @StateObject private var localization = LocalizationManager.shared
 
-	@State private var progress: Double = 0
-	@State private var currentStatusText = "Saving your profile..."
-	@State private var showContent = false
+    @State private var progress: Double = 0
+    @State private var currentStatusText = ""
+    @State private var showContent = false
 
     private var setupItems: [String] {
         [
-            "Saving your profile",
-            "Tuning your language",
-            "Applying chat background",
-            "Setting your quote voice"
+            localization.string(for: "setup.savingProfile"),
+            localization.string(for: "setup.tuningLanguage"),
+            localization.string(for: "setup.applyingBackground"),
+            localization.string(for: "setup.settingVoice")
         ]
     }
 
@@ -1850,7 +1897,7 @@ struct SetupLoadingStepView: View {
                 .animation(.easeOut(duration: 0.5), value: showContent)
 
             // Title text
-            Text("We're setting up\nQuote AI for you")
+            Text(localization.string(for: "setup.title"))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
@@ -1900,7 +1947,7 @@ struct SetupLoadingStepView: View {
 
             // Setup items list
             VStack(alignment: .leading, spacing: 16) {
-                Text("Setting up for you")
+                Text(localization.string(for: "setup.settingUp"))
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
 
@@ -1964,7 +2011,7 @@ struct SetupLoadingStepView: View {
         completedItems = []
         visibleItemsCount = 0 // Reset
         isLoadingComplete = false
-        currentStatusText = "Saving your profile..."
+        currentStatusText = "\(localization.string(for: "setup.savingProfile"))..."
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             showContent = true
@@ -2018,7 +2065,7 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Tuning your language..."
+                    currentStatusText = "\(localization.string(for: "setup.tuningLanguage"))..."
                 }
                 if i == 50 && !completedItems.contains(1) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -2029,7 +2076,7 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Applying chat background..."
+                    currentStatusText = "\(localization.string(for: "setup.applyingBackground"))..."
                 }
                 if i == 75 && !completedItems.contains(2) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -2040,16 +2087,16 @@ struct SetupLoadingStepView: View {
                     // Haptic feedback when item completes
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
-                    currentStatusText = "Setting your quote voice..."
+                    currentStatusText = "\(localization.string(for: "setup.settingVoice"))..."
                 }
                 if i == 95 && !completedItems.contains(3) {
-                    _ = withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         completedItems.insert(3)
-                    }
+                    } as Void
                     // Haptic feedback when item completes - slightly stronger for final item
                     let impact = UIImpactFeedbackGenerator(style: .medium)
                     impact.impactOccurred()
-                    currentStatusText = "All done!"
+                    currentStatusText = localization.string(for: "setup.allDone")
                 }
 
                 // Signal loading complete at 100%

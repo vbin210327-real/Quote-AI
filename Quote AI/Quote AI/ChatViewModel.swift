@@ -17,14 +17,47 @@ class ChatViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let kimiService = KimiService.shared
+    private let localization = LocalizationManager.shared
+    private var languageObserver: AnyCancellable?
 
     init() {
         // Add personalized welcome message
+        addWelcomeMessage()
+
+        // Observe language changes to update welcome message
+        languageObserver = localization.$currentLanguage
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshWelcomeMessage()
+            }
+    }
+
+    private func refreshWelcomeMessage() {
+        // Only update the first message (welcome message) if it exists and is not from user
+        if let firstMessage = messages.first, !firstMessage.isUser {
+            let userName = UserPreferences.shared.userName
+            let welcomeContent: String
+            if userName.isEmpty {
+                welcomeContent = localization.string(for: "chat.welcomeGeneric")
+            } else {
+                let template = localization.string(for: "chat.welcomePersonalized")
+                welcomeContent = String(format: template, userName)
+            }
+            messages[0] = ChatMessage(content: welcomeContent, isUser: false)
+        }
+    }
+
+    private func addWelcomeMessage() {
         let userName = UserPreferences.shared.userName
-        let welcomeContent = userName.isEmpty 
-            ? "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
-            : "Hi \(userName)! I'm ready to help. Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
-            
+        let welcomeContent: String
+        if userName.isEmpty {
+            welcomeContent = localization.string(for: "chat.welcomeGeneric")
+        } else {
+            let template = localization.string(for: "chat.welcomePersonalized")
+            welcomeContent = String(format: template, userName)
+        }
+
         let welcomeMessage = ChatMessage(
             content: welcomeContent,
             isUser: false
@@ -65,7 +98,7 @@ class ChatViewModel: ObservableObject {
                 errorMessage = error.localizedDescription
 
                 let errorBotMessage = ChatMessage(
-                    content: "Sorry, I encountered an error. Please try again.",
+                    content: localization.string(for: "chat.errorMessage"),
                     isUser: false
                 )
                 messages.append(errorBotMessage)
@@ -78,15 +111,6 @@ class ChatViewModel: ObservableObject {
     func clearChat() {
         messages.removeAll()
         // Re-add personalized welcome message
-        let userName = UserPreferences.shared.userName
-        let welcomeContent = userName.isEmpty 
-            ? "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
-            : "Hi \(userName)! I'm ready to help. Share what's on your mind, and I'll respond with a quote to inspire and motivate you."
-            
-        let welcomeMessage = ChatMessage(
-            content: welcomeContent,
-            isUser: false
-        )
-        messages.append(welcomeMessage)
+        addWelcomeMessage()
     }
 }

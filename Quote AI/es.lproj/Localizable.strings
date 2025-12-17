@@ -1,0 +1,137 @@
+/* WelcomeView */
+"welcome.mission" = "Sabiduría personalizada\npara tu camino";
+"welcome.getStarted" = "Comenzar";
+"welcome.alreadyHaveAccount" = "¿Ya tienes una cuenta?";
+"welcome.signIn" = "Iniciar sesión";
+"welcome.signInWithGoogle" = "Iniciar sesión con Google";
+"welcome.termsPrefix" = "Al continuar aceptas los";
+"welcome.termsAndConditions" = "Términos y Condiciones";
+"welcome.and" = "y la";
+"welcome.privacyPolicy" = "Política de Privacidad";
+"welcome.unableToSignIn" = "No se puede iniciar sesión";
+"welcome.signInFailed" = "Error al iniciar sesión:";
+
+/* OnboardingView - Titles */
+"onboarding.gender.title" = "¿Cuál es tu género?";
+"onboarding.name.title" = "¿Cómo te llamamos?";
+"onboarding.birthYear.title" = "¿Cuándo naciste?";
+"onboarding.mentalEnergy.title" = "¿Cómo está tu energía mental ahora?";
+"onboarding.energyDrain.title" = "¿Qué está agotando tu energía?";
+"onboarding.focus.title" = "¿Qué estás buscando?";
+"onboarding.barrier.title" = "¿Cuál es tu mayor obstáculo ahora?";
+"onboarding.mindset.title" = "Aprovecha Quote AI para resultados que importan.";
+"onboarding.background.title" = "¿Qué tipo de fondo\nte gusta?";
+"onboarding.tone.title" = "Elige una personalidad para tu experiencia Quote AI.";
+"onboarding.saveProgress.title" = "Guarda tu progreso";
+
+/* OnboardingView - Subtitles */
+"onboarding.personalize.subtitle" = "Esto se usará para personalizar Quote AI para ti";
+
+/* OnboardingView - Buttons */
+"onboarding.continue" = "Continuar";
+"onboarding.letsGetStarted" = "¡Comencemos!";
+
+/* OnboardingView - Gender */
+"gender.male" = "Masculino";
+"gender.female" = "Femenino";
+"gender.other" = "Otro";
+
+/* OnboardingView - Name */
+"onboarding.name.placeholder" = "Tu Nombre";
+
+/* OnboardingView - Mental Energy */
+"mentalEnergy.exhausted" = "Agotado";
+"mentalEnergy.drained" = "Cansado";
+"mentalEnergy.neutral" = "Neutral";
+"mentalEnergy.fresh" = "Fresco";
+"mentalEnergy.energized" = "Energizado";
+"mentalEnergy.low" = "Bajo";
+"mentalEnergy.medium" = "Medio";
+"mentalEnergy.high" = "Alto";
+
+/* OnboardingView - Mindset Chart */
+"mindsetChart.title" = "Tu mentalidad";
+"mindsetChart.withQuoteAI" = "Con Quote AI";
+"mindsetChart.withoutQuoteAI" = "Sin Quote AI";
+"mindsetChart.month1" = "Mes 1";
+"mindsetChart.month3" = "Mes 3";
+"mindsetChart.quote" = "No puedes arreglar una mente rota con la misma mente rota.";
+
+/* OnboardingView - Personalize */
+"personalize.title" = "Ahora personalicemos";
+"personalize.subtitle" = "Quote AI para ti";
+"personalize.privacy.title" = "Tu privacidad y seguridad nos importan.";
+"personalize.privacy.subtitle" = "Mantenemos tu información privada y solo la usamos para personalizar tu experiencia.";
+
+/* OnboardingView - Setup Loading */
+"setup.percentage" = "%d%%";
+"setup.title" = "Estamos configurando\nQuote AI para ti";
+"setup.settingUp" = "Configurando para ti";
+"setup.savingProfile" = "Guardando tu perfil";
+"setup.tuningLanguage" = "Ajustando tu idioma";
+"setup.applyingBackground" = "Aplicando fondo de chat";
+"setup.settingVoice" = "Configurando tu voz de citas";
+"setup.allDone" = "¡Todo listo!";
+
+/* OnboardingView - Setup Complete */
+"complete.congratulations" = "Felicidades";
+"complete.ready" = "¡tu Quote AI personalizado está listo!";
+"complete.tips.title" = "Aprovecha al máximo Quote AI:";
+"complete.tip1" = "Ábrelo al menos una vez al día";
+"complete.tip2" = "Cuéntale lo que tienes en mente";
+"complete.tip3" = "Guarda las citas que te impactan";
+"complete.tip4" = "Reléelas cuando te sientas atascado";
+
+/* OnboardingView - Sign In */
+"signIn.oneLastStep" = "Un último paso.";
+"signIn.saveProfile" = "Guarda tu perfil para comenzar.";
+"signIn.continueWithGoogle" = "Continuar con Google";
+"signIn.termsAgreement" = "Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad";
+
+/* ChatView */
+"chat.title" = "Quote AI";
+"chat.placeholder" = "¿Qué tienes en mente?";
+"chat.loading" = "Citando...";
+"chat.welcomeGeneric" = "¡Bienvenido! Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
+"chat.welcomePersonalized" = "¡Hola %@! Estoy listo para ayudarte. Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
+"chat.errorMessage" = "Lo siento, encontré un error. Por favor, inténtalo de nuevo.";
+
+/* ProfileView */
+"profile.title" = "Perfil";
+"profile.email" = "Correo electrónico";
+"profile.userId" = "ID de Usuario";
+"profile.signOut" = "Cerrar Sesión";
+"profile.done" = "Listo";
+
+/* Tones */
+"tone.gentle" = "Gentil";
+"tone.toughLove" = "Amor Duro";
+"tone.philosophical" = "Filosófico";
+"tone.realist" = "Realista";
+
+/* Focus */
+"focus.anxiety" = "Superar la Ansiedad";
+"focus.innerPeace" = "Encontrar Paz Interior";
+"focus.perspective" = "Ganar Perspectiva";
+"focus.confidence" = "Construir Confianza";
+
+/* Barriers */
+"barrier.procrastination" = "Procrastinación";
+"barrier.selfDoubt" = "Dudas Propias";
+"barrier.burnout" = "Agotamiento";
+"barrier.lackOfClarity" = "Falta de Claridad";
+"barrier.externalFactors" = "Factores Externos";
+
+/* Energy Drains */
+"energyDrain.career" = "Carrera";
+"energyDrain.relationship" = "Relación";
+"energyDrain.mediaNews" = "Medios y Noticias";
+"energyDrain.healthFitness" = "Salud y Fitness";
+
+/* Chat Backgrounds */
+"background.summit" = "Pico Helado";
+"background.ascent" = "Escalera de Sombras";
+"background.default" = "Predeterminado";
+
+/* Settings */
+"settings.language" = "Idioma";

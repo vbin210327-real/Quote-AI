@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABB3AE162EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE142EF251D000D89F9F /* Localizable.strings */; };
+		ABB3AE172EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE0E2EF251D000D89F9F /* Localizable.strings */; };
+		ABB3AE182EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE112EF251D000D89F9F /* Localizable.strings */; };
 		ABEB15422EDA023C00D0F7E3 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15412EDA023C00D0F7E3 /* Auth */; };
 		ABEB15442EDA023C00D0F7E3 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15432EDA023C00D0F7E3 /* Functions */; };
 		ABEB15462EDA023C00D0F7E3 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15452EDA023C00D0F7E3 /* PostgREST */; };
@@ -38,6 +41,9 @@
 		AB8E8C082ED7509900C3DF49 /* Quote AI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Quote AI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB8E8C152ED7509B00C3DF49 /* Quote AITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Quote AITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB8E8C1F2ED7509B00C3DF49 /* Quote AIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Quote AIUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABB3AE0D2EF251D000D89F9F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE102EF251D000D89F9F /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE132EF251D000D89F9F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,6 +100,9 @@
 		AB8E8BFF2ED7509800C3DF49 = {
 			isa = PBXGroup;
 			children = (
+				ABB3AE0F2EF251D000D89F9F /* en.lproj */,
+				ABB3AE122EF251D000D89F9F /* es.lproj */,
+				ABB3AE152EF251D000D89F9F /* fr.lproj */,
 				AB8E8C0A2ED7509900C3DF49 /* Quote AI */,
 				AB8E8C182ED7509B00C3DF49 /* Quote AITests */,
 				AB8E8C222ED7509B00C3DF49 /* Quote AIUITests */,
@@ -109,6 +118,30 @@
 				AB8E8C1F2ED7509B00C3DF49 /* Quote AIUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		ABB3AE0F2EF251D000D89F9F /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE0E2EF251D000D89F9F /* Localizable.strings */,
+			);
+			path = en.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE122EF251D000D89F9F /* es.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE112EF251D000D89F9F /* Localizable.strings */,
+			);
+			path = es.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE152EF251D000D89F9F /* fr.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE142EF251D000D89F9F /* Localizable.strings */,
+			);
+			path = fr.lproj;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +252,8 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
+				fr,
 			);
 			mainGroup = AB8E8BFF2ED7509800C3DF49;
 			minimizedProjectReferenceProxies = 1;
@@ -243,6 +278,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABB3AE162EF251D000D89F9F /* Localizable.strings in Resources */,
+				ABB3AE172EF251D000D89F9F /* Localizable.strings in Resources */,
+				ABB3AE182EF251D000D89F9F /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +336,33 @@
 			targetProxy = AB8E8C202ED7509B00C3DF49 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		ABB3AE0E2EF251D000D89F9F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE0D2EF251D000D89F9F /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE112EF251D000D89F9F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE102EF251D000D89F9F /* es */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE142EF251D000D89F9F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE132EF251D000D89F9F /* fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		AB8E8C272ED7509B00C3DF49 /* Debug */ = {

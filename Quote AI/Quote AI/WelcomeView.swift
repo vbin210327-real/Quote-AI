@@ -12,6 +12,7 @@ struct WelcomeView: View {
     var onGetStarted: () -> Void
     @StateObject private var supabaseManager = SupabaseManager.shared
     @StateObject private var userPreferences = UserPreferences.shared
+    @StateObject private var localization = LocalizationManager.shared
     @State private var showSignInSheet = false
     @State private var isSigningIn = false
     @State private var errorMessage: String?
@@ -26,87 +27,122 @@ struct WelcomeView: View {
     @State private var showRestOfContent = UserDefaults.standard.bool(forKey: "hasPlayedWelcomeIntro")
     
     var body: some View {
-        ZStack {
-            // Background Image
-            Group {
-                if let uiImage = Self.backgroundUIImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+        GeometryReader { proxy in
+            ZStack {
+                // Background Image
+                Group {
+                    if let uiImage = Self.backgroundUIImage {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .ignoresSafeArea()
+                    } else {
+                        // Fallback gradient if image fails
+                        LinearGradient(
+                            colors: [Color.black, Color.blue.opacity(0.5), Color.white],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                         .ignoresSafeArea()
-                } else {
-                    // Fallback gradient if image fails
-                    LinearGradient(
-                        colors: [Color.black, Color.blue.opacity(0.5), Color.white],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .ignoresSafeArea()
+                    }
                 }
-            }
-            // Prevent background from participating in text animations (avoids flicker/flash).
-            .transaction { transaction in
-                transaction.animation = nil
-            }
-            
-            VStack(spacing: 0) {
-                Spacer()
-                
-                // Mission Statement
-                VStack(spacing: 0) {
-                    Text("Wisdom customized\nfor your journey")
-                        .font(.system(size: 36, weight: .bold))
-                        .italic()
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 4)
+                // Prevent background from participating in text animations (avoids flicker/flash).
+                .transaction { transaction in
+                    transaction.animation = nil
                 }
-                .padding(.bottom, 20) // Keep original position (reserve space for bottom content)
-                .opacity(showMissionStatement ? 1 : 0)
-                .animation(shouldPlayIntroAnimation ? .easeOut(duration: 0.35) : nil, value: showMissionStatement)
+
 
                 VStack(spacing: 0) {
-                    // Get Started Button
-                    Button(action: {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        onGetStarted()
-                    }) {
-                        Text("Get Started")
-                            .font(.system(size: 18, weight: .semibold))
-                            .italic()
-                            .foregroundColor(.white)
-                            .frame(width: UIScreen.main.bounds.width - 40)
-                            .frame(height: 60)
-                            .background(Color.black)
-                            .cornerRadius(30)
-                    }
+                    Spacer()
                     
-                    // Already have an account text
-                    HStack(spacing: 4) {
-                        Text("Already have an account?")
-                            .font(.system(size: 15))
+                    // Mission Statement
+                    VStack(spacing: 0) {
+                        Text(localization.string(for: "welcome.mission"))
+                            .font(.system(size: 36, weight: .bold))
+                            .italic()
                             .foregroundColor(.black)
-                        
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 4)
+                    }
+                    .padding(.bottom, 20) // Keep original position (reserve space for bottom content)
+                    .opacity(showMissionStatement ? 1 : 0)
+                    .animation(shouldPlayIntroAnimation ? .easeOut(duration: 0.35) : nil, value: showMissionStatement)
+                    
+                    VStack(spacing: 0) {
+                        // Get Started Button
                         Button(action: {
-                            showSignInSheet = true
+                            let impact = UIImpactFeedbackGenerator(style: .medium)
+                            impact.impactOccurred()
+                            onGetStarted()
                         }) {
-                            Text("Sign In")
-                                .font(.system(size: 15, weight: .bold))
+                            Text(localization.string(for: "welcome.getStarted"))
+                                .font(.system(size: 18, weight: .semibold))
+                                .italic()
+                                .foregroundColor(.white)
+                                .frame(width: UIScreen.main.bounds.width - 40)
+                                .frame(height: 60)
+                                .background(Color.black)
+                                .cornerRadius(30)
+                        }
+                        
+                        // Already have an account text
+                        HStack(spacing: 4) {
+                            Text(localization.string(for: "welcome.alreadyHaveAccount"))
+                                .font(.system(size: 15))
                                 .foregroundColor(.black)
+
+                            Button(action: {
+                                showSignInSheet = true
+                            }) {
+                                Text(localization.string(for: "welcome.signIn"))
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.black)
+                            }
+                        }
+                        .padding(.top, 16)
+                        .padding(.bottom, 20)
+                    }
+                    // Keep space reserved from the start to avoid mission statement jumping position.
+                    .opacity(showRestOfContent ? 1 : 0)
+                    .offset(y: showRestOfContent ? 0 : 18)
+                    .blur(radius: showRestOfContent ? 0 : 6)
+                    .animation(shouldPlayIntroAnimation ? .easeOut(duration: 0.6).delay(0.05) : nil, value: showRestOfContent)
+                    .allowsHitTesting(showRestOfContent)
+                    .accessibilityHidden(!showRestOfContent)
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .overlay(alignment: .topTrailing) {
+            Menu {
+                ForEach(AppLanguage.allCases, id: \.self) { language in
+                    Button {
+                        localization.setLanguage(language)
+                    } label: {
+                        Label {
+                            Text("\(language.displayName) \(language.flag)")
+                        } icon: {
+                            if localization.currentLanguage == language {
+                                Image(systemName: "checkmark")
+                            }
                         }
                     }
-                    .padding(.top, 16)
-                    .padding(.bottom, 20)
                 }
-                // Keep space reserved from the start to avoid mission statement jumping position.
-                .opacity(showRestOfContent ? 1 : 0)
-                .offset(y: showRestOfContent ? 0 : 18)
-                .blur(radius: showRestOfContent ? 0 : 6)
-                .animation(shouldPlayIntroAnimation ? .easeOut(duration: 0.6).delay(0.05) : nil, value: showRestOfContent)
-                .allowsHitTesting(showRestOfContent)
-                .accessibilityHidden(!showRestOfContent)
+            } label: {
+                HStack(spacing: 8) {
+                    Text(localization.currentLanguage.flag)
+                        .font(.system(size: 18))
+                    Text(localization.currentLanguage.rawValue.uppercased())
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color(UIColor.systemGray4))
+                .cornerRadius(25)
             }
+            .padding(.trailing, 20)
+            .padding(.top, 10)
         }
         .sheet(isPresented: $showSignInSheet) {
             signInSheet
@@ -114,7 +150,7 @@ struct WelcomeView: View {
         .onAppear {
             guard !didConfigureAppearance else { return }
             didConfigureAppearance = true
-            
+
             if shouldPlayIntroAnimation {
                 userPreferences.hasPlayedWelcomeIntro = true
                 
@@ -155,8 +191,8 @@ struct WelcomeView: View {
                         } else {
                             GoogleLogoView(size: 24)
                         }
-                        
-                        Text("Sign in with Google")
+
+                        Text(localization.string(for: "welcome.signInWithGoogle"))
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
@@ -192,20 +228,20 @@ struct WelcomeView: View {
                 
                 // Terms and Privacy Policy
                 VStack(spacing: 4) {
-                    Text("By continuing you agree to Quote AI's")
+                    Text(localization.string(for: "welcome.termsPrefix"))
                         .font(.system(size: 13))
                         .foregroundColor(.gray)
-                    
+
                     HStack(spacing: 4) {
-                        Text("Terms and Conditions")
+                        Text(localization.string(for: "welcome.termsAndConditions"))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.black)
-                        
-                        Text("and")
+
+                        Text(localization.string(for: "welcome.and"))
                             .font(.system(size: 13))
                             .foregroundColor(.gray)
-                        
-                        Text("Privacy Policy")
+
+                        Text(localization.string(for: "welcome.privacyPolicy"))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.black)
                     }
@@ -214,7 +250,7 @@ struct WelcomeView: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 30)
             }
-            .navigationTitle("Sign In")
+            .navigationTitle(localization.string(for: "welcome.signIn"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -236,7 +272,7 @@ struct WelcomeView: View {
         // Get the root view controller
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
-            errorMessage = "Unable to present sign-in"
+            errorMessage = localization.string(for: "welcome.unableToSignIn")
             isSigningIn = false
             return
         }
@@ -255,7 +291,7 @@ struct WelcomeView: View {
                     return
                 }
                 
-                errorMessage = "Sign-in failed: \(error.localizedDescription)"
+                errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
                 isSigningIn = false
             }
         }

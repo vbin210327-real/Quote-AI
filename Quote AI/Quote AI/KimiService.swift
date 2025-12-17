@@ -48,14 +48,19 @@ class KimiService {
 
         // Build dynamic system prompt based on user preferences
         let preferences = UserPreferences.shared
+        let localization = LocalizationManager.shared
+        let languageName = localization.currentLanguage.displayName
+
         let dynamicPrompt = """
         \(Config.systemPrompt)
 
         USER: \(preferences.userName)
         TONE: \(preferences.quoteTone.rawValue) - \(preferences.quoteTone.description)
+        LANGUAGE: \(languageName)
 
         YOUR RESPONSE MUST embody the \(preferences.quoteTone.rawValue) tone completely. This is non-negotiable.
         Use their name sparingly (not every message).
+        IMPORTANT: You MUST respond in \(languageName). All your responses should be in \(languageName).
         """
 
         // Prepare request body

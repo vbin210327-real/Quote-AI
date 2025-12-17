@@ -11,6 +11,7 @@ import Auth
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
     @StateObject private var preferences = UserPreferences.shared
+    @StateObject private var localization = LocalizationManager.shared
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -23,7 +24,7 @@ struct ChatView: View {
 
                         Spacer()
 
-                        Text("Quote AI")
+                        Text(localization.string(for: "chat.title"))
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundColor(.white)
 
@@ -102,7 +103,7 @@ struct ChatView: View {
 
                 // Input area
                 HStack(spacing: 12) {
-                    TextField("What's on your mind?", text: $viewModel.currentInput, axis: .vertical)
+                    TextField(localization.string(for: "chat.placeholder"), text: $viewModel.currentInput, axis: .vertical)
                         .textFieldStyle(.plain)
                         .padding(12)
                         .background(Color.white.opacity(0.15))
@@ -190,6 +191,7 @@ struct ProfileButton: View {
 
 struct ProfileView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
     
@@ -199,16 +201,16 @@ struct ProfileView: View {
                 Section {
                     if let email = supabaseManager.currentUser?.email {
                         HStack {
-                            Text("Email")
+                            Text(localization.string(for: "profile.email"))
                                 .foregroundColor(.secondary)
                             Spacer()
                             Text(email)
                         }
                     }
-                    
+
                     if let userId = supabaseManager.currentUser?.id {
                         HStack {
-                            Text("User ID")
+                            Text(localization.string(for: "profile.userId"))
                                 .foregroundColor(.secondary)
                             Spacer()
                             Text(userId.uuidString.prefix(8) + "...")
@@ -218,6 +220,28 @@ struct ProfileView: View {
                     }
                 }
                 
+                // Language Selection
+                Section {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Button(action: {
+                            localization.setLanguage(language)
+                        }) {
+                            HStack {
+                                Text(language.flag)
+                                Text(language.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if localization.currentLanguage == language {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(localization.string(for: "settings.language"))
+                }
+
                 Section {
                     Button(action: {
                         handleSignOut()
@@ -227,18 +251,18 @@ struct ProfileView: View {
                                 ProgressView()
                                     .padding(.trailing, 8)
                             }
-                            Text("Sign Out")
+                            Text(localization.string(for: "profile.signOut"))
                                 .foregroundColor(.red)
                         }
                     }
                     .disabled(isSigningOut)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle(localization.string(for: "profile.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(localization.string(for: "profile.done")) {
                         dismiss()
                     }
                 }
@@ -293,11 +317,12 @@ struct MessageBubble: View {
 }
 
 struct LoadingIndicator: View {
+    @StateObject private var localization = LocalizationManager.shared
     @State private var shimmerOffset: CGFloat = -1.0
-    
+
     var body: some View {
         HStack {
-            Text("Quoting...")
+            Text(localization.string(for: "chat.loading"))
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(Color.gray)
                 .overlay(
@@ -314,7 +339,7 @@ struct LoadingIndicator: View {
                             .offset(x: geo.size.width * shimmerOffset)
                     }
                     .mask(
-                        Text("Quoting...")
+                        Text(localization.string(for: "chat.loading"))
                             .font(.system(size: 16, weight: .medium))
                     )
                 )
