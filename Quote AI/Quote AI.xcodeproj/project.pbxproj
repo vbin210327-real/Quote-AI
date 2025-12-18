@@ -10,6 +10,10 @@
 		ABB3AE162EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE142EF251D000D89F9F /* Localizable.strings */; };
 		ABB3AE172EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE0E2EF251D000D89F9F /* Localizable.strings */; };
 		ABB3AE182EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE112EF251D000D89F9F /* Localizable.strings */; };
+		ABB3AE202EF2891300D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE1E2EF2891300D89F9F /* Localizable.strings */; };
+		ABB3AE282EF3C28E00D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE262EF3C28E00D89F9F /* Localizable.strings */; };
+		ABB3AE2D2EF3C28E00D89B1 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE2B2EF3C28E00D89B1 /* Localizable.strings */; };
+		ABB3AE312EF3C28E00D89B1 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE2F2EF3C28E00D89B1 /* Localizable.strings */; };
 		ABEB15422EDA023C00D0F7E3 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15412EDA023C00D0F7E3 /* Auth */; };
 		ABEB15442EDA023C00D0F7E3 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15432EDA023C00D0F7E3 /* Functions */; };
 		ABEB15462EDA023C00D0F7E3 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15452EDA023C00D0F7E3 /* PostgREST */; };
@@ -44,6 +48,10 @@
 		ABB3AE0D2EF251D000D89F9F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		ABB3AE102EF251D000D89F9F /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = Localizable.strings; sourceTree = "<group>"; };
 		ABB3AE132EF251D000D89F9F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE1D2EF2891300D89F9F /* zh */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE252EF3C28E00D89F9F /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE2A2EF3C28E00D89B1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AE2E2EF3C28E00D89B1 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -100,6 +108,10 @@
 		AB8E8BFF2ED7509800C3DF49 = {
 			isa = PBXGroup;
 			children = (
+				ABB3AE302EF3C28E00D89B1 /* ko.lproj */,
+				ABB3AE2C2EF3C28E00D89B1 /* ja.lproj */,
+				ABB3AE272EF3C28E00D89F9F /* hi.lproj */,
+				ABB3AE1F2EF2891300D89F9F /* zh.lproj */,
 				ABB3AE0F2EF251D000D89F9F /* en.lproj */,
 				ABB3AE122EF251D000D89F9F /* es.lproj */,
 				ABB3AE152EF251D000D89F9F /* fr.lproj */,
@@ -142,6 +154,38 @@
 				ABB3AE142EF251D000D89F9F /* Localizable.strings */,
 			);
 			path = fr.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE1F2EF2891300D89F9F /* zh.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE1E2EF2891300D89F9F /* Localizable.strings */,
+			);
+			path = zh.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE272EF3C28E00D89F9F /* hi.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE262EF3C28E00D89F9F /* Localizable.strings */,
+			);
+			path = hi.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE2C2EF3C28E00D89B1 /* ja.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE2B2EF3C28E00D89B1 /* Localizable.strings */,
+			);
+			path = ja.lproj;
+			sourceTree = "<group>";
+		};
+		ABB3AE302EF3C28E00D89B1 /* ko.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AE2F2EF3C28E00D89B1 /* Localizable.strings */,
+			);
+			path = ko.lproj;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -254,6 +298,10 @@
 				Base,
 				es,
 				fr,
+				zh,
+				hi,
+				ja,
+				ko,
 			);
 			mainGroup = AB8E8BFF2ED7509800C3DF49;
 			minimizedProjectReferenceProxies = 1;
@@ -280,7 +328,11 @@
 			files = (
 				ABB3AE162EF251D000D89F9F /* Localizable.strings in Resources */,
 				ABB3AE172EF251D000D89F9F /* Localizable.strings in Resources */,
+				ABB3AE282EF3C28E00D89F9F /* Localizable.strings in Resources */,
 				ABB3AE182EF251D000D89F9F /* Localizable.strings in Resources */,
+				ABB3AE202EF2891300D89F9F /* Localizable.strings in Resources */,
+				ABB3AE2D2EF3C28E00D89B1 /* Localizable.strings in Resources */,
+				ABB3AE312EF3C28E00D89B1 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,6 +410,38 @@
 			isa = PBXVariantGroup;
 			children = (
 				ABB3AE132EF251D000D89F9F /* fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE1E2EF2891300D89F9F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE1D2EF2891300D89F9F /* zh */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE262EF3C28E00D89F9F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE252EF3C28E00D89F9F /* hi */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE2B2EF3C28E00D89B1 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE2A2EF3C28E00D89B1 /* ja */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		ABB3AE2F2EF3C28E00D89B1 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				ABB3AE2E2EF3C28E00D89B1 /* ko */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

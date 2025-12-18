@@ -1,0 +1,137 @@
+/* WelcomeView */
+"welcome.mission" = "आपकी यात्रा के लिए\nअनुकूलित ज्ञान";
+"welcome.getStarted" = "शुरू करें";
+"welcome.alreadyHaveAccount" = "पहले से खाता है?";
+"welcome.signIn" = "साइन इन करें";
+"welcome.signInWithGoogle" = "Google से साइन इन करें";
+"welcome.termsPrefix" = "जारी रखकर आप Quote AI की";
+"welcome.termsAndConditions" = "नियम और शर्तें";
+"welcome.and" = "और";
+"welcome.privacyPolicy" = "गोपनीयता नीति";
+"welcome.unableToSignIn" = "साइन इन नहीं हो पा रहा";
+"welcome.signInFailed" = "साइन इन विफल:";
+
+/* OnboardingView - Titles */
+"onboarding.gender.title" = "आपका लिंग क्या है?";
+"onboarding.name.title" = "हम आपको क्या बुलाएं?";
+"onboarding.birthYear.title" = "आपका जन्म कब हुआ?";
+"onboarding.mentalEnergy.title" = "अभी आपकी मानसिक ऊर्जा कैसी है?";
+"onboarding.energyDrain.title" = "वर्तमान में क्या आपकी ऊर्जा खींच रहा है?";
+"onboarding.focus.title" = "आप क्या खोज रहे हैं?";
+"onboarding.barrier.title" = "अभी आपकी सबसे बड़ी बाधा क्या है?";
+"onboarding.mindset.title" = "महत्वपूर्ण परिणामों के लिए Quote AI का उपयोग करें।";
+"onboarding.background.title" = "आपको किस तरह की\nपृष्ठभूमि पसंद है?";
+"onboarding.tone.title" = "अपने Quote AI अनुभव के लिए एक व्यक्तित्व चुनें।";
+"onboarding.saveProgress.title" = "अपनी प्रगति सहेजें";
+
+/* OnboardingView - Subtitles */
+"onboarding.personalize.subtitle" = "इसका उपयोग आपके लिए Quote AI को व्यक्तिगत बनाने के लिए किया जाएगा";
+
+/* OnboardingView - Buttons */
+"onboarding.continue" = "जारी रखें";
+"onboarding.letsGetStarted" = "चलिए शुरू करें!";
+
+/* OnboardingView - Gender */
+"gender.male" = "पुरुष";
+"gender.female" = "महिला";
+"gender.other" = "अन्य";
+
+/* OnboardingView - Name */
+"onboarding.name.placeholder" = "आपका नाम";
+
+/* OnboardingView - Mental Energy */
+"mentalEnergy.exhausted" = "थका हुआ";
+"mentalEnergy.drained" = "निचोड़ा हुआ";
+"mentalEnergy.neutral" = "सामान्य";
+"mentalEnergy.fresh" = "तरोताजा";
+"mentalEnergy.energized" = "ऊर्जावान";
+"mentalEnergy.low" = "कम";
+"mentalEnergy.medium" = "मध्यम";
+"mentalEnergy.high" = "उच्च";
+
+/* OnboardingView - Mindset Chart */
+"mindsetChart.title" = "आपकी मानसिकता";
+"mindsetChart.withQuoteAI" = "Quote AI के साथ";
+"mindsetChart.withoutQuoteAI" = "Quote AI के बिना";
+"mindsetChart.month1" = "महीना 1";
+"mindsetChart.month3" = "महीना 3";
+"mindsetChart.quote" = "आप टूटे हुए दिमाग से टूटे हुए दिमाग को ठीक नहीं कर सकते।";
+
+/* OnboardingView - Personalize */
+"personalize.title" = "अब व्यक्तिगत बनाएं";
+"personalize.subtitle" = "आपके लिए Quote AI";
+"personalize.privacy.title" = "आपकी गोपनीयता और सुरक्षा हमारे लिए महत्वपूर्ण है।";
+"personalize.privacy.subtitle" = "हम आपकी जानकारी निजी रखते हैं और इसका उपयोग केवल आपके अनुभव को अनुकूलित करने के लिए करते हैं।";
+
+/* OnboardingView - Setup Loading */
+"setup.percentage" = "%d%%";
+"setup.title" = "हम आपके लिए\nQuote AI सेट कर रहे हैं";
+"setup.settingUp" = "आपके लिए सेट कर रहे हैं";
+"setup.savingProfile" = "आपकी प्रोफ़ाइल सहेज रहे हैं";
+"setup.tuningLanguage" = "भाषा समायोजित कर रहे हैं";
+"setup.applyingBackground" = "चैट पृष्ठभूमि लागू कर रहे हैं";
+"setup.settingVoice" = "उद्धरण आवाज़ सेट कर रहे हैं";
+"setup.allDone" = "सब हो गया!";
+
+/* OnboardingView - Setup Complete */
+"complete.congratulations" = "बधाई हो";
+"complete.ready" = "आपका कस्टम Quote AI तैयार है!";
+"complete.tips.title" = "Quote AI का पूरा लाभ उठाएं:";
+"complete.tip1" = "दिन में कम से कम एक बार खोलें";
+"complete.tip2" = "बताएं कि आपके मन में क्या है";
+"complete.tip3" = "जो उद्धरण आपको प्रभावित करें उन्हें सहेजें";
+"complete.tip4" = "जब अटका हुआ महसूस करें तो उन्हें फिर से पढ़ें";
+
+/* OnboardingView - Sign In */
+"signIn.oneLastStep" = "एक आखिरी कदम।";
+"signIn.saveProfile" = "शुरू करने के लिए अपनी प्रोफ़ाइल सहेजें।";
+"signIn.continueWithGoogle" = "Google से जारी रखें";
+"signIn.termsAgreement" = "जारी रखकर, आप हमारी सेवा की शर्तों और गोपनीयता नीति से सहमत हैं";
+
+/* ChatView */
+"chat.title" = "Quote AI";
+"chat.placeholder" = "आपके मन में क्या है?";
+"chat.loading" = "उद्धरण बना रहे हैं...";
+"chat.welcomeGeneric" = "स्वागत है! अपने मन की बात साझा करें, और मैं आपको प्रेरित करने के लिए एक उद्धरण दूंगा।";
+"chat.welcomePersonalized" = "नमस्ते %@! मैं मदद के लिए तैयार हूं। अपने मन की बात साझा करें, और मैं आपको प्रेरित करने के लिए एक उद्धरण दूंगा।";
+"chat.errorMessage" = "क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।";
+
+/* ProfileView */
+"profile.title" = "प्रोफ़ाइल";
+"profile.email" = "ईमेल";
+"profile.userId" = "यूज़र आईडी";
+"profile.signOut" = "साइन आउट";
+"profile.done" = "हो गया";
+
+/* Tones */
+"tone.gentle" = "कोमल";
+"tone.toughLove" = "कठोर प्रेम";
+"tone.philosophical" = "दार्शनिक";
+"tone.realist" = "यथार्थवादी";
+
+/* Focus */
+"focus.anxiety" = "चिंता पर काबू";
+"focus.innerPeace" = "आंतरिक शांति";
+"focus.perspective" = "नई दृष्टि";
+"focus.confidence" = "आत्मविश्वास निर्माण";
+
+/* Barriers */
+"barrier.procrastination" = "टालमटोल";
+"barrier.selfDoubt" = "आत्म-संदेह";
+"barrier.burnout" = "थकान";
+"barrier.lackOfClarity" = "स्पष्टता की कमी";
+"barrier.externalFactors" = "बाहरी कारक";
+
+/* Energy Drains */
+"energyDrain.career" = "करियर";
+"energyDrain.relationship" = "रिश्ते";
+"energyDrain.mediaNews" = "मीडिया और समाचार";
+"energyDrain.healthFitness" = "स्वास्थ्य और फिटनेस";
+
+/* Chat Backgrounds */
+"background.summit" = "बर्फीली चोटी";
+"background.ascent" = "छाया सीढ़ी";
+"background.default" = "डिफ़ॉल्ट";
+
+/* Settings */
+"settings.language" = "भाषा";

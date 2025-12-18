@@ -1478,6 +1478,7 @@ struct BirthYearStepView: View {
             )
             .datePickerStyle(.wheel)
             .labelsHidden()
+            .environment(\.locale, LocalizationManager.shared.currentLanguage.locale)
             .frame(height: 200)
             .offset(y: showContent ? 0 : 100)
             .opacity(showContent ? 1 : 0)

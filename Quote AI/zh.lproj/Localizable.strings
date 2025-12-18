@@ -1,0 +1,137 @@
+/* WelcomeView */
+"welcome.mission" = "为你的旅程\n定制智慧";
+"welcome.getStarted" = "开始使用";
+"welcome.alreadyHaveAccount" = "已有账号？";
+"welcome.signIn" = "登录";
+"welcome.signInWithGoogle" = "使用 Google 登录";
+"welcome.termsPrefix" = "继续即表示你同意 Quote AI 的";
+"welcome.termsAndConditions" = "条款和条件";
+"welcome.and" = "和";
+"welcome.privacyPolicy" = "隐私政策";
+"welcome.unableToSignIn" = "无法登录";
+"welcome.signInFailed" = "登录失败：";
+
+/* OnboardingView - Titles */
+"onboarding.gender.title" = "你的性别是？";
+"onboarding.name.title" = "我们该怎么称呼你？";
+"onboarding.birthYear.title" = "你是哪年出生的？";
+"onboarding.mentalEnergy.title" = "你现在的精神状态如何？";
+"onboarding.energyDrain.title" = "什么正在消耗你的精力？";
+"onboarding.focus.title" = "你在寻找什么？";
+"onboarding.barrier.title" = "你现在最大的障碍是什么？";
+"onboarding.mindset.title" = "用 Quote AI 获得有意义的结果。";
+"onboarding.background.title" = "你喜欢什么样的\n背景？";
+"onboarding.tone.title" = "为你的 Quote AI 体验选择一种风格。";
+"onboarding.saveProgress.title" = "保存你的进度";
+
+/* OnboardingView - Subtitles */
+"onboarding.personalize.subtitle" = "这将用于为你个性化 Quote AI";
+
+/* OnboardingView - Buttons */
+"onboarding.continue" = "继续";
+"onboarding.letsGetStarted" = "开始吧！";
+
+/* OnboardingView - Gender */
+"gender.male" = "男";
+"gender.female" = "女";
+"gender.other" = "其他";
+
+/* OnboardingView - Name */
+"onboarding.name.placeholder" = "你的名字";
+
+/* OnboardingView - Mental Energy */
+"mentalEnergy.exhausted" = "精疲力竭";
+"mentalEnergy.drained" = "疲惫";
+"mentalEnergy.neutral" = "一般";
+"mentalEnergy.fresh" = "精神不错";
+"mentalEnergy.energized" = "精力充沛";
+"mentalEnergy.low" = "低";
+"mentalEnergy.medium" = "中";
+"mentalEnergy.high" = "高";
+
+/* OnboardingView - Mindset Chart */
+"mindsetChart.title" = "你的心态";
+"mindsetChart.withQuoteAI" = "使用 Quote AI";
+"mindsetChart.withoutQuoteAI" = "不使用 Quote AI";
+"mindsetChart.month1" = "第1个月";
+"mindsetChart.month3" = "第3个月";
+"mindsetChart.quote" = "你无法用破碎的心态修复破碎的心态。";
+
+/* OnboardingView - Personalize */
+"personalize.title" = "现在让我们个性化";
+"personalize.subtitle" = "Quote AI 为你服务";
+"personalize.privacy.title" = "你的隐私和安全对我们很重要。";
+"personalize.privacy.subtitle" = "我们会保护你的信息隐私，仅用于定制你的体验。";
+
+/* OnboardingView - Setup Loading */
+"setup.percentage" = "%d%%";
+"setup.title" = "我们正在为你\n设置 Quote AI";
+"setup.settingUp" = "正在为你设置";
+"setup.savingProfile" = "正在保存你的资料";
+"setup.tuningLanguage" = "正在调整语言";
+"setup.applyingBackground" = "正在应用聊天背景";
+"setup.settingVoice" = "正在设置语录风格";
+"setup.allDone" = "全部完成！";
+
+/* OnboardingView - Setup Complete */
+"complete.congratulations" = "恭喜";
+"complete.ready" = "你的专属 Quote AI 已准备就绪！";
+"complete.tips.title" = "充分利用 Quote AI：";
+"complete.tip1" = "每天至少打开一次";
+"complete.tip2" = "告诉它你在想什么";
+"complete.tip3" = "保存触动你的语录";
+"complete.tip4" = "当你感到迷茫时重读它们";
+
+/* OnboardingView - Sign In */
+"signIn.oneLastStep" = "最后一步。";
+"signIn.saveProfile" = "保存你的资料以开始使用。";
+"signIn.continueWithGoogle" = "使用 Google 继续";
+"signIn.termsAgreement" = "继续即表示你同意我们的服务条款和隐私政策";
+
+/* ChatView */
+"chat.title" = "Quote AI";
+"chat.placeholder" = "你在想什么？";
+"chat.loading" = "正在生成语录...";
+"chat.welcomeGeneric" = "欢迎！分享你的想法，我会用一句语录来激励你。";
+"chat.welcomePersonalized" = "你好 %@！我准备好帮助你了。分享你的想法，我会用一句语录来激励你。";
+"chat.errorMessage" = "抱歉，遇到了错误。请重试。";
+
+/* ProfileView */
+"profile.title" = "个人资料";
+"profile.email" = "邮箱";
+"profile.userId" = "用户ID";
+"profile.signOut" = "退出登录";
+"profile.done" = "完成";
+
+/* Tones */
+"tone.gentle" = "温和";
+"tone.toughLove" = "严厉关爱";
+"tone.philosophical" = "哲学";
+"tone.realist" = "现实主义";
+
+/* Focus */
+"focus.anxiety" = "克服焦虑";
+"focus.innerPeace" = "寻找内心平静";
+"focus.perspective" = "获得新视角";
+"focus.confidence" = "建立自信";
+
+/* Barriers */
+"barrier.procrastination" = "拖延症";
+"barrier.selfDoubt" = "自我怀疑";
+"barrier.burnout" = "倦怠";
+"barrier.lackOfClarity" = "缺乏方向";
+"barrier.externalFactors" = "外部因素";
+
+/* Energy Drains */
+"energyDrain.career" = "事业";
+"energyDrain.relationship" = "人际关系";
+"energyDrain.mediaNews" = "媒体与新闻";
+"energyDrain.healthFitness" = "健康与健身";
+
+/* Chat Backgrounds */
+"background.summit" = "冰峰";
+"background.ascent" = "暗影阶梯";
+"background.default" = "默认";
+
+/* Settings */
+"settings.language" = "语言";

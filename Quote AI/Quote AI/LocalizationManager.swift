@@ -13,12 +13,20 @@ enum AppLanguage: String, CaseIterable, Codable {
     case english = "en"
     case spanish = "es"
     case french = "fr"
+    case chinese = "zh"
+    case hindi = "hi"
+    case japanese = "ja"
+    case korean = "ko"
 
     var displayName: String {
         switch self {
         case .english: return "English"
         case .spanish: return "Español"
         case .french: return "Français"
+        case .chinese: return "中文"
+        case .hindi: return "हिन्दी"
+        case .japanese: return "日本語"
+        case .korean: return "한국어"
         }
     }
 
@@ -27,7 +35,15 @@ enum AppLanguage: String, CaseIterable, Codable {
         case .english: return "🇺🇸"
         case .spanish: return "🇪🇸"
         case .french: return "🇫🇷"
+        case .chinese: return "🇨🇳"
+        case .hindi: return "🇮🇳"
+        case .japanese: return "🇯🇵"
+        case .korean: return "🇰🇷"
         }
+    }
+
+    var locale: Locale {
+        return Locale(identifier: self.rawValue)
     }
 }
 

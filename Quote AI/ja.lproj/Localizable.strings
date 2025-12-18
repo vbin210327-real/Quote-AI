@@ -1,0 +1,137 @@
+/* WelcomeView */
+"welcome.mission" = "あなたの旅に合わせた\n至言を";
+"welcome.getStarted" = "はじめる";
+"welcome.alreadyHaveAccount" = "すでにアカウントをお持ちですか？";
+"welcome.signIn" = "サインイン";
+"welcome.signInWithGoogle" = "Googleでサインイン";
+"welcome.termsPrefix" = "続行することで、Quote AIの";
+"welcome.termsAndConditions" = "利用規約";
+"welcome.and" = "および";
+"welcome.privacyPolicy" = "プライバシーポリシー";
+"welcome.unableToSignIn" = "サインインを表示できません";
+"welcome.signInFailed" = "サインインに失敗しました:";
+
+/* OnboardingView - Titles */
+"onboarding.gender.title" = "あなたの性別は？";
+"onboarding.name.title" = "お名前を教えてください";
+"onboarding.birthYear.title" = "生年は？";
+"onboarding.mentalEnergy.title" = "今の心のエネルギーはどのくらいですか？";
+"onboarding.energyDrain.title" = "現在、何があなたのエネルギーを消耗させていますか？";
+"onboarding.focus.title" = "何を求めていますか？";
+"onboarding.barrier.title" = "今、最大の障壁は何ですか？";
+"onboarding.mindset.title" = "Quote AIを活用して、価値のある結果を。";
+"onboarding.background.title" = "どのような背景が\nお好みですか？";
+"onboarding.tone.title" = "Quote AIの体験に合わせた性格を選んでください。";
+"onboarding.saveProgress.title" = "進行状況を保存";
+
+/* OnboardingView - Subtitles */
+"onboarding.personalize.subtitle" = "これはあなたのためにQuote AIをパーソナライズするために使用されます";
+
+/* OnboardingView - Buttons */
+"onboarding.continue" = "次へ";
+"onboarding.letsGetStarted" = "はじめましょう！";
+
+/* OnboardingView - Gender */
+"gender.male" = "男性";
+"gender.female" = "女性";
+"gender.other" = "その他";
+
+/* OnboardingView - Name */
+"onboarding.name.placeholder" = "お名前";
+
+/* OnboardingView - Mental Energy */
+"mentalEnergy.exhausted" = "疲弊している";
+"mentalEnergy.drained" = "消耗している";
+"mentalEnergy.neutral" = "普通";
+"mentalEnergy.fresh" = "リフレッシュ";
+"mentalEnergy.energized" = "活力がある";
+"mentalEnergy.low" = "低い";
+"mentalEnergy.medium" = "中程度";
+"mentalEnergy.high" = "高い";
+
+/* OnboardingView - Mindset Chart */
+"mindsetChart.title" = "あなたのマインドセット";
+"mindsetChart.withQuoteAI" = "Quote AIあり";
+"mindsetChart.withoutQuoteAI" = "Quote AIなし";
+"mindsetChart.month1" = "1ヶ月目";
+"mindsetChart.month3" = "3ヶ月目";
+"mindsetChart.quote" = "壊れた心は、同じ壊れた心では治せない。";
+
+/* OnboardingView - Personalize */
+"personalize.title" = "パーソナライズしましょう";
+"personalize.subtitle" = "あなただけのQuote AI";
+"personalize.privacy.title" = "あなたのプライバシーとセキュリティは重要です。";
+"personalize.privacy.subtitle" = "情報は非公開に保たれ、体験のカスタマイズにのみ使用されます。";
+
+/* OnboardingView - Setup Loading */
+"setup.percentage" = "%d%%";
+"setup.title" = "あなたのためにQuote AIを\n設定しています";
+"setup.settingUp" = "設定中";
+"setup.savingProfile" = "プロフィールを保存中";
+"setup.tuningLanguage" = "言語を調整中";
+"setup.applyingBackground" = "背景を適用中";
+"setup.settingVoice" = "ボイスを設定中";
+"setup.allDone" = "完了しました！";
+
+/* OnboardingView - Setup Complete */
+"complete.congratulations" = "おめでとうございます";
+"complete.ready" = "あなた専用のQuote AIの準備が整いました！";
+"complete.tips.title" = "Quote AIを最大限に活用するために：";
+"complete.tip1" = "少なくとも1日1回は開いてください";
+"complete.tip2" = "思っていることを伝えてください";
+"complete.tip3" = "心に響いた名言を保存してください";
+"complete.tip4" = "行き詰まったときに読み返してください";
+
+/* OnboardingView - Sign In */
+"signIn.oneLastStep" = "あと一歩です。";
+"signIn.saveProfile" = "プロフィールを保存して開始します。";
+"signIn.continueWithGoogle" = "Googleで続行";
+"signIn.termsAgreement" = "続行することで、利用規約とプライバシーポリシーに同意したものとみなされます";
+
+/* ChatView */
+"chat.title" = "Quote AI";
+"chat.placeholder" = "思っていることを教えてください";
+"chat.loading" = "引用中...";
+"chat.welcomeGeneric" = "ようこそ！思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
+"chat.welcomePersonalized" = "こんにちは、%@さん！お手伝いします。思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
+"chat.errorMessage" = "申し訳ありませんが、エラーが発生しました。もう一度お試しください。";
+
+/* ProfileView */
+"profile.title" = "プロフィール";
+"profile.email" = "メールアドレス";
+"profile.userId" = "ユーザーID";
+"profile.signOut" = "サインアウト";
+"profile.done" = "完了";
+
+/* Tones */
+"tone.gentle" = "穏やか";
+"tone.toughLove" = "愛のムチ";
+"tone.philosophical" = "哲学的";
+"tone.realist" = "現実主義";
+
+/* Focus */
+"focus.anxiety" = "不安の克服";
+"focus.innerPeace" = "心の平穏";
+"focus.perspective" = "視点を変える";
+"focus.confidence" = "自信をつける";
+
+/* Barriers */
+"barrier.procrastination" = "先延ばし";
+"barrier.selfDoubt" = "自己紹介";
+"barrier.burnout" = "燃え尽き";
+"barrier.lackOfClarity" = "不明確さ";
+"barrier.externalFactors" = "外部要因";
+
+/* Energy Drains */
+"energyDrain.career" = "キャリア";
+"energyDrain.relationship" = "人間関係";
+"energyDrain.mediaNews" = "メディアとニュース";
+"energyDrain.healthFitness" = "健康とフィットネス";
+
+/* Chat Backgrounds */
+"background.summit" = "アイス・ピーク";
+"background.ascent" = "シャドウ・ステアケース";
+"background.default" = "デフォルト";
+
+/* Settings */
+"settings.language" = "言語";

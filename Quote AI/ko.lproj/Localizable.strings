@@ -1,0 +1,137 @@
+/* WelcomeView */
+"welcome.mission" = "당신의 여정에 맞춘\n지혜";
+"welcome.getStarted" = "시작하기";
+"welcome.alreadyHaveAccount" = "이미 계정이 있으신가요?";
+"welcome.signIn" = "로그인";
+"welcome.signInWithGoogle" = "Google로 로그인";
+"welcome.termsPrefix" = "계속하면 Quote AI의";
+"welcome.termsAndConditions" = "이용약관";
+"welcome.and" = "및";
+"welcome.privacyPolicy" = "개인정보 처리방침";
+"welcome.unableToSignIn" = "로그인을 표시할 수 없습니다";
+"welcome.signInFailed" = "로그인 실패:";
+
+/* OnboardingView - Titles */
+"onboarding.gender.title" = "성별이 무엇입니까?";
+"onboarding.name.title" = "어떻게 불러드릴까요?";
+"onboarding.birthYear.title" = "언제 태어나셨나요?";
+"onboarding.mentalEnergy.title" = "지금 정신 에너지는 어떠신가요?";
+"onboarding.energyDrain.title" = "현재 에너지를 소모시키는 요인은 무엇인가요?";
+"onboarding.focus.title" = "무엇을 찾고 계신가요?";
+"onboarding.barrier.title" = "지금 가장 큰 장애물은 무엇인가요?";
+"onboarding.mindset.title" = "Quote AI로 가치 있는 결과를 만드세요.";
+"onboarding.background.title" = "어떤 배경을\n좋아하시나요?";
+"onboarding.tone.title" = "Quote AI 경험을 위한 성격을 선택하세요.";
+"onboarding.saveProgress.title" = "진행 상황 저장";
+
+/* OnboardingView - Subtitles */
+"onboarding.personalize.subtitle" = "이 정보는 Quote AI를 당신에게 최적화하는 데 사용됩니다";
+
+/* OnboardingView - Buttons */
+"onboarding.continue" = "계속";
+"onboarding.letsGetStarted" = "시작해 봅시다!";
+
+/* OnboardingView - Gender */
+"gender.male" = "남성";
+"gender.female" = "여성";
+"gender.other" = "기타";
+
+/* OnboardingView - Name */
+"onboarding.name.placeholder" = "이름";
+
+/* OnboardingView - Mental Energy */
+"mentalEnergy.exhausted" = "지침";
+"mentalEnergy.drained" = "기운 없음";
+"mentalEnergy.neutral" = "보통";
+"mentalEnergy.fresh" = "상쾌함";
+"mentalEnergy.energized" = "활기참";
+"mentalEnergy.low" = "낮음";
+"mentalEnergy.medium" = "중간";
+"mentalEnergy.high" = "높음";
+
+/* OnboardingView - Mindset Chart */
+"mindsetChart.title" = "당신의 마인드셋";
+"mindsetChart.withQuoteAI" = "Quote AI 사용 시";
+"mindsetChart.withoutQuoteAI" = "Quote AI 미사용 시";
+"mindsetChart.month1" = "1개월 차";
+"mindsetChart.month3" = "3개월 차";
+"mindsetChart.quote" = "부서진 마음은 같은 부서진 마음으로 고칠 수 없다.";
+
+/* OnboardingView - Personalize */
+"personalize.title" = "이제 맞춤 설정을 해봅시다";
+"personalize.subtitle" = "당신을 위한 Quote AI";
+"personalize.privacy.title" = "당신의 개인정보와 보안은 소중합니다.";
+"personalize.privacy.subtitle" = "정보는 비공개로 유지되며 오직 서비스 최적화에만 사용됩니다.";
+
+/* OnboardingView - Setup Loading */
+"setup.percentage" = "%d%%";
+"setup.title" = "Quote AI를\n설정하고 있습니다";
+"setup.settingUp" = "설정 중";
+"setup.savingProfile" = "프로필 저장 중";
+"setup.tuningLanguage" = "언어 조정 중";
+"setup.applyingBackground" = "배경 적용 중";
+"setup.settingVoice" = "목소리 설정 중";
+"setup.allDone" = "완료되었습니다!";
+
+/* OnboardingView - Setup Complete */
+"complete.congratulations" = "축하합니다";
+"complete.ready" = "당신만을 위한 Quote AI가 준비되었습니다!";
+"complete.tips.title" = "Quote AI를 최대한 활용하려면:";
+"complete.tip1" = "적어도 하루에 한 번 앱을 여세요";
+"complete.tip2" = "무슨 생각을 하고 있는지 공유하세요";
+"complete.tip3" = "당신에게 울림을 준 명언을 저장하세요";
+"complete.tip4" = "막막함을 느낄 때 다시 읽어보세요";
+
+/* OnboardingView - Sign In */
+"signIn.oneLastStep" = "마지막 단계입니다.";
+"signIn.saveProfile" = "시작하려면 프로필을 저장하세요.";
+"signIn.continueWithGoogle" = "Google로 계속하기";
+"signIn.termsAgreement" = "계속하면 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다";
+
+/* ChatView */
+"chat.title" = "Quote AI";
+"chat.placeholder" = "무슨 생각을 하고 계신가요?";
+"chat.loading" = "인용 중...";
+"chat.welcomeGeneric" = "환영합니다! 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
+"chat.welcomePersonalized" = "안녕하세요, %@님! 도와드릴 준비가 되었습니다. 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
+"chat.errorMessage" = "죄송합니다. 오류가 발생했습니다. 다시 시도해 주세요.";
+
+/* ProfileView */
+"profile.title" = "프로필";
+"profile.email" = "이메일";
+"profile.userId" = "사용자 ID";
+"profile.signOut" = "로그아웃";
+"profile.done" = "완료";
+
+/* Tones */
+"tone.gentle" = "부드러운";
+"tone.toughLove" = "단호한";
+"tone.philosophical" = "철학적인";
+"tone.realist" = "현실적인";
+
+/* Focus */
+"focus.anxiety" = "불안 극복";
+"focus.innerPeace" = "마음의 평화";
+"focus.perspective" = "관점의 변화";
+"focus.confidence" = "自信감 향상";
+
+/* Barriers */
+"barrier.procrastination" = "미루기";
+"barrier.selfDoubt" = "자기 회의";
+"barrier.burnout" = "번아웃";
+"barrier.lackOfClarity" = "불명확함";
+"barrier.externalFactors" = "외부 요인";
+
+/* Energy Drains */
+"energyDrain.career" = "커리어";
+"energyDrain.relationship" = "인간관계";
+"energyDrain.mediaNews" = "미디어 및 뉴스";
+"energyDrain.healthFitness" = "건강 및 피트니스";
+
+/* Chat Backgrounds */
+"background.summit" = "아이시 피크";
+"background.ascent" = "섀도우 스테어케이스";
+"background.default" = "기본";
+
+/* Settings */
+"settings.language" = "언어";
