@@ -14,6 +14,10 @@ struct ChatView: View {
     @StateObject private var localization = LocalizationManager.shared
     @FocusState private var isInputFocused: Bool
 
+    private var isDefaultBackground: Bool {
+        preferences.chatBackground == .defaultBackground
+    }
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -26,7 +30,7 @@ struct ChatView: View {
 
                         Text(localization.string(for: "chat.title"))
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(isDefaultBackground ? .primary : .white)
 
                         Spacer()
 
@@ -39,10 +43,10 @@ struct ChatView: View {
 
                     // Subtle divider line
                     Rectangle()
-                        .fill(Color.white.opacity(0.15))
+                        .fill(isDefaultBackground ? Color.primary.opacity(0.15) : Color.white.opacity(0.15))
                         .frame(height: 0.5)
                 }
-                .background(Color.black.opacity(0.2))
+                .background(isDefaultBackground ? Color.clear : Color.black.opacity(0.2))
 
                 // Chat messages
                 ScrollViewReader { proxy in
@@ -106,11 +110,11 @@ struct ChatView: View {
                     TextField(localization.string(for: "chat.placeholder"), text: $viewModel.currentInput, axis: .vertical)
                         .textFieldStyle(.plain)
                         .padding(12)
-                        .background(Color.white.opacity(0.15))
+                        .background(isDefaultBackground ? Color.gray.opacity(0.1) : Color.white.opacity(0.15))
                         .cornerRadius(20)
                         .lineLimit(1...5)
                         .focused($isInputFocused)
-                        .foregroundColor(.white)
+                        .foregroundColor(isDefaultBackground ? .primary : .white)
                         .onSubmit {
                             viewModel.sendMessage()
                         }
@@ -124,11 +128,12 @@ struct ChatView: View {
                             .frame(width: 32, height: 32)
                             .background(
                                 viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                                ? Color.white.opacity(0.5)
-                                : Color.white
+                                ? (isDefaultBackground ? Color.gray.opacity(0.3) : Color.white.opacity(0.5))
+                                : (isDefaultBackground ? Color.primary : Color.white)
                             )
                             .clipShape(Circle())
                     }
+                    .foregroundColor(isDefaultBackground ? (viewModel.currentInput.isEmpty ? .secondary : .white) : .black)
                     .disabled(viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
                 }
                 .padding()
@@ -174,6 +179,7 @@ private struct ChatBackgroundView: View {
 
 struct ProfileButton: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var preferences = UserPreferences.shared
     @State private var showingProfile = false
     
     var body: some View {
@@ -182,6 +188,7 @@ struct ProfileButton: View {
         }) {
             Image(systemName: "person.circle.fill")
                 .font(.title2)
+                .foregroundColor(preferences.chatBackground == .defaultBackground ? .primary : .white)
         }
         .sheet(isPresented: $showingProfile) {
             ProfileView()
@@ -286,6 +293,7 @@ struct ProfileView: View {
 
 struct MessageBubble: View {
     let message: ChatMessage
+    @StateObject private var preferences = UserPreferences.shared
 
     var body: some View {
         HStack {
@@ -299,13 +307,16 @@ struct MessageBubble: View {
                     .padding(message.isUser ? 12 : 0)
                     .background(
                         message.isUser
-                        ? AnyShapeStyle(Color.white.opacity(0.25)) 
+                        ? AnyShapeStyle(preferences.chatBackground == .defaultBackground ? Color.primary.opacity(0.08) : Color.white.opacity(0.25)) 
                         : AnyShapeStyle(Color.clear)
                     )
-                    .foregroundColor(.white)
+                    .foregroundColor(preferences.chatBackground == .defaultBackground ? .primary : .white)
                     .cornerRadius(message.isUser ? 18 : 0)
-                    .italic(!message.isUser)
-                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                    .italic(!message.isUser && preferences.chatBackground != .defaultBackground)
+                    .shadow(
+                        color: preferences.chatBackground == .defaultBackground ? .clear : .black.opacity(0.3),
+                        radius: 2, x: 0, y: 1
+                    )
             }
             .padding(.horizontal, message.isUser ? 0 : 4)
 
@@ -324,7 +335,7 @@ struct LoadingIndicator: View {
         HStack {
             Text(localization.string(for: "chat.loading"))
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color.gray)
+                .foregroundColor(LocalizationManager.shared.currentLanguage == .english ? .gray : .secondary)
                 .overlay(
                     GeometryReader { geo in
                         Rectangle()

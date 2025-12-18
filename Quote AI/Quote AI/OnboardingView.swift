@@ -2043,11 +2043,11 @@ struct SetupLoadingStepView: View {
                 // 85-92%: Even slower (~0.25s per %)
                 delayForThisStep = 0.25
             } else if i <= 97 {
-                // 92-97%: Very slow (~0.4s per %)
-                delayForThisStep = 0.40
+                // 92-97%: Faster for smoother finish (~0.25s per %)
+                delayForThisStep = 0.25
             } else {
-                // 97-100%: Crawling (~0.6s per %)
-                delayForThisStep = 0.60
+                // 97-100%: Consistent slow finish (~0.35s per %)
+                delayForThisStep = 0.35
             }
 
             accumulatedTime += delayForThisStep
@@ -2090,23 +2090,25 @@ struct SetupLoadingStepView: View {
                     impact.impactOccurred()
                     currentStatusText = "\(localization.string(for: "setup.settingVoice"))..."
                 }
-                if i == 95 && !completedItems.contains(3) {
+                
+                // Final item and "All done" at 100%
+                if i == 100 && !completedItems.contains(3) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                        completedItems.insert(3)
-                    } as Void
-                    // Haptic feedback when item completes - slightly stronger for final item
+                        _ = completedItems.insert(3)
+                    }
+                    // Haptic feedback when final item completes
                     let impact = UIImpactFeedbackGenerator(style: .medium)
                     impact.impactOccurred()
                     currentStatusText = localization.string(for: "setup.allDone")
                 }
 
-                // Signal loading complete at 100%
+                // Signal loading complete after a short delay once 100% is reached
                 if i == 100 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         withAnimation {
                             isLoadingComplete = true
                         }
-                        // Success haptic when button appears
+                        // Success haptic when complete
                         let notification = UINotificationFeedbackGenerator()
                         notification.notificationOccurred(.success)
                     }

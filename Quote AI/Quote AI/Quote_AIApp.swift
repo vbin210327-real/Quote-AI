@@ -43,6 +43,7 @@ struct Quote_AIApp: App {
                                     showWelcome = false
                                 }
                             }
+                            .preferredColorScheme(.light)
                         } else {
                             OnboardingView {
                                 // Go back to Welcome
@@ -50,6 +51,7 @@ struct Quote_AIApp: App {
                                     showWelcome = true
                                 }
                             }
+                            .preferredColorScheme(.light)
                         }
                     }
                     .onOpenURL { url in
