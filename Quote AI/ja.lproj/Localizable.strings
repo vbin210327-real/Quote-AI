@@ -4,6 +4,7 @@
 "welcome.alreadyHaveAccount" = "すでにアカウントをお持ちですか？";
 "welcome.signIn" = "サインイン";
 "welcome.signInWithGoogle" = "Googleでサインイン";
+"welcome.signInWithApple" = "Appleでサインイン";
 "welcome.termsPrefix" = "続行することで、Quote AIの";
 "welcome.termsAndConditions" = "利用規約";
 "welcome.and" = "および";
@@ -85,7 +86,8 @@
 /* OnboardingView - Sign In */
 "signIn.oneLastStep" = "あと一歩です。";
 "signIn.saveProfile" = "プロフィールを保存して開始します。";
-"signIn.continueWithGoogle" = "Googleで続行";
+"signIn.continueWithGoogle" = "Googleでサインイン";
+"signIn.continueWithApple" = "Appleでサインイン";
 "signIn.termsAgreement" = "続行することで、利用規約とプライバシーポリシーに同意したものとみなされます";
 
 /* ChatView */

@@ -178,25 +178,35 @@ struct WelcomeView: View {
             VStack(spacing: 16) {
                 Spacer()
 
-                // Apple Sign In Button (Apple requires this to be equally prominent or first)
-                SignInWithAppleButton(.continue) { request in
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { _ in }
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 50)
-                .cornerRadius(12)
+                // Apple Sign In Button (Custom button with localized text)
+                Button(action: {
+                    handleAppleSignIn()
+                }) {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
+                        Image(systemName: "applelogo")
+                            .font(.system(size: 24, weight: .semibold))
+                            .frame(width: 24, height: 24)
+
+                        Text(localization.string(for: "welcome.signInWithApple"))
+                            .font(.system(size: 18, weight: .semibold))
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(16)
+                }
                 .disabled(isSigningIn)
                 .padding(.horizontal, 32)
-                .onTapGesture {
-                    handleAppleSignIn()
-                }
-                .allowsHitTesting(!isSigningIn)
 
                 // Google Sign In Button
                 Button(action: {
                     handleGoogleSignIn()
                 }) {
-                    HStack {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
                         if let uiImage = Self.googleLogoUIImage {
                             Image(uiImage: uiImage)
                                 .resizable()
@@ -205,19 +215,21 @@ struct WelcomeView: View {
                                 .frame(width: 24, height: 24)
                         } else {
                             GoogleLogoView(size: 24)
+                                .frame(width: 24, height: 24)
                         }
 
                         Text(localization.string(for: "welcome.signInWithGoogle"))
-                            .font(.headline)
+                            .font(.system(size: 18, weight: .semibold))
+                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
+                    .frame(height: 64)
                     .background(Color.white)
                     .foregroundColor(.black)
-                    .cornerRadius(12)
+                    .cornerRadius(16)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
                     )
                 }
                 .disabled(isSigningIn)

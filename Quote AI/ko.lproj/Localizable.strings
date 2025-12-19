@@ -4,6 +4,7 @@
 "welcome.alreadyHaveAccount" = "이미 계정이 있으신가요?";
 "welcome.signIn" = "로그인";
 "welcome.signInWithGoogle" = "Google로 로그인";
+"welcome.signInWithApple" = "Apple로 로그인";
 "welcome.termsPrefix" = "계속하면 Quote AI의";
 "welcome.termsAndConditions" = "이용약관";
 "welcome.and" = "및";
@@ -85,7 +86,8 @@
 /* OnboardingView - Sign In */
 "signIn.oneLastStep" = "마지막 단계입니다.";
 "signIn.saveProfile" = "시작하려면 프로필을 저장하세요.";
-"signIn.continueWithGoogle" = "Google로 계속하기";
+"signIn.continueWithGoogle" = "Google로 로그인";
+"signIn.continueWithApple" = "Apple로 로그인";
 "signIn.termsAgreement" = "계속하면 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다";
 
 /* ChatView */

@@ -34,25 +34,34 @@ struct AuthView: View {
             
             // Sign-In Buttons
             VStack(spacing: 16) {
-                // Apple Sign In Button (Apple requires this to be equally prominent or first)
-                SignInWithAppleButton(.continue) { request in
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { _ in }
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 50)
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-                .disabled(isSigningIn)
-                .onTapGesture {
+                // Apple Sign In Button (Custom button with localized text)
+                Button(action: {
                     handleAppleSignIn()
+                }) {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
+                        Image(systemName: "applelogo")
+                            .font(.system(size: 20, weight: .semibold))
+
+                        Text("Continue with Apple")
+                            .font(.headline)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
-                .allowsHitTesting(!isSigningIn)
+                .disabled(isSigningIn)
 
                 // Google Sign-In Button
                 Button(action: {
                     handleGoogleSignIn()
                 }) {
-                    HStack {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
                         if let logoPath = Bundle.main.path(forResource: "google_logo", ofType: "png"),
                            let uiImage = UIImage(contentsOfFile: logoPath) {
                             Image(uiImage: uiImage)
@@ -62,19 +71,21 @@ struct AuthView: View {
                                 .frame(width: 24, height: 24)
                         } else {
                             GoogleLogoView(size: 24)
+                                .frame(width: 24, height: 24)
                         }
 
                         Text("Continue with Google")
                             .font(.headline)
+                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
+                    .frame(height: 64)
                     .background(Color.white)
                     .foregroundColor(.black)
-                    .cornerRadius(12)
+                    .cornerRadius(16)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
                     )
                     .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
