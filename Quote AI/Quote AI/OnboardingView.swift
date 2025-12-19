@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignInSwift
+import AuthenticationServices
 
 struct OnboardingView: View {
     var onGoBack: (() -> Void)? = nil
@@ -494,8 +495,23 @@ struct OnboardingView: View {
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
-            
+
             VStack(spacing: 16) {
+                // Apple Sign In Button (Apple requires this to be equally prominent or first)
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { _ in }
+                .signInWithAppleButtonStyle(.white)
+                .frame(height: 50)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .disabled(isSigningIn)
+                .onTapGesture {
+                    handleAppleSignIn()
+                }
+                .allowsHitTesting(!isSigningIn)
+
+                // Google Sign In Button
                 Button(action: {
                     handleGoogleSignIn()
                 }) {
@@ -515,19 +531,19 @@ struct OnboardingView: View {
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .frame(height: 50)
                     .background(Color.white)
                     .foregroundColor(.black)
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
                 .disabled(isSigningIn)
-                
+
                 if isSigningIn {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
-                
+
                 if let error = errorMessage {
                     Text(error)
                         .font(.caption)
@@ -540,7 +556,7 @@ struct OnboardingView: View {
                 }
             }
             .padding(.horizontal, 32)
-            
+
             Text(localization.string(for: "signIn.termsAgreement"))
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.6))
@@ -596,6 +612,29 @@ struct OnboardingView: View {
                     return
                 }
                 
+                errorMessage = "Sign-in failed: \(error.localizedDescription)"
+                isSigningIn = false
+            }
+        }
+    }
+
+    private func handleAppleSignIn() {
+        isSigningIn = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await supabaseManager.signInWithApple()
+                // On success, the onChange handler will complete onboarding
+                isSigningIn = false
+            } catch {
+                // Ignore user cancellation error (code 1001)
+                let nsError = error as NSError
+                if nsError.code == 1001 || nsError.domain == ASAuthorizationError.errorDomain {
+                    isSigningIn = false
+                    return
+                }
+
                 errorMessage = "Sign-in failed: \(error.localizedDescription)"
                 isSigningIn = false
             }

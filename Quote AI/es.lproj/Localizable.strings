@@ -4,6 +4,7 @@
 "welcome.alreadyHaveAccount" = "¿Ya tienes una cuenta?";
 "welcome.signIn" = "Iniciar sesión";
 "welcome.signInWithGoogle" = "Iniciar sesión con Google";
+"welcome.signInWithApple" = "Continuar con Apple";
 "welcome.termsPrefix" = "Al continuar aceptas los";
 "welcome.termsAndConditions" = "Términos y Condiciones";
 "welcome.and" = "y la";
@@ -86,6 +87,7 @@
 "signIn.oneLastStep" = "Un último paso.";
 "signIn.saveProfile" = "Guarda tu perfil para comenzar.";
 "signIn.continueWithGoogle" = "Continuar con Google";
+"signIn.continueWithApple" = "Continuar con Apple";
 "signIn.termsAgreement" = "Al continuar, aceptas nuestros Términos de Servicio y Política de Privacidad";
 
 /* ChatView */

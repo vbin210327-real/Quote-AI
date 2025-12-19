@@ -11,15 +11,60 @@ import Supabase
 import GoogleSignIn
 import AuthenticationServices
 
+// Apple Sign In Coordinator - Bridges delegate callbacks to async/await
+class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    private var continuation: CheckedContinuation<ASAuthorization, Error>?
+    private weak var presentingWindow: UIWindow?
+
+    init(window: UIWindow?) {
+        self.presentingWindow = window
+        super.init()
+    }
+
+    func signIn() async throws -> ASAuthorization {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+
+            let provider = ASAuthorizationAppleIDProvider()
+            let request = provider.createRequest()
+            request.requestedScopes = [.fullName, .email]
+
+            let controller = ASAuthorizationController(authorizationRequests: [request])
+            controller.delegate = self
+            controller.presentationContextProvider = self
+            controller.performRequests()
+        }
+    }
+
+    // MARK: - ASAuthorizationControllerDelegate
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        continuation?.resume(returning: authorization)
+        continuation = nil
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        continuation?.resume(throwing: error)
+        continuation = nil
+    }
+
+    // MARK: - ASAuthorizationControllerPresentationContextProviding
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return presentingWindow ?? UIWindow()
+    }
+}
+
 @MainActor
 class SupabaseManager: ObservableObject {
     static let shared = SupabaseManager()
-    
+
     @Published var currentUser: User?
     @Published var isAuthenticated = false
-    
+
     let client: SupabaseClient
-    
+    private var appleSignInCoordinator: AppleSignInCoordinator?
+
     private init() {
         self.client = SupabaseClient(
             supabaseURL: URL(string: SupabaseConfig.supabaseURL)!,
@@ -80,7 +125,49 @@ class SupabaseManager: ObservableObject {
         self.currentUser = session.user
         self.isAuthenticated = true
     }
-    
+
+    // Sign in with Apple
+    func signInWithApple() async throws {
+        // Get the key window for presenting the Apple Sign In sheet
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else {
+            throw NSError(domain: "AppleSignIn", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "Unable to find window for presentation"
+            ])
+        }
+
+        // Create coordinator and keep strong reference during sign-in
+        let coordinator = AppleSignInCoordinator(window: window)
+        self.appleSignInCoordinator = coordinator
+
+        defer {
+            self.appleSignInCoordinator = nil
+        }
+
+        // Perform Apple Sign In
+        let authorization = try await coordinator.signIn()
+
+        // Extract credentials from authorization
+        guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let identityTokenData = appleIDCredential.identityToken,
+              let identityToken = String(data: identityTokenData, encoding: .utf8) else {
+            throw NSError(domain: "AppleSignIn", code: -2, userInfo: [
+                NSLocalizedDescriptionKey: "Failed to get Apple ID credentials"
+            ])
+        }
+
+        // Sign in to Supabase with Apple token
+        let session = try await client.auth.signInWithIdToken(
+            credentials: .init(
+                provider: .apple,
+                idToken: identityToken
+            )
+        )
+
+        self.currentUser = session.user
+        self.isAuthenticated = true
+    }
+
     // Sign out
     func signOut() async throws {
         try await client.auth.signOut()

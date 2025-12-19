@@ -4,6 +4,7 @@
 "welcome.alreadyHaveAccount" = "Already have an account?";
 "welcome.signIn" = "Sign In";
 "welcome.signInWithGoogle" = "Sign in with Google";
+"welcome.signInWithApple" = "Continue with Apple";
 "welcome.termsPrefix" = "By continuing you agree to Quote AI's";
 "welcome.termsAndConditions" = "Terms and Conditions";
 "welcome.and" = "and";
@@ -86,6 +87,7 @@
 "signIn.oneLastStep" = "One last step.";
 "signIn.saveProfile" = "Save your profile to start.";
 "signIn.continueWithGoogle" = "Continue with Google";
+"signIn.continueWithApple" = "Continue with Apple";
 "signIn.termsAgreement" = "By continuing, you agree to our Terms of Service and Privacy Policy";
 
 /* ChatView */

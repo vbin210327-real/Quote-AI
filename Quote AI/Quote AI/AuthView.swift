@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignInSwift
+import AuthenticationServices
 
 struct AuthView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
@@ -31,8 +32,23 @@ struct AuthView: View {
             
             Spacer()
             
-            // Google Sign-In Button
+            // Sign-In Buttons
             VStack(spacing: 16) {
+                // Apple Sign In Button (Apple requires this to be equally prominent or first)
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { _ in }
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 50)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .disabled(isSigningIn)
+                .onTapGesture {
+                    handleAppleSignIn()
+                }
+                .allowsHitTesting(!isSigningIn)
+
+                // Google Sign-In Button
                 Button(action: {
                     handleGoogleSignIn()
                 }) {
@@ -47,24 +63,28 @@ struct AuthView: View {
                         } else {
                             GoogleLogoView(size: 24)
                         }
-                        
+
                         Text("Continue with Google")
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .frame(height: 50)
                     .background(Color.white)
                     .foregroundColor(.black)
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
                     .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
                 .disabled(isSigningIn)
-                
+
                 if isSigningIn {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
                 }
-                
+
                 if let error = errorMessage {
                     Text(error)
                         .font(.caption)
@@ -105,6 +125,34 @@ struct AuthView: View {
                 try await supabaseManager.signInWithGoogle(presentingViewController: rootViewController)
                 isSigningIn = false
             } catch {
+                // Ignore user cancellation error (code -5)
+                let nsError = error as NSError
+                if nsError.code == -5 {
+                    isSigningIn = false
+                    return
+                }
+                errorMessage = "Sign-in failed: \(error.localizedDescription)"
+                isSigningIn = false
+            }
+        }
+    }
+
+    private func handleAppleSignIn() {
+        isSigningIn = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await supabaseManager.signInWithApple()
+                isSigningIn = false
+            } catch {
+                // Ignore user cancellation error (code 1001)
+                let nsError = error as NSError
+                if nsError.code == 1001 || nsError.domain == ASAuthorizationError.errorDomain {
+                    isSigningIn = false
+                    return
+                }
+
                 errorMessage = "Sign-in failed: \(error.localizedDescription)"
                 isSigningIn = false
             }

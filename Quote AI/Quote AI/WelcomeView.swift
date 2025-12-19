@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignInSwift
+import AuthenticationServices
 
 struct WelcomeView: View {
     var onGetStarted: () -> Void
@@ -174,9 +175,23 @@ struct WelcomeView: View {
     // Sign In Sheet
     var signInSheet: some View {
         NavigationView {
-            VStack(spacing: 30) {
+            VStack(spacing: 16) {
                 Spacer()
-                
+
+                // Apple Sign In Button (Apple requires this to be equally prominent or first)
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { _ in }
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 50)
+                .cornerRadius(12)
+                .disabled(isSigningIn)
+                .padding(.horizontal, 32)
+                .onTapGesture {
+                    handleAppleSignIn()
+                }
+                .allowsHitTesting(!isSigningIn)
+
                 // Google Sign In Button
                 Button(action: {
                     handleGoogleSignIn()
@@ -196,7 +211,7 @@ struct WelcomeView: View {
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .frame(height: 50)
                     .background(Color.white)
                     .foregroundColor(.black)
                     .cornerRadius(12)
@@ -207,12 +222,12 @@ struct WelcomeView: View {
                 }
                 .disabled(isSigningIn)
                 .padding(.horizontal, 32)
-                
+
                 if isSigningIn {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .black))
                 }
-                
+
                 if let error = errorMessage {
                     Text(error)
                         .font(.caption)
@@ -223,7 +238,7 @@ struct WelcomeView: View {
                         .background(Color.red.opacity(0.1))
                         .cornerRadius(8)
                 }
-                
+
                 Spacer()
                 
                 // Terms and Privacy Policy
@@ -291,6 +306,30 @@ struct WelcomeView: View {
                     return
                 }
                 
+                errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
+                isSigningIn = false
+            }
+        }
+    }
+
+    private func handleAppleSignIn() {
+        isSigningIn = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await supabaseManager.signInWithApple()
+                // On success, close sheet
+                isSigningIn = false
+                showSignInSheet = false
+            } catch {
+                // Ignore user cancellation error (code 1001)
+                let nsError = error as NSError
+                if nsError.code == 1001 || nsError.domain == ASAuthorizationError.errorDomain {
+                    isSigningIn = false
+                    return
+                }
+
                 errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
                 isSigningIn = false
             }
