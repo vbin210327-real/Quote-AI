@@ -4,7 +4,7 @@
 "welcome.alreadyHaveAccount" = "पहले से खाता है?";
 "welcome.signIn" = "साइन इन करें";
 "welcome.signInWithGoogle" = "Google से साइन इन करें";
-"welcome.signInWithApple" = "Apple से जारी रखें";
+"welcome.signInWithApple" = "Apple से साइन इन करें";
 "welcome.termsPrefix" = "जारी रखकर आप Quote AI की";
 "welcome.termsAndConditions" = "नियम और शर्तें";
 "welcome.and" = "और";
@@ -87,7 +87,7 @@
 "signIn.oneLastStep" = "एक आखिरी कदम।";
 "signIn.saveProfile" = "शुरू करने के लिए अपनी प्रोफ़ाइल सहेजें।";
 "signIn.continueWithGoogle" = "Google से जारी रखें";
-"signIn.continueWithApple" = "Apple से जारी रखें";
+"signIn.continueWithApple" = "Apple से साइन इन करें";
 "signIn.termsAgreement" = "जारी रखकर, आप हमारी सेवा की शर्तों और गोपनीयता नीति से सहमत हैं";
 
 /* ChatView */

@@ -4,7 +4,7 @@
 "welcome.alreadyHaveAccount" = "已有账号？";
 "welcome.signIn" = "登录";
 "welcome.signInWithGoogle" = "使用 Google 登录";
-"welcome.signInWithApple" = "通过 Apple 继续";
+"welcome.signInWithApple" = "使用 Apple 登录";
 "welcome.termsPrefix" = "继续即表示你同意 Quote AI 的";
 "welcome.termsAndConditions" = "条款和条件";
 "welcome.and" = "和";
@@ -87,7 +87,7 @@
 "signIn.oneLastStep" = "最后一步。";
 "signIn.saveProfile" = "保存你的资料以开始使用。";
 "signIn.continueWithGoogle" = "使用 Google 继续";
-"signIn.continueWithApple" = "通过 Apple 继续";
+"signIn.continueWithApple" = "使用 Apple 登录";
 "signIn.termsAgreement" = "继续即表示你同意我们的服务条款和隐私政策";
 
 /* ChatView */

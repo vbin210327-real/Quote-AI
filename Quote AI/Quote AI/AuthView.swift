@@ -11,6 +11,7 @@ import AuthenticationServices
 
 struct AuthView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var localization = LocalizationManager.shared
     @State private var isSigningIn = false
     @State private var errorMessage: String?
     
@@ -43,7 +44,7 @@ struct AuthView: View {
                         Image(systemName: "applelogo")
                             .font(.system(size: 20, weight: .semibold))
 
-                        Text("Continue with Apple")
+                        Text(localization.string(for: "signIn.continueWithApple"))
                             .font(.headline)
                         Spacer(minLength: 0)
                     }
