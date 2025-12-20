@@ -63,6 +63,8 @@ struct ChatView: View {
 
                             if viewModel.isLoading {
                                 LoadingIndicator()
+                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                    .id("loading")
                             }
                         }
                         .padding()

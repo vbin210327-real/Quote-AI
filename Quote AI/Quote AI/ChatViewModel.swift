@@ -83,8 +83,10 @@ class ChatViewModel: ObservableObject {
         // Clear previous error
         errorMessage = nil
 
-        // Set loading state
-        isLoading = true
+        // Set loading state with animation
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isLoading = true
+        }
 
         // Get quote from API
         Task {
@@ -106,11 +108,14 @@ class ChatViewModel: ObservableObject {
                 
                 let quote = try await kimiService.getQuote(for: input)
 
+                // Stop loading FIRST, then add message (prevents flash)
+                isLoading = false
+                
                 // Add bot response
                 let botMessage = ChatMessage(content: quote, isUser: false)
                 messages.append(botMessage)
                 
-                // Save bot message to database
+                // Save bot message to database (in background, doesn't affect UI)
                 if let conversationId = currentConversation?.id {
                     _ = try await supabaseManager.saveMessage(
                         conversationId: conversationId,
@@ -123,14 +128,15 @@ class ChatViewModel: ObservableObject {
                 // Handle error
                 errorMessage = error.localizedDescription
 
+                // Stop loading FIRST
+                isLoading = false
+
                 let errorBotMessage = ChatMessage(
                     content: localization.string(for: "chat.errorMessage"),
                     isUser: false
                 )
                 messages.append(errorBotMessage)
             }
-
-            isLoading = false
         }
     }
 
