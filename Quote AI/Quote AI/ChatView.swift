@@ -13,6 +13,7 @@ struct ChatView: View {
     @StateObject private var preferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
     @FocusState private var isInputFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     private var isDefaultBackground: Bool {
         preferences.chatBackground == .defaultBackground
@@ -125,25 +126,26 @@ struct ChatView: View {
                             viewModel.sendMessage()
                         }
 
+                    let isSendDisabled = viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
+                    let isDarkMode = colorScheme == .dark
+                    let activeForeground = (isDefaultBackground && isDarkMode) ? Color.black : (isDefaultBackground ? Color.white : Color.black)
+                    let activeBackground = (isDefaultBackground && isDarkMode) ? Color.white : (isDefaultBackground ? Color.black : Color.white)
+
                     Button(action: {
                         viewModel.sendMessage()
                     }) {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(
-                                viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                                ? .gray
-                                : (isDefaultBackground ? .black : .black)
+                                isSendDisabled ? .gray : activeForeground
                             )
                             .frame(width: 32, height: 32)
                             .background(
-                                viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                                ? Color.gray.opacity(0.3)
-                                : Color.white
+                                isSendDisabled ? Color.gray.opacity(0.3) : activeBackground
                             )
                             .clipShape(Circle())
                     }
-                    .disabled(viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
+                    .disabled(isSendDisabled)
                 }
                 .padding()
             }
