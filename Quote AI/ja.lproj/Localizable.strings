@@ -137,6 +137,7 @@
 
 /* Settings */
 "settings.language" = "言語";
+"settings.personality" = "パーソナリティ";
 
 /* Conversation History */
 "history.title" = "履歴";

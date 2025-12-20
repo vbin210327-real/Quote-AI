@@ -137,6 +137,7 @@
 
 /* Settings */
 "settings.language" = "언어";
+"settings.personality" = "성격";
 
 /* Conversation History */
 "history.title" = "기록";

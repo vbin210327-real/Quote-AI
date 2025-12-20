@@ -137,6 +137,7 @@
 
 /* Settings */
 "settings.language" = "Language";
+"settings.personality" = "Personality";
 
 /* Conversation History */
 "history.title" = "History";

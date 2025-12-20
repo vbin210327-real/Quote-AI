@@ -70,7 +70,7 @@ struct ChatView: View {
                                     .id(message.id)
                             }
 
-                            if viewModel.isLoading || typingMessageId != nil {
+                            if viewModel.isLoading {
                                 LoadingIndicator()
                                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                                     .id("loading")
@@ -255,12 +255,22 @@ struct ProfileButton: View {
 
 struct ProfileView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var preferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
     @State private var showingHistory = false
     
     var onSelectConversation: ((Conversation) -> Void)?
+
+    private func localizedTone(_ tone: QuoteTone) -> String {
+        switch tone {
+        case .gentle: return localization.string(for: "tone.gentle")
+        case .toughLove: return localization.string(for: "tone.toughLove")
+        case .philosophical: return localization.string(for: "tone.philosophical")
+        case .realist: return localization.string(for: "tone.realist")
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -305,6 +315,29 @@ struct ProfileView: View {
                     }
                 }
                 
+                // Personality Selection
+                Section {
+                    ForEach(QuoteTone.allCases, id: \.self) { tone in
+                        Button(action: {
+                            preferences.quoteTone = tone
+                        }) {
+                            HStack {
+                                Image(systemName: tone.icon)
+                                    .foregroundColor(.primary)
+                                Text(localizedTone(tone))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if preferences.quoteTone == tone {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(localization.string(for: "settings.personality"))
+                }
+
                 // Language Selection
                 Section {
                     ForEach(AppLanguage.allCases, id: \.self) { language in
@@ -452,13 +485,7 @@ struct LoadingIndicator: View {
                 .overlay(
                     GeometryReader { geo in
                         Rectangle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.clear, .white.opacity(0.6), .clear],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
+                            .fill(shimmerGradient)
                             .frame(width: geo.size.width / 2)
                             .offset(x: geo.size.width * shimmerOffset)
                     }
@@ -468,15 +495,32 @@ struct LoadingIndicator: View {
                     )
                 )
                 .padding(.leading, 4) // Align with bubbles
-                .onAppear {
-                    withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                        shimmerOffset = 2.0
-                    }
-                }
-            
+
             Spacer()
         }
         .padding(.vertical, 8)
+        .onAppear {
+            startShimmer()
+        }
+    }
+
+    private var shimmerGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color.clear,
+                Color.primary.opacity(0.6),
+                Color.clear
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    private func startShimmer() {
+        shimmerOffset = -1.0
+        withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+            shimmerOffset = 2.0
+        }
     }
 }
 
