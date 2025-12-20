@@ -561,7 +561,7 @@ struct OnboardingView: View {
 
                 if isSigningIn {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .primary))
                 }
 
                 if let error = errorMessage {
@@ -624,7 +624,6 @@ struct OnboardingView: View {
             do {
                 try await supabaseManager.signInWithGoogle(presentingViewController: rootViewController)
                 // On success, the onChange handler will complete onboarding
-                isSigningIn = false
             } catch {
                 // Ignore user cancellation error (code -5)
                 let nsError = error as NSError
@@ -647,7 +646,6 @@ struct OnboardingView: View {
             do {
                 try await supabaseManager.signInWithApple()
                 // On success, the onChange handler will complete onboarding
-                isSigningIn = false
             } catch {
                 // Ignore user cancellation error (code 1001)
                 let nsError = error as NSError
