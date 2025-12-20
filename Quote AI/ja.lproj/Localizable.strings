@@ -137,3 +137,16 @@
 
 /* Settings */
 "settings.language" = "言語";
+
+/* Conversation History */
+"history.title" = "履歴";
+"history.loading" = "会話を読み込み中...";
+"history.empty" = "まだ会話がありません";
+"history.emptyDescription" = "チャットを始めると、会話がここに表示されます。";
+"history.startChat" = "チャットを始める";
+"history.today" = "今日";
+"history.yesterday" = "昨日";
+"history.delete" = "削除";
+"history.deleteConfirm" = "会話を削除しますか？";
+"history.deleteMessage" = "この会話とすべてのメッセージが完全に削除されます。";
+"history.cancel" = "キャンセル";

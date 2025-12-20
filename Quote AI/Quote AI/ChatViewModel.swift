@@ -15,8 +15,10 @@ class ChatViewModel: ObservableObject {
     @Published var currentInput: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var currentConversation: Conversation?
 
     private let kimiService = KimiService.shared
+    private let supabaseManager = SupabaseManager.shared
     private let localization = LocalizationManager.shared
     private var languageObserver: AnyCancellable?
 
@@ -87,11 +89,35 @@ class ChatViewModel: ObservableObject {
         // Get quote from API
         Task {
             do {
+                // Create conversation if this is the first message
+                if currentConversation == nil {
+                    let conversationTitle = input.prefix(50).description // Use first 50 chars as title
+                    currentConversation = try await supabaseManager.createConversation(title: conversationTitle)
+                }
+                
+                // Save user message to database
+                if let conversationId = currentConversation?.id {
+                    _ = try await supabaseManager.saveMessage(
+                        conversationId: conversationId,
+                        content: input,
+                        isUser: true
+                    )
+                }
+                
                 let quote = try await kimiService.getQuote(for: input)
 
                 // Add bot response
                 let botMessage = ChatMessage(content: quote, isUser: false)
                 messages.append(botMessage)
+                
+                // Save bot message to database
+                if let conversationId = currentConversation?.id {
+                    _ = try await supabaseManager.saveMessage(
+                        conversationId: conversationId,
+                        content: quote,
+                        isUser: false
+                    )
+                }
 
             } catch {
                 // Handle error
@@ -110,7 +136,21 @@ class ChatViewModel: ObservableObject {
 
     func clearChat() {
         messages.removeAll()
+        currentConversation = nil  // Reset conversation for new chat
         // Re-add personalized welcome message
         addWelcomeMessage()
+    }
+    
+    /// Load an existing conversation from database
+    func loadConversation(_ conversation: Conversation) async {
+        currentConversation = conversation
+        messages.removeAll()
+        
+        do {
+            let storedMessages = try await supabaseManager.fetchMessages(conversationId: conversation.id)
+            messages = storedMessages.map { $0.toChatMessage() }
+        } catch {
+            errorMessage = "Failed to load conversation: \(error.localizedDescription)"
+        }
     }
 }

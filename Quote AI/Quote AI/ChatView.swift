@@ -24,7 +24,11 @@ struct ChatView: View {
                 // Custom header with subtle divider
                 VStack(spacing: 0) {
                     HStack {
-                        ProfileButton()
+                        ProfileButton { conversation in
+                            Task {
+                                await viewModel.loadConversation(conversation)
+                            }
+                        }
 
                         Spacer()
 
@@ -124,16 +128,19 @@ struct ChatView: View {
                     }) {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(
+                                viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
+                                ? .gray
+                                : (isDefaultBackground ? .black : .black)
+                            )
                             .frame(width: 32, height: 32)
                             .background(
                                 viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                                ? (isDefaultBackground ? Color.gray.opacity(0.3) : Color.white.opacity(0.5))
-                                : (isDefaultBackground ? Color.primary : Color.white)
+                                ? Color.gray.opacity(0.3)
+                                : Color.white
                             )
                             .clipShape(Circle())
                     }
-                    .foregroundColor(isDefaultBackground ? (viewModel.currentInput.isEmpty ? .secondary : .white) : .black)
                     .disabled(viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
                 }
                 .padding()
@@ -182,16 +189,43 @@ struct ProfileButton: View {
     @StateObject private var preferences = UserPreferences.shared
     @State private var showingProfile = false
     
+    var onSelectConversation: ((Conversation) -> Void)?
+    
     var body: some View {
         Button(action: {
             showingProfile = true
         }) {
-            Image(systemName: "person.circle.fill")
-                .font(.title2)
-                .foregroundColor(preferences.chatBackground == .defaultBackground ? .primary : .white)
+            // Custom align-center icon (three horizontal lines)
+            ZStack {
+                Canvas { context, size in
+                    let lineColor = preferences.chatBackground == .defaultBackground ? Color.primary : Color.white
+                    
+                    // Top line (longest)
+                    let topPath = Path { path in
+                        path.move(to: CGPoint(x: size.width * 0.15, y: size.height * 0.25))
+                        path.addLine(to: CGPoint(x: size.width * 0.85, y: size.height * 0.25))
+                    }
+                    context.stroke(topPath, with: .color(lineColor), lineWidth: 2)
+                    
+                    // Middle line (shortest)
+                    let middlePath = Path { path in
+                        path.move(to: CGPoint(x: size.width * 0.30, y: size.height * 0.50))
+                        path.addLine(to: CGPoint(x: size.width * 0.70, y: size.height * 0.50))
+                    }
+                    context.stroke(middlePath, with: .color(lineColor), lineWidth: 2)
+                    
+                    // Bottom line (medium)
+                    let bottomPath = Path { path in
+                        path.move(to: CGPoint(x: size.width * 0.20, y: size.height * 0.75))
+                        path.addLine(to: CGPoint(x: size.width * 0.80, y: size.height * 0.75))
+                    }
+                    context.stroke(bottomPath, with: .color(lineColor), lineWidth: 2)
+                }
+                .frame(width: 28, height: 28)
+            }
         }
         .sheet(isPresented: $showingProfile) {
-            ProfileView()
+            ProfileView(onSelectConversation: onSelectConversation)
         }
     }
 }
@@ -201,6 +235,9 @@ struct ProfileView: View {
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
+    @State private var showingHistory = false
+    
+    var onSelectConversation: ((Conversation) -> Void)?
     
     var body: some View {
         NavigationView {
@@ -223,6 +260,24 @@ struct ProfileView: View {
                             Text(userId.uuidString.prefix(8) + "...")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                // Conversation History
+                Section {
+                    Button(action: {
+                        showingHistory = true
+                    }) {
+                        HStack {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .foregroundColor(.black)
+                            Text(localization.string(for: "history.title"))
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
                     }
                 }
@@ -272,6 +327,12 @@ struct ProfileView: View {
                     Button(localization.string(for: "profile.done")) {
                         dismiss()
                     }
+                }
+            }
+            .sheet(isPresented: $showingHistory) {
+                ConversationHistoryView { conversation in
+                    dismiss()
+                    onSelectConversation?(conversation)
                 }
             }
         }

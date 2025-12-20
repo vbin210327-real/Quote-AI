@@ -137,3 +137,16 @@
 
 /* Settings */
 "settings.language" = "语言";
+
+/* Conversation History */
+"history.title" = "历史记录";
+"history.loading" = "正在加载对话...";
+"history.empty" = "暂无对话";
+"history.emptyDescription" = "开始聊天后，你的对话将显示在这里。";
+"history.startChat" = "开始聊天";
+"history.today" = "今天";
+"history.yesterday" = "昨天";
+"history.delete" = "删除";
+"history.deleteConfirm" = "删除对话？";
+"history.deleteMessage" = "这将永久删除此对话及其所有消息。";
+"history.cancel" = "取消";

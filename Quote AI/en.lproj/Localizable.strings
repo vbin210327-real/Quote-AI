@@ -137,3 +137,16 @@
 
 /* Settings */
 "settings.language" = "Language";
+
+/* Conversation History */
+"history.title" = "History";
+"history.loading" = "Loading conversations...";
+"history.empty" = "No conversations yet";
+"history.emptyDescription" = "Start a chat and your conversations will appear here.";
+"history.startChat" = "Start Chatting";
+"history.today" = "Today";
+"history.yesterday" = "Yesterday";
+"history.delete" = "Delete";
+"history.deleteConfirm" = "Delete Conversation?";
+"history.deleteMessage" = "This will permanently delete this conversation and all its messages.";
+"history.cancel" = "Cancel";
