@@ -94,8 +94,8 @@
 "chat.title" = "Quote AI";
 "chat.placeholder" = "What's on your mind?";
 "chat.loading" = "Quoting...";
-"chat.welcomeGeneric" = "Welcome! Share what's on your mind, and I'll respond with a quote to inspire and motivate you.";
-"chat.welcomePersonalized" = "Hi %@! I'm ready to help. Share what's on your mind, and I'll respond with a quote to inspire and motivate you.";
+"chat.welcomeGeneric" = "I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
+"chat.welcomePersonalized" = "Hi %@! I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
 "chat.errorMessage" = "Sorry, I encountered an error. Please try again.";
 
 /* ProfileView */
