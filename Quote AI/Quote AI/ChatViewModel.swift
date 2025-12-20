@@ -112,7 +112,7 @@ class ChatViewModel: ObservableObject {
                 isLoading = false
                 
                 // Add bot response
-                let botMessage = ChatMessage(content: quote, isUser: false)
+                let botMessage = ChatMessage(content: quote, isUser: false, shouldAnimate: true)
                 messages.append(botMessage)
                 
                 // Save bot message to database (in background, doesn't affect UI)

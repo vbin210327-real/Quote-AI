@@ -17,6 +17,7 @@ struct TypewriterView: View {
     var speed: TimeInterval = 0.1
     var startDelay: TimeInterval = 0
     var isActive: Bool = true
+    var enableHaptics: Bool = false
     var onComplete: (() -> Void)? = nil
     
     @State private var revealedCount: Int = 0
@@ -92,9 +93,9 @@ struct TypewriterView: View {
             if revealedCount < totalCount {
                 revealedCount += 1
                 
-                 if revealedCount % 3 == 0 {
-                     let impact = UIImpactFeedbackGenerator(style: .light)
-                     impact.impactOccurred(intensity: 0.3)
+                if enableHaptics && revealedCount % 3 == 0 {
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred(intensity: 0.3)
                 }
             } else {
                 stopTimer()

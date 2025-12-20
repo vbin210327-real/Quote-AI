@@ -13,11 +13,13 @@ struct ChatMessage: Identifiable, Equatable {
     let content: String
     let isUser: Bool
     let timestamp: Date
+    let shouldAnimate: Bool
 
-    init(content: String, isUser: Bool) {
+    init(content: String, isUser: Bool, shouldAnimate: Bool = false) {
         self.content = content
         self.isUser = isUser
         self.timestamp = Date()
+        self.shouldAnimate = shouldAnimate
     }
 }
 

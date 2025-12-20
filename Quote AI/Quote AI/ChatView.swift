@@ -14,6 +14,7 @@ struct ChatView: View {
     @StateObject private var localization = LocalizationManager.shared
     @FocusState private var isInputFocused: Bool
     @Environment(\.colorScheme) private var colorScheme
+    @State private var typingMessageId: UUID?
 
     private var isDefaultBackground: Bool {
         preferences.chatBackground == .defaultBackground
@@ -58,11 +59,18 @@ struct ChatView: View {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.messages) { message in
-                                MessageBubble(message: message)
+                                MessageBubble(
+                                    message: message,
+                                    onTypingComplete: {
+                                        if typingMessageId == message.id {
+                                            typingMessageId = nil
+                                        }
+                                    }
+                                )
                                     .id(message.id)
                             }
 
-                            if viewModel.isLoading {
+                            if viewModel.isLoading || typingMessageId != nil {
                                 LoadingIndicator()
                                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                                     .id("loading")
@@ -79,8 +87,19 @@ struct ChatView: View {
                     .onChange(of: viewModel.messages.count) { _ in
                         // Scroll to bottom when new message arrives
                         if let lastMessage = viewModel.messages.last {
+                            if lastMessage.shouldAnimate {
+                                typingMessageId = lastMessage.id
+                            }
                             withAnimation {
                                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
+                        }
+                    }
+                    .onChange(of: typingMessageId) { newValue in
+                        guard newValue != nil else { return }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            withAnimation {
+                                proxy.scrollTo("loading", anchor: .bottom)
                             }
                         }
                     }
@@ -358,30 +377,59 @@ struct ProfileView: View {
 
 struct MessageBubble: View {
     let message: ChatMessage
+    var onTypingComplete: (() -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
 
     var body: some View {
+        let textColor = preferences.chatBackground == .defaultBackground ? Color.primary : Color.white
+        let bubbleBackground = message.isUser
+        ? AnyShapeStyle(preferences.chatBackground == .defaultBackground ? Color.primary.opacity(0.08) : Color.white.opacity(0.25))
+        : AnyShapeStyle(Color.clear)
+        let isItalic = !message.isUser && preferences.chatBackground != .defaultBackground
+        let typingSpeed: TimeInterval = {
+            let length = message.content.count
+            if length > 240 { return 0.012 }
+            if length > 120 { return 0.016 }
+            return 0.02
+        }()
+
         HStack {
             if message.isUser {
                 Spacer(minLength: 50)
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
-                Text(message.content)
-                    .font(.body)
-                    .padding(message.isUser ? 12 : 0)
-                    .background(
-                        message.isUser
-                        ? AnyShapeStyle(preferences.chatBackground == .defaultBackground ? Color.primary.opacity(0.08) : Color.white.opacity(0.25)) 
-                        : AnyShapeStyle(Color.clear)
+                if message.isUser || !message.shouldAnimate {
+                    Text(message.content)
+                        .font(.body)
+                        .foregroundColor(textColor)
+                        .italic(isItalic)
+                        .padding(message.isUser ? 12 : 0)
+                        .background(bubbleBackground)
+                        .cornerRadius(message.isUser ? 18 : 0)
+                        .shadow(
+                            color: preferences.chatBackground == .defaultBackground ? .clear : .black.opacity(0.3),
+                            radius: 2, x: 0, y: 1
+                        )
+                } else {
+                    TypewriterView(
+                        text: message.content,
+                        font: .body,
+                        textColor: textColor,
+                        isItalic: isItalic,
+                        speed: typingSpeed,
+                        isActive: true,
+                        enableHaptics: false,
+                        onComplete: onTypingComplete
                     )
-                    .foregroundColor(preferences.chatBackground == .defaultBackground ? .primary : .white)
+                    .padding(message.isUser ? 12 : 0)
+                    .background(bubbleBackground)
                     .cornerRadius(message.isUser ? 18 : 0)
-                    .italic(!message.isUser && preferences.chatBackground != .defaultBackground)
                     .shadow(
                         color: preferences.chatBackground == .defaultBackground ? .clear : .black.opacity(0.3),
                         radius: 2, x: 0, y: 1
                     )
+                }
             }
             .padding(.horizontal, message.isUser ? 0 : 4)
 
