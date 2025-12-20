@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Auth
+import UIKit
 
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
@@ -65,6 +66,12 @@ struct ChatView: View {
                                         if typingMessageId == message.id {
                                             typingMessageId = nil
                                         }
+                                    },
+                                    onCopy: {
+                                        UIPasteboard.general.string = message.content
+                                    },
+                                    onRegenerate: { tone in
+                                        viewModel.regenerateMessage(for: message, tone: tone)
                                     }
                                 )
                                     .id(message.id)
@@ -100,6 +107,16 @@ struct ChatView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                             withAnimation {
                                 proxy.scrollTo("loading", anchor: .bottom)
+                            }
+                        }
+                    }
+                    .onChange(of: viewModel.isLoading) { isLoading in
+                        if isLoading {
+                            // Slightly longer delay to ensure the loading view is actually rendered and layout is updated
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    proxy.scrollTo("loading", anchor: .bottom)
+                                }
                             }
                         }
                     }
@@ -411,7 +428,11 @@ struct ProfileView: View {
 struct MessageBubble: View {
     let message: ChatMessage
     var onTypingComplete: (() -> Void)? = nil
+    var onCopy: (() -> Void)? = nil
+    var onRegenerate: ((QuoteTone?) -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
+    @State private var isAnimationCompleted = false
+    @State private var isCopied = false
 
     var body: some View {
         let textColor = preferences.chatBackground == .defaultBackground ? Color.primary : Color.white
@@ -453,7 +474,10 @@ struct MessageBubble: View {
                         speed: typingSpeed,
                         isActive: true,
                         enableHaptics: false,
-                        onComplete: onTypingComplete
+                        onComplete: {
+                            isAnimationCompleted = true
+                            onTypingComplete?()
+                        }
                     )
                     .padding(message.isUser ? 12 : 0)
                     .background(bubbleBackground)
@@ -463,6 +487,59 @@ struct MessageBubble: View {
                         radius: 2, x: 0, y: 1
                     )
                 }
+
+                if !message.isUser && !message.isWelcome && (!message.shouldAnimate || isAnimationCompleted) {
+                    HStack(spacing: 16) {
+                        if let onCopy {
+                            Button(action: {
+                                onCopy()
+                                let generator = UINotificationFeedbackGenerator()
+                                generator.notificationOccurred(.success)
+                                withAnimation {
+                                    isCopied = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    withAnimation {
+                                        isCopied = false
+                                    }
+                                }
+                            }) {
+                                Image(systemName: isCopied ? "checkmark" : "square.on.square")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(actionColor)
+                                    .padding(6)
+                            }
+                        }
+
+                        if let onRegenerate {
+                            Menu {
+                                Button {
+                                    onRegenerate(nil)
+                                } label: {
+                                    Label(LocalizationManager.shared.string(for: "chat.welcome.getStarted") == "Get Started" ? "Regenerate" : "重新生成", systemImage: "arrow.clockwise")
+                                }
+                                
+                                Divider()
+                                
+                                ForEach(QuoteTone.allCases, id: \.self) { tone in
+                                    Button {
+                                        onRegenerate(tone)
+                                    } label: {
+                                        Label(tone.localizedName, systemImage: tone.icon)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(actionColor)
+                                    .frame(width: 26, height: 26)
+                                    .contentShape(Rectangle())
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 6)
+                }
             }
             .padding(.horizontal, message.isUser ? 0 : 4)
 
@@ -470,6 +547,12 @@ struct MessageBubble: View {
                 Spacer(minLength: 50)
             }
         }
+    }
+
+    private var actionColor: Color {
+        preferences.chatBackground == .defaultBackground
+        ? Color.secondary
+        : Color.white.opacity(0.8)
     }
 }
 
@@ -518,7 +601,7 @@ struct LoadingIndicator: View {
 
     private func startShimmer() {
         shimmerOffset = -1.0
-        withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+        withAnimation(.linear(duration: 2.5).repeatForever(autoreverses: false)) {
             shimmerOffset = 2.0
         }
     }
@@ -554,4 +637,15 @@ extension Color {
 
 #Preview {
     ChatView()
+}
+
+extension QuoteTone {
+    var localizedName: String {
+        switch self {
+        case .gentle: return LocalizationManager.shared.string(for: "tone.gentle")
+        case .toughLove: return LocalizationManager.shared.string(for: "tone.toughLove")
+        case .philosophical: return LocalizationManager.shared.string(for: "tone.philosophical")
+        case .realist: return LocalizationManager.shared.string(for: "tone.realist")
+        }
+    }
 }

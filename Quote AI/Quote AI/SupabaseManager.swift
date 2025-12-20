@@ -263,6 +263,15 @@ class SupabaseManager: ObservableObject {
             .execute()
     }
     
+    /// Delete a specific message by ID
+    func deleteMessage(messageId: UUID) async throws {
+        try await client
+            .from("messages")
+            .delete()
+            .eq("id", value: messageId.uuidString)
+            .execute()
+    }
+    
     // MARK: - Private Helpers
     
     private func updateConversationTimestamp(conversationId: UUID) async throws {

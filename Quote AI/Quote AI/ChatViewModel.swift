@@ -46,7 +46,7 @@ class ChatViewModel: ObservableObject {
                 let template = localization.string(for: "chat.welcomePersonalized")
                 welcomeContent = String(format: template, userName)
             }
-            messages[0] = ChatMessage(content: welcomeContent, isUser: false)
+            messages[0] = ChatMessage(content: welcomeContent, isUser: false, isWelcome: true)
         }
     }
 
@@ -62,13 +62,15 @@ class ChatViewModel: ObservableObject {
 
         let welcomeMessage = ChatMessage(
             content: welcomeContent,
-            isUser: false
+            isUser: false,
+            isWelcome: true
         )
         messages.append(welcomeMessage)
     }
 
-    func sendMessage() {
-        let input = currentInput.trimmingCharacters(in: .whitespacesAndNewlines)
+    func sendMessage(text: String? = nil, tone: QuoteTone? = nil) {
+        let inputToCheck = text ?? currentInput
+        let input = inputToCheck.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !input.isEmpty else { return }
         guard !isLoading else { return }
@@ -77,8 +79,10 @@ class ChatViewModel: ObservableObject {
         let userMessage = ChatMessage(content: input, isUser: true)
         messages.append(userMessage)
 
-        // Clear input
-        currentInput = ""
+        // Clear input only if we used the text field
+        if text == nil {
+            currentInput = ""
+        }
 
         // Clear previous error
         errorMessage = nil
@@ -106,7 +110,7 @@ class ChatViewModel: ObservableObject {
                     )
                 }
                 
-                let quote = try await kimiService.getQuote(for: input)
+                let quote = try await kimiService.getQuote(for: input, tone: tone)
 
                 // Stop loading FIRST, then add message (prevents flash)
                 isLoading = false
@@ -138,6 +142,51 @@ class ChatViewModel: ObservableObject {
                 messages.append(errorBotMessage)
             }
         }
+    }
+
+    func regenerateMessage(for message: ChatMessage, tone: QuoteTone? = nil) {
+        guard !isLoading else { return }
+        guard let messageIndex = messages.firstIndex(where: { $0.id == message.id }) else { return }
+        
+        var promptIndex: Int?
+        var prompt: String?
+        
+        // Find the preceding user message (the prompt)
+        if messageIndex > 0 {
+            for index in stride(from: messageIndex - 1, through: 0, by: -1) {
+                if messages[index].isUser {
+                    prompt = messages[index].content
+                    promptIndex = index
+                    break
+                }
+            }
+        }
+        
+        guard let userPrompt = prompt, !userPrompt.isEmpty, let pIndex = promptIndex else { return }
+        
+        // Capture IDs for deletion
+        let aiMessageId = message.id
+        let userMessageId = messages[pIndex].id
+        
+        // Remove both messages from local state immediately
+        // Remove higher index first to avoid index shifting problems
+        let indicesToRemove = [messageIndex, pIndex].sorted(by: >)
+        for index in indicesToRemove {
+            messages.remove(at: index)
+        }
+        
+        // Delete from database in background
+        Task {
+            do {
+                try await supabaseManager.deleteMessage(messageId: aiMessageId)
+                try await supabaseManager.deleteMessage(messageId: userMessageId)
+            } catch {
+                print("Error deleting messages: \(error)")
+            }
+        }
+        
+        // Resend the original question to generate a new answer at the bottom
+        sendMessage(text: userPrompt, tone: tone)
     }
 
     func clearChat() {

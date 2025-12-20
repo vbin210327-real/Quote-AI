@@ -35,7 +35,7 @@ class KimiService {
 
     private init() {}
 
-    func getQuote(for userMessage: String) async throws -> String {
+    func getQuote(for userMessage: String, tone: QuoteTone? = nil) async throws -> String {
         guard let url = URL(string: Config.kimiAPIEndpoint) else {
             throw KimiServiceError.invalidURL
         }
@@ -52,15 +52,22 @@ class KimiService {
         let language = localization.currentLanguage
         let languageName = language.promptName
         let languageCode = language.rawValue
+        
+        let activeTone = tone ?? preferences.quoteTone
+        
+        let vibeInstruction = activeTone == .philosophical
+            ? "Present all wisdom as your own original insight. DO NOT cite philosophers, authors, or schools of thought (e.g. 'The Stoics', 'Nietzsche'). DO NOT use phrases like 'As X said'. Speak the wisdom directly as if it comes from you."
+            : ""
 
         let dynamicPrompt = """
         \(Config.systemPrompt)
 
         USER: \(preferences.userName)
-        TONE: \(preferences.quoteTone.rawValue) - \(preferences.quoteTone.description)
+        TONE: \(activeTone.rawValue) - \(activeTone.description)
         LANGUAGE: \(languageName) (\(languageCode))
 
-        YOUR RESPONSE MUST embody the \(preferences.quoteTone.rawValue) tone completely. This is non-negotiable.
+        YOUR RESPONSE MUST embody the \(activeTone.rawValue) tone completely. This is non-negotiable.
+        \(vibeInstruction)
         Use their name sparingly (not every message).
         IMPORTANT: You MUST respond in \(languageName) (\(languageCode)). All your responses should be in \(languageName), even if the user writes in another language.
         """
