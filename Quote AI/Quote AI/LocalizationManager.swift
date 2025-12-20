@@ -30,6 +30,18 @@ enum AppLanguage: String, CaseIterable, Codable {
         }
     }
 
+    var promptName: String {
+        switch self {
+        case .english: return "English"
+        case .spanish: return "Spanish"
+        case .french: return "French"
+        case .chinese: return "Chinese"
+        case .hindi: return "Hindi"
+        case .japanese: return "Japanese"
+        case .korean: return "Korean"
+        }
+    }
+
     var flag: String {
         switch self {
         case .english: return "🇺🇸"
