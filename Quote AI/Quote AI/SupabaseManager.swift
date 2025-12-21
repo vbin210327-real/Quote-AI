@@ -218,6 +218,24 @@ class SupabaseManager: ObservableObject {
         return conversations
     }
     
+    /// Search conversations by title or message content
+    func searchConversations(query: String) async throws -> [Conversation] {
+        guard let _ = currentUser?.id else {
+            throw NSError(domain: "SupabaseManager", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "User not authenticated"
+            ])
+        }
+        
+        let params = ["search_query": query]
+        
+        let conversations: [Conversation] = try await client
+            .rpc("search_conversations", params: params)
+            .execute()
+            .value
+            
+        return conversations
+    }
+    
     /// Save a message to a conversation
     func saveMessage(conversationId: UUID, content: String, isUser: Bool) async throws -> StoredMessage {
         let request = SaveMessageRequest(

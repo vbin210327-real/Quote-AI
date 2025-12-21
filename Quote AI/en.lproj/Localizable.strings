@@ -140,6 +140,7 @@
 "settings.personality" = "Personality";
 
 /* Conversation History */
+"history.search" = "Search";
 "history.title" = "History";
 "history.loading" = "Loading conversations...";
 "history.empty" = "No conversations yet";

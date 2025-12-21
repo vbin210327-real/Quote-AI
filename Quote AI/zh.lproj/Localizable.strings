@@ -140,6 +140,7 @@
 "settings.personality" = "个性";
 
 /* Conversation History */
+"history.search" = "搜索";
 "history.title" = "历史记录";
 "history.loading" = "正在加载对话...";
 "history.empty" = "暂无对话";

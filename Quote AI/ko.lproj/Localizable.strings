@@ -140,6 +140,11 @@
 "settings.personality" = "성격";
 
 /* Conversation History */
+"history.search" = "검색";
+"history.title" = "기록";
+
+/* Conversation History */
+"history.search" = "검색";
 "history.title" = "기록";
 "history.loading" = "대화를 불러오는 중...";
 "history.empty" = "아직 대화가 없습니다";

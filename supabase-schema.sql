@@ -98,3 +98,20 @@ CREATE TRIGGER update_conversations_updated_at
     BEFORE UPDATE ON conversations
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- RPC Function for searching conversations by content
+CREATE OR REPLACE FUNCTION search_conversations(search_query TEXT)
+RETURNS SETOF conversations AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT c.*
+  FROM conversations c
+  JOIN messages m ON c.id = m.conversation_id
+  WHERE c.user_id = auth.uid()::text
+  AND (
+    c.title ILIKE '%' || search_query || '%'
+    OR m.content ILIKE '%' || search_query || '%'
+  )
+  ORDER BY c.updated_at DESC;
+END;
+$$ LANGUAGE plpgsql;

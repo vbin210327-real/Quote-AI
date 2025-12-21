@@ -14,6 +14,7 @@ struct Conversation: Identifiable, Codable {
     let title: String  // Auto-generated from first user message
     let createdAt: Date
     let updatedAt: Date
+    let snippet: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -21,6 +22,7 @@ struct Conversation: Identifiable, Codable {
         case title
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+        case snippet = "match_snippet"
     }
 }
 

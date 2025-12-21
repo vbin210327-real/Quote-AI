@@ -16,179 +16,216 @@ struct ChatView: View {
     @FocusState private var isInputFocused: Bool
     @Environment(\.colorScheme) private var colorScheme
     @State private var typingMessageId: UUID?
+    @State private var showingProfile = false
 
     private var isDefaultBackground: Bool {
         preferences.chatBackground == .defaultBackground
     }
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Custom header with subtle divider
+        ZStack(alignment: .leading) {
+            NavigationView {
                 VStack(spacing: 0) {
-                    HStack {
-                        ProfileButton { conversation in
-                            Task {
-                                await viewModel.loadConversation(conversation)
-                            }
+                    // Custom header with subtle divider
+                    VStack(spacing: 0) {
+                        HStack {
+                            ProfileButton(isPresented: $showingProfile)
+
+                            Spacer()
+
+                            Text(localization.string(for: "chat.title"))
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(isDefaultBackground ? .primary : .white)
+
+                            Spacer()
+
+                            // Invisible spacer to balance the profile button
+                            Color.clear
+                                .frame(width: 32, height: 32)
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
 
-                        Spacer()
-
-                        Text(localization.string(for: "chat.title"))
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(isDefaultBackground ? .primary : .white)
-
-                        Spacer()
-
-                        // Invisible spacer to balance the profile button
-                        Color.clear
-                            .frame(width: 32, height: 32)
+                        // Subtle divider line
+                        Rectangle()
+                            .fill(isDefaultBackground ? Color.primary.opacity(0.15) : Color.white.opacity(0.15))
+                            .frame(height: 0.5)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .background(isDefaultBackground ? Color.clear : Color.black.opacity(0.2))
 
-                    // Subtle divider line
-                    Rectangle()
-                        .fill(isDefaultBackground ? Color.primary.opacity(0.15) : Color.white.opacity(0.15))
-                        .frame(height: 0.5)
-                }
-                .background(isDefaultBackground ? Color.clear : Color.black.opacity(0.2))
-
-                // Chat messages
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.messages) { message in
-                                MessageBubble(
-                                    message: message,
-                                    onTypingComplete: {
-                                        if typingMessageId == message.id {
-                                            typingMessageId = nil
+                    // Chat messages
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(viewModel.messages) { message in
+                                    MessageBubble(
+                                        message: message,
+                                        onTypingComplete: {
+                                            if typingMessageId == message.id {
+                                                typingMessageId = nil
+                                            }
+                                        },
+                                        onCopy: {
+                                            UIPasteboard.general.string = message.content
+                                        },
+                                        onRegenerate: { tone in
+                                            viewModel.regenerateMessage(for: message, tone: tone)
                                         }
-                                    },
-                                    onCopy: {
-                                        UIPasteboard.general.string = message.content
-                                    },
-                                    onRegenerate: { tone in
-                                        viewModel.regenerateMessage(for: message, tone: tone)
-                                    }
-                                )
+                                    )
                                     .id(message.id)
-                            }
+                                }
 
-                            if viewModel.isLoading {
-                                LoadingIndicator()
-                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                                    .id("loading")
+                                if viewModel.isLoading {
+                                    LoadingIndicator()
+                                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                        .id("loading")
+                                }
+                            }
+                            .padding()
+                        }
+                        .scrollDismissesKeyboard(.interactively)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+                        .onTapGesture {
+                            isInputFocused = false
+                        }
+                        .onChange(of: viewModel.messages.count) { _ in
+                            // Scroll to bottom when new message arrives
+                            if let lastMessage = viewModel.messages.last {
+                                if lastMessage.shouldAnimate {
+                                    typingMessageId = lastMessage.id
+                                }
+                                withAnimation {
+                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                }
                             }
                         }
-                        .padding()
-                    }
-                    .scrollDismissesKeyboard(.interactively)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
-                    .onTapGesture {
-                        isInputFocused = false
-                    }
-                    .onChange(of: viewModel.messages.count) { _ in
-                        // Scroll to bottom when new message arrives
-                        if let lastMessage = viewModel.messages.last {
-                            if lastMessage.shouldAnimate {
-                                typingMessageId = lastMessage.id
-                            }
-                            withAnimation {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
-                        }
-                    }
-                    .onChange(of: typingMessageId) { newValue in
-                        guard newValue != nil else { return }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                            withAnimation {
-                                proxy.scrollTo("loading", anchor: .bottom)
-                            }
-                        }
-                    }
-                    .onChange(of: viewModel.isLoading) { isLoading in
-                        if isLoading {
-                            // Slightly longer delay to ensure the loading view is actually rendered and layout is updated
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                withAnimation(.easeOut(duration: 0.3)) {
+                        .onChange(of: typingMessageId) { newValue in
+                            guard newValue != nil else { return }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                withAnimation {
                                     proxy.scrollTo("loading", anchor: .bottom)
                                 }
                             }
                         }
-                    }
-                    .onChange(of: isInputFocused) { focused in
-                        if let lastMessage = viewModel.messages.last {
-                            if focused {
-                                // Keyboard appearing - scroll after a short delay
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        .onChange(of: viewModel.isLoading) { isLoading in
+                            if isLoading {
+                                // Slightly longer delay to ensure the loading view is actually rendered and layout is updated
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    withAnimation(.easeOut(duration: 0.3)) {
+                                        proxy.scrollTo("loading", anchor: .bottom)
+                                    }
                                 }
-                            } else {
-                                // Keyboard dismissing - scroll after keyboard starts hiding
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    withAnimation(.easeOut(duration: 0.2)) {
+                            }
+                        }
+                        .onChange(of: isInputFocused) { focused in
+                            if let lastMessage = viewModel.messages.last {
+                                if focused {
+                                    // Keyboard appearing - scroll after a short delay
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                                         proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                    }
+                                } else {
+                                    // Keyboard dismissing - scroll after keyboard starts hiding
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        withAnimation(.easeOut(duration: 0.2)) {
+                                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // Error message
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
-
-                // Input area
-                HStack(spacing: 12) {
-                    TextField(localization.string(for: "chat.placeholder"), text: $viewModel.currentInput, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .padding(12)
-                        .background(isDefaultBackground ? Color.gray.opacity(0.1) : Color.white.opacity(0.15))
-                        .cornerRadius(20)
-                        .lineLimit(1...5)
-                        .focused($isInputFocused)
-                        .foregroundColor(isDefaultBackground ? .primary : .white)
-                        .onSubmit {
-                            viewModel.sendMessage()
-                        }
-
-                    let isSendDisabled = viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
-                    let isDarkMode = colorScheme == .dark
-                    let activeForeground = (isDefaultBackground && isDarkMode) ? Color.black : (isDefaultBackground ? Color.white : Color.black)
-                    let activeBackground = (isDefaultBackground && isDarkMode) ? Color.white : (isDefaultBackground ? Color.black : Color.white)
-
-                    Button(action: {
-                        viewModel.sendMessage()
-                    }) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(
-                                isSendDisabled ? .gray : activeForeground
-                            )
-                            .frame(width: 32, height: 32)
-                            .background(
-                                isSendDisabled ? Color.gray.opacity(0.3) : activeBackground
-                            )
-                            .clipShape(Circle())
+                    // Error message
+                    if let error = viewModel.errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.horizontal)
+                            .padding(.top, 8)
                     }
-                    .disabled(isSendDisabled)
+
+                    // Input area
+                    HStack(spacing: 12) {
+                        TextField(localization.string(for: "chat.placeholder"), text: $viewModel.currentInput, axis: .vertical)
+                            .textFieldStyle(.plain)
+                            .padding(12)
+                            .background(isDefaultBackground ? Color.gray.opacity(0.1) : Color.white.opacity(0.15))
+                            .cornerRadius(20)
+                            .lineLimit(1...5)
+                            .focused($isInputFocused)
+                            .foregroundColor(isDefaultBackground ? .primary : .white)
+                            .onSubmit {
+                                viewModel.sendMessage()
+                            }
+
+                        let isSendDisabled = viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
+                        let isDarkMode = colorScheme == .dark
+                        let activeForeground = (isDefaultBackground && isDarkMode) ? Color.black : (isDefaultBackground ? Color.white : Color.black)
+                        let activeBackground = (isDefaultBackground && isDarkMode) ? Color.white : (isDefaultBackground ? Color.black : Color.white)
+
+                        Button(action: {
+                            viewModel.sendMessage()
+                        }) {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(
+                                    isSendDisabled ? .gray : activeForeground
+                                )
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    isSendDisabled ? Color.gray.opacity(0.3) : activeBackground
+                                )
+                                .clipShape(Circle())
+                        }
+                        .disabled(isSendDisabled)
+                    }
+                    .padding()
                 }
-                .padding()
+                .background(
+                    ChatBackgroundView(background: preferences.chatBackground)
+                )
+                .navigationBarHidden(true)
             }
-            .background(
-                ChatBackgroundView(background: preferences.chatBackground)
-            )
-            .navigationBarHidden(true)
+            .blur(radius: showingProfile ? 3 : 0)
+            .disabled(showingProfile) // Disable interaction with chat when profile is open
+
+            // Dimming Layer
+            if showingProfile {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation {
+                            showingProfile = false
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+
+            // Side Drawer
+            if showingProfile {
+                ProfileView(
+                    onSelectConversation: { conversation in
+                        withAnimation {
+                            showingProfile = false
+                        }
+                        Task {
+                            await viewModel.loadConversation(conversation)
+                        }
+                    },
+                    onClose: {
+                        withAnimation {
+                            showingProfile = false
+                        }
+                    }
+                )
+                .frame(width: UIScreen.main.bounds.width * 0.85)
+                .background(Color(UIColor.systemBackground))
+                .transition(.move(edge: .leading))
+                .zIndex(2)
+            }
         }
     }
 }
@@ -225,15 +262,16 @@ private struct ChatBackgroundView: View {
 }
 
 struct ProfileButton: View {
-    @StateObject private var supabaseManager = SupabaseManager.shared
     @StateObject private var preferences = UserPreferences.shared
-    @State private var showingProfile = false
-    
-    var onSelectConversation: ((Conversation) -> Void)?
+    @Binding var isPresented: Bool
     
     var body: some View {
         Button(action: {
-            showingProfile = true
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                isPresented = true
+            }
         }) {
             // Custom align-center icon (three horizontal lines)
             ZStack {
@@ -264,9 +302,6 @@ struct ProfileButton: View {
                 .frame(width: 28, height: 28)
             }
         }
-        .sheet(isPresented: $showingProfile) {
-            ProfileView(onSelectConversation: onSelectConversation)
-        }
     }
 }
 
@@ -276,9 +311,13 @@ struct ProfileView: View {
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
-    @State private var showingHistory = false
+    @State private var searchText = ""
+    @State private var conversations: [Conversation] = []
+    @State private var isLoading = true
+    @State private var searchTask: Task<Void, Never>?
     
     var onSelectConversation: ((Conversation) -> Void)?
+    var onClose: (() -> Void)?
 
     private func localizedTone(_ tone: QuoteTone) -> String {
         switch tone {
@@ -290,133 +329,196 @@ struct ProfileView: View {
     }
     
     var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    if let email = supabaseManager.currentUser?.email {
-                        HStack {
-                            Text(localization.string(for: "profile.email"))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(email)
+        List {
+            // Search Bar
+            Section {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    TextField(localization.string(for: "history.search"), text: $searchText)
+                        .onChange(of: searchText) { newValue in
+                            searchTask?.cancel()
+                            searchTask = Task {
+                                // Debounce
+                                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+                                if Task.isCancelled { return }
+                                
+                                await loadConversations()
+                            }
                         }
+                }
+            }
+            
+            // Conversations List
+            Section {
+                if isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .padding()
+                        Spacer()
                     }
-
-                    if let userId = supabaseManager.currentUser?.id {
-                        HStack {
-                            Text(localization.string(for: "profile.userId"))
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(userId.uuidString.prefix(8) + "...")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                } else if conversations.isEmpty {
+                    if searchText.isEmpty {
+                        Text("No conversations yet")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("No conversations found")
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    ForEach(conversations) { conversation in
+                        Button(action: {
+                            onSelectConversation?(conversation)
+                            onClose?()
+                        }) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(conversation.title)
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                    .lineLimit(1)
+                                
+                                if let snippet = conversation.snippet {
+                                    highlightedSnippet(snippet, query: searchText)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(2)
+                                }
+                                
+                                Text(
+                                    conversation.createdAt.formatted(
+                                        Date.FormatStyle(date: .abbreviated, time: .shortened)
+                                            .locale(localization.currentLanguage.locale)
+                                    )
+                                )
+                                    .font(.caption2) // Made slightly smaller to distinguish from snippet
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.vertical, 2)
                         }
                     }
                 }
-                
-                // Conversation History
-                Section {
+            } header: {
+                Text(localization.string(for: "history.title"))
+            }
+            
+            // Personality Selection
+            Section {
+                ForEach(QuoteTone.allCases, id: \.self) { tone in
                     Button(action: {
-                        showingHistory = true
+                        preferences.quoteTone = tone
                     }) {
                         HStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.black)
-                            Text(localization.string(for: "history.title"))
+                            Image(systemName: tone.icon)
+                                .foregroundColor(.primary)
+                            Text(localizedTone(tone))
                                 .foregroundColor(.primary)
                             Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                    }
-                }
-                
-                // Personality Selection
-                Section {
-                    ForEach(QuoteTone.allCases, id: \.self) { tone in
-                        Button(action: {
-                            preferences.quoteTone = tone
-                        }) {
-                            HStack {
-                                Image(systemName: tone.icon)
-                                    .foregroundColor(.primary)
-                                Text(localizedTone(tone))
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                if preferences.quoteTone == tone {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
+                            if preferences.quoteTone == tone {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
                             }
                         }
                     }
-                } header: {
-                    Text(localization.string(for: "settings.personality"))
                 }
+            } header: {
+                Text(localization.string(for: "settings.personality"))
+            }
 
-                // Language Selection
-                Section {
-                    ForEach(AppLanguage.allCases, id: \.self) { language in
-                        Button(action: {
-                            localization.setLanguage(language)
-                        }) {
-                            HStack {
-                                Text(language.flag)
-                                Text(language.displayName)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                if localization.currentLanguage == language {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text(localization.string(for: "settings.language"))
-                }
-
-                Section {
+            // Language Selection
+            Section {
+                ForEach(AppLanguage.allCases, id: \.self) { language in
                     Button(action: {
-                        handleSignOut()
+                        localization.setLanguage(language)
                     }) {
                         HStack {
-                            if isSigningOut {
-                                ProgressView()
-                                    .padding(.trailing, 8)
+                            Text(language.flag)
+                            Text(language.displayName)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if localization.currentLanguage == language {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
                             }
-                            Text(localization.string(for: "profile.signOut"))
-                                .foregroundColor(.red)
                         }
                     }
-                    .disabled(isSigningOut)
                 }
+            } header: {
+                Text(localization.string(for: "settings.language"))
             }
-            .navigationTitle(localization.string(for: "profile.title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(localization.string(for: "profile.done")) {
-                        dismiss()
+
+            Section {
+                Button(action: {
+                    handleSignOut()
+                }) {
+                    HStack {
+                        if isSigningOut {
+                            ProgressView()
+                                .padding(.trailing, 8)
+                        }
+                        Text(localization.string(for: "profile.signOut"))
+                            .foregroundColor(.red)
                     }
                 }
-            }
-            .sheet(isPresented: $showingHistory) {
-                ConversationHistoryView { conversation in
-                    dismiss()
-                    onSelectConversation?(conversation)
-                }
+                .disabled(isSigningOut)
             }
         }
+        .task {
+            await loadConversations()
+        }
+        .environment(\.locale, localization.currentLanguage.locale)
     }
     
+    private func loadConversations() async {
+        isLoading = true
+        do {
+            if searchText.isEmpty {
+                conversations = try await supabaseManager.fetchConversations()
+            } else {
+                do {
+                    conversations = try await supabaseManager.searchConversations(query: searchText)
+                } catch {
+                    print("Server search failed (check if 'search_conversations' RPC exists), falling back to local title search: \(error)")
+                    let allConversations = try await supabaseManager.fetchConversations()
+                    conversations = allConversations.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+                }
+            }
+        } catch {
+            print("Error loading conversations: \(error)")
+        }
+        isLoading = false
+    }
+    
+    private func highlightedSnippet(_ content: String, query: String) -> Text {
+        if query.isEmpty { return Text(content) }
+        
+        let lowerContent = content.lowercased()
+        let lowerQuery = query.lowercased()
+        var lastIndex = lowerContent.startIndex
+        var result = Text("")
+        
+        while let range = lowerContent.range(of: lowerQuery, range: lastIndex..<lowerContent.endIndex) {
+            let before = String(content[lastIndex..<range.lowerBound])
+            let match = String(content[range])
+            
+            result = result + Text(before)
+            result = result + Text(match).foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.3)).bold()
+            
+            lastIndex = range.upperBound
+        }
+        
+        let remaining = String(content[lastIndex..<content.endIndex])
+        result = result + Text(remaining)
+        
+        return result
+    }
+
     private func handleSignOut() {
         isSigningOut = true
         Task {
             do {
                 try await supabaseManager.signOut()
-                dismiss()
+                onClose?()
             } catch {
                 print("Error signing out: \(error)")
             }

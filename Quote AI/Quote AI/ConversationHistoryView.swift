@@ -112,7 +112,10 @@ struct ConversationHistoryView: View {
             ForEach(groupedConversations.keys.sorted(by: >), id: \.self) { date in
                 Section {
                     ForEach(groupedConversations[date] ?? []) { conversation in
-                        ConversationRow(conversation: conversation)
+                        ConversationRow(
+                            conversation: conversation,
+                            locale: localization.currentLanguage.locale
+                        )
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 onSelectConversation?(conversation)
@@ -159,10 +162,12 @@ struct ConversationHistoryView: View {
             return localization.string(for: "history.yesterday")
         } else if calendar.isDate(date, equalTo: Date(), toGranularity: .weekOfYear) {
             let formatter = DateFormatter()
+            formatter.locale = localization.currentLanguage.locale
             formatter.dateFormat = "EEEE"
             return formatter.string(from: date)
         } else {
             let formatter = DateFormatter()
+            formatter.locale = localization.currentLanguage.locale
             formatter.dateStyle = .medium
             return formatter.string(from: date)
         }
@@ -196,6 +201,7 @@ struct ConversationHistoryView: View {
 
 struct ConversationRow: View {
     let conversation: Conversation
+    let locale: Locale
     
     var body: some View {
         HStack(spacing: 16) {
@@ -235,6 +241,7 @@ struct ConversationRow: View {
     
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
+        formatter.locale = locale
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }

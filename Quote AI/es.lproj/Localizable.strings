@@ -138,3 +138,7 @@
 /* Settings */
 "settings.language" = "Idioma";
 "settings.personality" = "Personalidad";
+
+/* Conversation History */
+"history.search" = "Buscar";
+"history.title" = "Historial";

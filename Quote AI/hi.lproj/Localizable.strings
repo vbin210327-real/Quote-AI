@@ -138,3 +138,7 @@
 /* Settings */
 "settings.language" = "भाषा";
 "settings.personality" = "व्यक्तित्व";
+
+/* Conversation History */
+"history.search" = "खोजें";
+"history.title" = "इतिहास";
