@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "¡Bienvenido! Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
 "chat.welcomePersonalized" = "¡Hola %@! Estoy listo para ayudarte. Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
 "chat.errorMessage" = "Lo siento, encontré un error. Por favor, inténtalo de nuevo.";
+"chat.tokenWarning" = "Acercándose al límite de conversación";
+"chat.tokenLimitReached" = "Límite de conversación alcanzado. Por favor, inicia un nuevo chat.";
 
 /* ProfileView */
 "profile.title" = "Perfil";
@@ -136,9 +138,23 @@
 "background.default" = "Predeterminado";
 
 /* Settings */
+"settings.title" = "Ajustes";
 "settings.language" = "Idioma";
 "settings.personality" = "Personalidad";
 
 /* Conversation History */
 "history.search" = "Buscar";
 "history.title" = "Historial";
+"history.newChat" = "Nuevo chat";
+"history.delete" = "Eliminar";
+"history.deleteConfirm" = "¿Eliminar conversación?";
+"history.deleteMessage" = "Esto eliminará permanentemente esta conversación y todos sus mensajes.";
+"history.cancel" = "Cancelar";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "Citas Guardadas";
+"favorites.empty" = "No hay citas guardadas";
+"favorites.emptyHint" = "Toca el icono del corazón en cualquier cita para guardarla aquí";
+"favorites.remove" = "Eliminar";
+"favorites.removeConfirm" = "¿Eliminar cita?";
+"favorites.removeMessage" = "Esta cita será eliminada de tus citas guardadas.";

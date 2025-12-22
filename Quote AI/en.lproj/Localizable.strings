@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
 "chat.welcomePersonalized" = "Hi %@! I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
 "chat.errorMessage" = "Sorry, I encountered an error. Please try again.";
+"chat.tokenWarning" = "Approaching conversation limit";
+"chat.tokenLimitReached" = "Conversation limit reached. Please start a new chat.";
 
 /* ProfileView */
 "profile.title" = "Profile";
@@ -136,6 +138,7 @@
 "background.default" = "Default";
 
 /* Settings */
+"settings.title" = "Settings";
 "settings.language" = "Language";
 "settings.personality" = "Personality";
 
@@ -146,9 +149,18 @@
 "history.empty" = "No conversations yet";
 "history.emptyDescription" = "Start a chat and your conversations will appear here.";
 "history.startChat" = "Start Chatting";
+"history.newChat" = "New Chat";
 "history.today" = "Today";
 "history.yesterday" = "Yesterday";
 "history.delete" = "Delete";
 "history.deleteConfirm" = "Delete Conversation?";
 "history.deleteMessage" = "This will permanently delete this conversation and all its messages.";
 "history.cancel" = "Cancel";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "Saved Quotes";
+"favorites.empty" = "No saved quotes yet";
+"favorites.emptyHint" = "Tap the heart icon on any quote to save it here";
+"favorites.remove" = "Remove";
+"favorites.removeConfirm" = "Remove Quote?";
+"favorites.removeMessage" = "This quote will be removed from your saved quotes.";

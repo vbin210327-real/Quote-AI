@@ -146,6 +146,38 @@ struct ChatView: View {
                             .padding(.top, 8)
                     }
 
+                    // Token warning banner
+                    if viewModel.showTokenWarning {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text(localization.string(for: "chat.tokenWarning"))
+                                .font(.caption)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.orange.opacity(0.15))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    }
+
+                    // Token limit reached banner
+                    if viewModel.isAtTokenLimit {
+                        HStack {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.red)
+                            Text(localization.string(for: "chat.tokenLimitReached"))
+                                .font(.caption)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.red.opacity(0.15))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    }
+
                     // Input area
                     HStack(spacing: 12) {
                         TextField(localization.string(for: "chat.placeholder"), text: $viewModel.currentInput, axis: .vertical)
@@ -160,7 +192,7 @@ struct ChatView: View {
                                 viewModel.sendMessage()
                             }
 
-                        let isSendDisabled = viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading
+                        let isSendDisabled = viewModel.currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isAtTokenLimit
                         let isDarkMode = colorScheme == .dark
                         let activeForeground = (isDefaultBackground && isDarkMode) ? Color.black : (isDefaultBackground ? Color.white : Color.black)
                         let activeBackground = (isDefaultBackground && isDarkMode) ? Color.white : (isDefaultBackground ? Color.black : Color.white)
@@ -190,6 +222,11 @@ struct ChatView: View {
             }
             .blur(radius: showingProfile ? 3 : 0)
             .disabled(showingProfile) // Disable interaction with chat when profile is open
+            .onChange(of: showingProfile) { isOpen in
+                if isOpen {
+                    isInputFocused = false // Dismiss keyboard when drawer opens
+                }
+            }
 
             // Dimming Layer
             if showingProfile {
@@ -207,6 +244,7 @@ struct ChatView: View {
             // Side Drawer
             if showingProfile {
                 ProfileView(
+                    isChatBusy: viewModel.isLoading,
                     onSelectConversation: { conversation in
                         withAnimation {
                             showingProfile = false
@@ -219,6 +257,12 @@ struct ChatView: View {
                         withAnimation {
                             showingProfile = false
                         }
+                    },
+                    onNewChat: {
+                        withAnimation {
+                            showingProfile = false
+                        }
+                        viewModel.clearChat()
                     }
                 )
                 .frame(width: UIScreen.main.bounds.width * 0.85)
@@ -264,9 +308,12 @@ private struct ChatBackgroundView: View {
 struct ProfileButton: View {
     @StateObject private var preferences = UserPreferences.shared
     @Binding var isPresented: Bool
-    
+
     var body: some View {
         Button(action: {
+            // Dismiss keyboard first
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+
             let generator = UIImpactFeedbackGenerator(style: .light)
             generator.impactOccurred()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -307,16 +354,262 @@ struct ProfileButton: View {
 
 struct ProfileView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
-    @StateObject private var preferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
-    @Environment(\.dismiss) private var dismiss
-    @State private var isSigningOut = false
+    @StateObject private var favoritesManager = FavoriteQuotesManager.shared
     @State private var searchText = ""
     @State private var conversations: [Conversation] = []
     @State private var isLoading = true
     @State private var searchTask: Task<Void, Never>?
-    
+    @State private var showingDeleteAlert = false
+    @State private var conversationToDelete: Conversation?
+    @State private var showingSavedQuotes = false
+    @State private var showingSettings = false
+
+    let isChatBusy: Bool
     var onSelectConversation: ((Conversation) -> Void)?
+    var onClose: (() -> Void)?
+    var onNewChat: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            List {
+                // Search Bar
+                Section {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                        TextField(localization.string(for: "history.search"), text: $searchText)
+                            .onChange(of: searchText) { newValue in
+                                searchTask?.cancel()
+                                searchTask = Task {
+                                    try? await Task.sleep(nanoseconds: 300_000_000)
+                                    if Task.isCancelled { return }
+                                    await loadConversations()
+                                }
+                            }
+                    }
+                }
+
+                Section {
+                    Button(action: {
+                        onNewChat?()
+                    }) {
+                        HStack(spacing: 8) {
+                            SquarePenIcon(size: 18)
+                            Text(localization.string(for: "history.newChat"))
+                        }
+                        .foregroundColor(.primary)
+                    }
+                    .disabled(isChatBusy)
+                }
+
+                // Saved Quotes Section
+                Section {
+                    Button(action: {
+                        showingSavedQuotes = true
+                    }) {
+                        HStack {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                            Text(localization.string(for: "favorites.title"))
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if !favoritesManager.savedQuotes.isEmpty {
+                                Text("\(favoritesManager.savedQuotes.count)")
+                                    .font(.caption)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(Color.red)
+                                    .clipShape(Capsule())
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                // Conversations List
+                Section {
+                    if isLoading {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .padding()
+                            Spacer()
+                        }
+                    } else if conversations.isEmpty {
+                        if searchText.isEmpty {
+                            Text("No conversations yet")
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("No conversations found")
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        ForEach(conversations) { conversation in
+                            Button(action: {
+                                onSelectConversation?(conversation)
+                                onClose?()
+                            }) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(conversation.title)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                        .lineLimit(1)
+
+                                    if let snippet = conversation.snippet {
+                                        highlightedSnippet(snippet, query: searchText)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(2)
+                                    }
+
+                                    Text(
+                                        conversation.createdAt.formatted(
+                                            Date.FormatStyle(date: .abbreviated, time: .shortened)
+                                                .locale(localization.currentLanguage.locale)
+                                        )
+                                    )
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.vertical, 2)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    conversationToDelete = conversation
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label(localization.string(for: "history.delete"), systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(localization.string(for: "history.title"))
+                }
+            }
+            .scrollDismissesKeyboard(.immediately)
+
+            // Profile button at bottom
+            Button(action: {
+                showingSettings = true
+            }) {
+                HStack(spacing: 12) {
+                    // Avatar
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                        )
+
+                    // User info
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(supabaseManager.currentUser?.email?.components(separatedBy: "@").first ?? "User")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color(UIColor.systemBackground))
+            }
+        }
+        .ignoresSafeArea(.keyboard)
+        .task {
+            await loadConversations()
+        }
+        .environment(\.locale, localization.currentLanguage.locale)
+        .alert(localization.string(for: "history.deleteConfirm"), isPresented: $showingDeleteAlert) {
+            Button(localization.string(for: "history.cancel"), role: .cancel) { }
+            Button(localization.string(for: "history.delete"), role: .destructive) {
+                if let conversation = conversationToDelete {
+                    Task {
+                        await deleteConversation(conversation)
+                    }
+                }
+            }
+        } message: {
+            Text(localization.string(for: "history.deleteMessage"))
+        }
+        .sheet(isPresented: $showingSavedQuotes) {
+            SavedQuotesView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView(onClose: onClose)
+        }
+    }
+
+    private func loadConversations() async {
+        isLoading = true
+        do {
+            if searchText.isEmpty {
+                conversations = try await supabaseManager.fetchConversations()
+            } else {
+                do {
+                    conversations = try await supabaseManager.searchConversations(query: searchText)
+                } catch {
+                    print("Server search failed, falling back to local title search: \(error)")
+                    let allConversations = try await supabaseManager.fetchConversations()
+                    conversations = allConversations.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+                }
+            }
+        } catch {
+            print("Error loading conversations: \(error)")
+        }
+        isLoading = false
+    }
+
+    private func highlightedSnippet(_ content: String, query: String) -> Text {
+        if query.isEmpty { return Text(content) }
+
+        let lowerContent = content.lowercased()
+        let lowerQuery = query.lowercased()
+        var lastIndex = lowerContent.startIndex
+        var result = Text("")
+
+        while let range = lowerContent.range(of: lowerQuery, range: lastIndex..<lowerContent.endIndex) {
+            let before = String(content[lastIndex..<range.lowerBound])
+            let match = String(content[range])
+
+            result = result + Text(before)
+            result = result + Text(match).foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.3)).bold()
+
+            lastIndex = range.upperBound
+        }
+
+        let remaining = String(content[lastIndex..<content.endIndex])
+        result = result + Text(remaining)
+
+        return result
+    }
+
+    private func deleteConversation(_ conversation: Conversation) async {
+        do {
+            try await supabaseManager.deleteConversation(conversationId: conversation.id)
+            conversations.removeAll { $0.id == conversation.id }
+        } catch {
+            print("Error deleting conversation: \(error)")
+        }
+    }
+}
+
+// MARK: - Settings View
+struct SettingsView: View {
+    @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var preferences = UserPreferences.shared
+    @StateObject private var localization = LocalizationManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var isSigningOut = false
+
     var onClose: (() -> Void)?
 
     private func localizedTone(_ tone: QuoteTone) -> String {
@@ -327,190 +620,86 @@ struct ProfileView: View {
         case .realist: return localization.string(for: "tone.realist")
         }
     }
-    
+
     var body: some View {
-        List {
-            // Search Bar
-            Section {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField(localization.string(for: "history.search"), text: $searchText)
-                        .onChange(of: searchText) { newValue in
-                            searchTask?.cancel()
-                            searchTask = Task {
-                                // Debounce
-                                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                                if Task.isCancelled { return }
-                                
-                                await loadConversations()
-                            }
-                        }
-                }
-            }
-            
-            // Conversations List
-            Section {
-                if isLoading {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                            .padding()
-                        Spacer()
-                    }
-                } else if conversations.isEmpty {
-                    if searchText.isEmpty {
-                        Text("No conversations yet")
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("No conversations found")
-                            .foregroundColor(.secondary)
-                    }
-                } else {
-                    ForEach(conversations) { conversation in
+        NavigationView {
+            List {
+                // Personality Selection
+                Section {
+                    ForEach(QuoteTone.allCases, id: \.self) { tone in
                         Button(action: {
-                            onSelectConversation?(conversation)
-                            onClose?()
+                            preferences.quoteTone = tone
                         }) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(conversation.title)
-                                    .font(.body)
+                            HStack {
+                                Image(systemName: tone.icon)
                                     .foregroundColor(.primary)
-                                    .lineLimit(1)
-                                
-                                if let snippet = conversation.snippet {
-                                    highlightedSnippet(snippet, query: searchText)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(2)
+                                Text(localizedTone(tone))
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if preferences.quoteTone == tone {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
                                 }
-                                
-                                Text(
-                                    conversation.createdAt.formatted(
-                                        Date.FormatStyle(date: .abbreviated, time: .shortened)
-                                            .locale(localization.currentLanguage.locale)
-                                    )
-                                )
-                                    .font(.caption2) // Made slightly smaller to distinguish from snippet
-                                    .foregroundColor(.gray)
                             }
-                            .padding(.vertical, 2)
                         }
                     }
+                } header: {
+                    Text(localization.string(for: "settings.personality"))
                 }
-            } header: {
-                Text(localization.string(for: "history.title"))
-            }
-            
-            // Personality Selection
-            Section {
-                ForEach(QuoteTone.allCases, id: \.self) { tone in
+
+                // Language Selection
+                Section {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Button(action: {
+                            localization.setLanguage(language)
+                        }) {
+                            HStack {
+                                Text(language.flag)
+                                Text(language.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if localization.currentLanguage == language {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text(localization.string(for: "settings.language"))
+                }
+
+                // Sign Out
+                Section {
                     Button(action: {
-                        preferences.quoteTone = tone
+                        handleSignOut()
                     }) {
                         HStack {
-                            Image(systemName: tone.icon)
-                                .foregroundColor(.primary)
-                            Text(localizedTone(tone))
-                                .foregroundColor(.primary)
-                            Spacer()
-                            if preferences.quoteTone == tone {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
+                            if isSigningOut {
+                                ProgressView()
+                                    .padding(.trailing, 8)
                             }
+                            Text(localization.string(for: "profile.signOut"))
+                                .foregroundColor(.red)
                         }
                     }
+                    .disabled(isSigningOut)
                 }
-            } header: {
-                Text(localization.string(for: "settings.personality"))
             }
-
-            // Language Selection
-            Section {
-                ForEach(AppLanguage.allCases, id: \.self) { language in
+            .navigationTitle(localization.string(for: "settings.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        localization.setLanguage(language)
+                        dismiss()
                     }) {
-                        HStack {
-                            Text(language.flag)
-                            Text(language.displayName)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            if localization.currentLanguage == language {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
                     }
                 }
-            } header: {
-                Text(localization.string(for: "settings.language"))
             }
-
-            Section {
-                Button(action: {
-                    handleSignOut()
-                }) {
-                    HStack {
-                        if isSigningOut {
-                            ProgressView()
-                                .padding(.trailing, 8)
-                        }
-                        Text(localization.string(for: "profile.signOut"))
-                            .foregroundColor(.red)
-                    }
-                }
-                .disabled(isSigningOut)
-            }
-        }
-        .task {
-            await loadConversations()
         }
         .environment(\.locale, localization.currentLanguage.locale)
-    }
-    
-    private func loadConversations() async {
-        isLoading = true
-        do {
-            if searchText.isEmpty {
-                conversations = try await supabaseManager.fetchConversations()
-            } else {
-                do {
-                    conversations = try await supabaseManager.searchConversations(query: searchText)
-                } catch {
-                    print("Server search failed (check if 'search_conversations' RPC exists), falling back to local title search: \(error)")
-                    let allConversations = try await supabaseManager.fetchConversations()
-                    conversations = allConversations.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
-                }
-            }
-        } catch {
-            print("Error loading conversations: \(error)")
-        }
-        isLoading = false
-    }
-    
-    private func highlightedSnippet(_ content: String, query: String) -> Text {
-        if query.isEmpty { return Text(content) }
-        
-        let lowerContent = content.lowercased()
-        let lowerQuery = query.lowercased()
-        var lastIndex = lowerContent.startIndex
-        var result = Text("")
-        
-        while let range = lowerContent.range(of: lowerQuery, range: lastIndex..<lowerContent.endIndex) {
-            let before = String(content[lastIndex..<range.lowerBound])
-            let match = String(content[range])
-            
-            result = result + Text(before)
-            result = result + Text(match).foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.3)).bold()
-            
-            lastIndex = range.upperBound
-        }
-        
-        let remaining = String(content[lastIndex..<content.endIndex])
-        result = result + Text(remaining)
-        
-        return result
     }
 
     private func handleSignOut() {
@@ -518,6 +707,7 @@ struct ProfileView: View {
         Task {
             do {
                 try await supabaseManager.signOut()
+                dismiss()
                 onClose?()
             } catch {
                 print("Error signing out: \(error)")
@@ -533,6 +723,7 @@ struct MessageBubble: View {
     var onCopy: (() -> Void)? = nil
     var onRegenerate: ((QuoteTone?) -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
+    @StateObject private var favoritesManager = FavoriteQuotesManager.shared
     @State private var isAnimationCompleted = false
     @State private var isCopied = false
 
@@ -611,6 +802,20 @@ struct MessageBubble: View {
                                     .foregroundColor(actionColor)
                                     .padding(6)
                             }
+                        }
+
+                        // Save/Favorite button
+                        Button(action: {
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                favoritesManager.toggleSave(message.content)
+                            }
+                        }) {
+                            Image(systemName: favoritesManager.isSaved(message.content) ? "heart.fill" : "heart")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(favoritesManager.isSaved(message.content) ? .red : actionColor)
+                                .padding(6)
                         }
 
                         if let onRegenerate {

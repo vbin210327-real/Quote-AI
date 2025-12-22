@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "欢迎！分享你的想法，我会用一句语录来激励你。";
 "chat.welcomePersonalized" = "你好 %@！我准备好帮助你了。分享你的想法，我会用一句语录来激励你。";
 "chat.errorMessage" = "抱歉，遇到了错误。请重试。";
+"chat.tokenWarning" = "接近对话限制";
+"chat.tokenLimitReached" = "已达到对话限制。请开始新对话。";
 
 /* ProfileView */
 "profile.title" = "个人资料";
@@ -136,6 +138,7 @@
 "background.default" = "默认";
 
 /* Settings */
+"settings.title" = "设置";
 "settings.language" = "语言";
 "settings.personality" = "个性";
 
@@ -146,9 +149,18 @@
 "history.empty" = "暂无对话";
 "history.emptyDescription" = "开始聊天后，你的对话将显示在这里。";
 "history.startChat" = "开始聊天";
+"history.newChat" = "新建聊天";
 "history.today" = "今天";
 "history.yesterday" = "昨天";
 "history.delete" = "删除";
 "history.deleteConfirm" = "删除对话？";
 "history.deleteMessage" = "这将永久删除此对话及其所有消息。";
 "history.cancel" = "取消";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "收藏的语录";
+"favorites.empty" = "暂无收藏的语录";
+"favorites.emptyHint" = "点击任意语录上的心形图标来收藏";
+"favorites.remove" = "移除";
+"favorites.removeConfirm" = "移除语录？";
+"favorites.removeMessage" = "此语录将从您的收藏中移除。";

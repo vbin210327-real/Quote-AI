@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "환영합니다! 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
 "chat.welcomePersonalized" = "안녕하세요, %@님! 도와드릴 준비가 되었습니다. 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
 "chat.errorMessage" = "죄송합니다. 오류가 발생했습니다. 다시 시도해 주세요.";
+"chat.tokenWarning" = "대화 한도에 가까워지고 있습니다";
+"chat.tokenLimitReached" = "대화 한도에 도달했습니다. 새 채팅을 시작해 주세요.";
 
 /* ProfileView */
 "profile.title" = "프로필";
@@ -136,6 +138,7 @@
 "background.default" = "기본";
 
 /* Settings */
+"settings.title" = "설정";
 "settings.language" = "언어";
 "settings.personality" = "성격";
 
@@ -150,9 +153,18 @@
 "history.empty" = "아직 대화가 없습니다";
 "history.emptyDescription" = "채팅을 시작하면 대화가 여기에 표시됩니다.";
 "history.startChat" = "채팅 시작";
+"history.newChat" = "새 채팅";
 "history.today" = "오늘";
 "history.yesterday" = "어제";
 "history.delete" = "삭제";
 "history.deleteConfirm" = "대화를 삭제하시겠습니까?";
 "history.deleteMessage" = "이 대화와 모든 메시지가 영구적으로 삭제됩니다.";
 "history.cancel" = "취소";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "저장된 명언";
+"favorites.empty" = "저장된 명언이 없습니다";
+"favorites.emptyHint" = "명언의 하트 아이콘을 탭하여 저장하세요";
+"favorites.remove" = "삭제";
+"favorites.removeConfirm" = "명언을 삭제하시겠습니까?";
+"favorites.removeMessage" = "이 명언이 저장 목록에서 삭제됩니다.";

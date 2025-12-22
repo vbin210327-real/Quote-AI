@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "ようこそ！思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
 "chat.welcomePersonalized" = "こんにちは、%@さん！お手伝いします。思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
 "chat.errorMessage" = "申し訳ありませんが、エラーが発生しました。もう一度お試しください。";
+"chat.tokenWarning" = "会話制限に近づいています";
+"chat.tokenLimitReached" = "会話制限に達しました。新しいチャットを開始してください。";
 
 /* ProfileView */
 "profile.title" = "プロフィール";
@@ -136,6 +138,7 @@
 "background.default" = "デフォルト";
 
 /* Settings */
+"settings.title" = "設定";
 "settings.language" = "言語";
 "settings.personality" = "パーソナリティ";
 
@@ -150,9 +153,18 @@
 "history.empty" = "まだ会話がありません";
 "history.emptyDescription" = "チャットを始めると、会話がここに表示されます。";
 "history.startChat" = "チャットを始める";
+"history.newChat" = "新規チャット";
 "history.today" = "今日";
 "history.yesterday" = "昨日";
 "history.delete" = "削除";
 "history.deleteConfirm" = "会話を削除しますか？";
 "history.deleteMessage" = "この会話とすべてのメッセージが完全に削除されます。";
 "history.cancel" = "キャンセル";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "保存した名言";
+"favorites.empty" = "保存した名言はまだありません";
+"favorites.emptyHint" = "名言のハートアイコンをタップして保存できます";
+"favorites.remove" = "削除";
+"favorites.removeConfirm" = "名言を削除しますか？";
+"favorites.removeMessage" = "この名言は保存リストから削除されます。";

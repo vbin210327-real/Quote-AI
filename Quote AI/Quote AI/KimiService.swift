@@ -35,7 +35,7 @@ class KimiService {
 
     private init() {}
 
-    func getQuote(for userMessage: String, tone: QuoteTone? = nil) async throws -> String {
+    func getQuote(for userMessage: String, conversationHistory: [ChatMessage] = [], tone: QuoteTone? = nil) async throws -> String {
         guard let url = URL(string: Config.kimiAPIEndpoint) else {
             throw KimiServiceError.invalidURL
         }
@@ -52,9 +52,9 @@ class KimiService {
         let language = localization.currentLanguage
         let languageName = language.promptName
         let languageCode = language.rawValue
-        
+
         let activeTone = tone ?? preferences.quoteTone
-        
+
         let vibeInstruction = activeTone == .philosophical
             ? "Present all wisdom as your own original insight. DO NOT cite philosophers, authors, or schools of thought (e.g. 'The Stoics', 'Nietzsche'). DO NOT use phrases like 'As X said'. Speak the wisdom directly as if it comes from you."
             : ""
@@ -63,22 +63,36 @@ class KimiService {
         \(Config.systemPrompt)
 
         USER: \(preferences.userName)
-        TONE: \(activeTone.rawValue) - \(activeTone.description)
+        VOICE STYLE: \(activeTone.description)
         LANGUAGE: \(languageName) (\(languageCode))
 
-        YOUR RESPONSE MUST embody the \(activeTone.rawValue) tone completely. This is non-negotiable.
+        YOUR RESPONSE MUST fully embody the voice style described above. This is non-negotiable.
+        NEVER describe your tone or style in your response - just BE that style naturally.
         \(vibeInstruction)
         Use their name sparingly (not every message).
         IMPORTANT: You MUST respond in \(languageName) (\(languageCode)). All your responses should be in \(languageName), even if the user writes in another language.
         """
 
+        // Build messages array with conversation history
+        var apiMessages: [KimiMessage] = [
+            KimiMessage(role: "system", content: dynamicPrompt)
+        ]
+
+        // Add all messages from current conversation
+        for message in conversationHistory {
+            apiMessages.append(KimiMessage(
+                role: message.isUser ? "user" : "assistant",
+                content: message.content
+            ))
+        }
+
+        // Add current user message
+        apiMessages.append(KimiMessage(role: "user", content: userMessage))
+
         // Prepare request body
         let kimiRequest = KimiRequest(
             model: Config.modelName,
-            messages: [
-                KimiMessage(role: "system", content: dynamicPrompt),
-                KimiMessage(role: "user", content: userMessage)
-            ],
+            messages: apiMessages,
             temperature: 0.7,
             maxTokens: 300
         )

@@ -97,6 +97,8 @@
 "chat.welcomeGeneric" = "Bienvenue ! Partagez ce que vous avez en tête et je vous répondrai avec une citation pour vous inspirer et vous motiver.";
 "chat.welcomePersonalized" = "Bonjour %@ ! Je suis prêt à vous aider. Partagez ce que vous avez en tête et je vous répondrai avec une citation pour vous inspirer et vous motiver.";
 "chat.errorMessage" = "Désolé, j'ai rencontré une erreur. Veuillez réessayer.";
+"chat.tokenWarning" = "Approche de la limite de conversation";
+"chat.tokenLimitReached" = "Limite de conversation atteinte. Veuillez démarrer un nouveau chat.";
 
 /* ProfileView */
 "profile.title" = "Profil";
@@ -136,9 +138,23 @@
 "background.default" = "Par défaut";
 
 /* Settings */
+"settings.title" = "Paramètres";
 "settings.language" = "Langue";
 "settings.personality" = "Personnalité";
 
 /* Conversation History */
 "history.search" = "Rechercher";
 "history.title" = "Historique";
+"history.newChat" = "Nouveau chat";
+"history.delete" = "Supprimer";
+"history.deleteConfirm" = "Supprimer la conversation ?";
+"history.deleteMessage" = "Cela supprimera définitivement cette conversation et tous ses messages.";
+"history.cancel" = "Annuler";
+
+/* Favorites/Saved Quotes */
+"favorites.title" = "Citations Sauvegardées";
+"favorites.empty" = "Aucune citation sauvegardée";
+"favorites.emptyHint" = "Appuyez sur l'icône coeur sur une citation pour la sauvegarder ici";
+"favorites.remove" = "Supprimer";
+"favorites.removeConfirm" = "Supprimer la citation ?";
+"favorites.removeMessage" = "Cette citation sera supprimée de vos citations sauvegardées.";

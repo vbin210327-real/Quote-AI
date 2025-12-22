@@ -16,6 +16,13 @@ class ChatViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var currentConversation: Conversation?
+    @Published var currentTokenCount: Int = 0
+    @Published var showTokenWarning: Bool = false
+    @Published var isAtTokenLimit: Bool = false
+    private var hasShownWarning: Bool = false  // Track if warning was already shown
+
+    let maxTokens: Int = 32000        // ~100+ messages before block
+    let warningThreshold: Int = 25600 // 80% - warning shows first
 
     private let kimiService = KimiService.shared
     private let supabaseManager = SupabaseManager.shared
@@ -68,6 +75,36 @@ class ChatViewModel: ObservableObject {
         messages.append(welcomeMessage)
     }
 
+    /// Estimate token count for a text string
+    private func estimateTokens(_ text: String) -> Int {
+        // Rough estimate: ~3 chars per token (balanced for English/Chinese)
+        return max(1, text.count / 3)
+    }
+
+    /// Update the current token count based on all messages
+    private func updateTokenCount() {
+        currentTokenCount = messages
+            .filter { !$0.isWelcome }
+            .reduce(0) { $0 + estimateTokens($1.content) }
+
+        // Check if at limit first
+        isAtTokenLimit = currentTokenCount >= maxTokens
+
+        // Hide warning when at limit (block banner takes over)
+        if isAtTokenLimit {
+            showTokenWarning = false
+        } else if currentTokenCount >= warningThreshold && !hasShownWarning {
+            // Show warning only once when threshold is first crossed
+            showTokenWarning = true
+            hasShownWarning = true
+        }
+    }
+
+    /// Dismiss the warning banner
+    func dismissWarning() {
+        showTokenWarning = false
+    }
+
     func sendMessage(text: String? = nil, tone: QuoteTone? = nil) {
         let inputToCheck = text ?? currentInput
         let input = inputToCheck.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -75,9 +112,19 @@ class ChatViewModel: ObservableObject {
         guard !input.isEmpty else { return }
         guard !isLoading else { return }
 
+        // Check token limit
+        guard !isAtTokenLimit else {
+            errorMessage = localization.string(for: "chat.tokenLimitReached")
+            return
+        }
+
+        // Dismiss warning if showing
+        dismissWarning()
+
         // Add user message
         let userMessage = ChatMessage(content: input, isUser: true)
         messages.append(userMessage)
+        updateTokenCount()
 
         // Clear input only if we used the text field
         if text == nil {
@@ -110,7 +157,9 @@ class ChatViewModel: ObservableObject {
                     )
                 }
                 
-                let quote = try await kimiService.getQuote(for: input, tone: tone)
+                // Pass conversation history (filter out welcome message)
+                let history = messages.filter { !$0.isWelcome }
+                let quote = try await kimiService.getQuote(for: input, conversationHistory: history, tone: tone)
 
                 // Stop loading FIRST, then add message (prevents flash)
                 isLoading = false
@@ -118,7 +167,8 @@ class ChatViewModel: ObservableObject {
                 // Add bot response
                 let botMessage = ChatMessage(content: quote, isUser: false, shouldAnimate: true)
                 messages.append(botMessage)
-                
+                updateTokenCount()
+
                 // Save bot message to database (in background, doesn't affect UI)
                 if let conversationId = currentConversation?.id {
                     _ = try await supabaseManager.saveMessage(
@@ -192,6 +242,10 @@ class ChatViewModel: ObservableObject {
     func clearChat() {
         messages.removeAll()
         currentConversation = nil  // Reset conversation for new chat
+        currentTokenCount = 0
+        showTokenWarning = false
+        isAtTokenLimit = false
+        hasShownWarning = false  // Reset so warning can show again in new chat
         // Re-add personalized welcome message
         addWelcomeMessage()
     }
@@ -200,10 +254,11 @@ class ChatViewModel: ObservableObject {
     func loadConversation(_ conversation: Conversation) async {
         currentConversation = conversation
         messages.removeAll()
-        
+
         do {
             let storedMessages = try await supabaseManager.fetchMessages(conversationId: conversation.id)
             messages = storedMessages.map { $0.toChatMessage() }
+            updateTokenCount()
         } catch {
             errorMessage = "Failed to load conversation: \(error.localizedDescription)"
         }
