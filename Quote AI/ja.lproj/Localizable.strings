@@ -97,7 +97,8 @@
 "chat.welcomeGeneric" = "ようこそ！思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
 "chat.welcomePersonalized" = "こんにちは、%@さん！お手伝いします。思っていることを教えてください。あなたを元気づけ、励ます名言をお届けします。";
 "chat.errorMessage" = "申し訳ありませんが、エラーが発生しました。もう一度お試しください。";
-"chat.tokenWarning" = "会話制限に近づいています";
+"chat.regenerate" = "再生成";
+"chat.tokenWarning" = "会話の制限に近づいています";
 "chat.tokenLimitReached" = "会話制限に達しました。新しいチャットを開始してください。";
 
 /* ProfileView */
@@ -162,7 +163,7 @@
 "history.cancel" = "キャンセル";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "保存した名言";
+"favorites.title" = "保存";
 "favorites.empty" = "保存した名言はまだありません";
 "favorites.emptyHint" = "名言のハートアイコンをタップして保存できます";
 "favorites.remove" = "削除";

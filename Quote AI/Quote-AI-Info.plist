@@ -15,5 +15,7 @@
 			</array>
 		</dict>
 	</array>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Quote AI needs access to your photo library to let you choose a custom profile picture.</string>
 </dict>
 </plist>

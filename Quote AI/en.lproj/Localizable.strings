@@ -97,6 +97,7 @@
 "chat.welcomeGeneric" = "I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
 "chat.welcomePersonalized" = "Hi %@! I'm Quote AI, I'm ready to help. Tell me what you're dealing with :)";
 "chat.errorMessage" = "Sorry, I encountered an error. Please try again.";
+"chat.regenerate" = "Regenerate";
 "chat.tokenWarning" = "Approaching conversation limit";
 "chat.tokenLimitReached" = "Conversation limit reached. Please start a new chat.";
 
@@ -158,7 +159,7 @@
 "history.cancel" = "Cancel";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "Saved Quotes";
+"favorites.title" = "Saves";
 "favorites.empty" = "No saved quotes yet";
 "favorites.emptyHint" = "Tap the heart icon on any quote to save it here";
 "favorites.remove" = "Remove";

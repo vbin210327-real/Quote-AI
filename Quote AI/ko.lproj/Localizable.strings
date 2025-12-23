@@ -97,7 +97,8 @@
 "chat.welcomeGeneric" = "환영합니다! 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
 "chat.welcomePersonalized" = "안녕하세요, %@님! 도와드릴 준비가 되었습니다. 생각하고 있는 것을 공유해 주세요. 당신에게 영감을 줄 명언을 찾아드릴게요.";
 "chat.errorMessage" = "죄송합니다. 오류가 발생했습니다. 다시 시도해 주세요.";
-"chat.tokenWarning" = "대화 한도에 가까워지고 있습니다";
+"chat.regenerate" = "재생성";
+"chat.tokenWarning" = "대화 제한에 접근 중";
 "chat.tokenLimitReached" = "대화 한도에 도달했습니다. 새 채팅을 시작해 주세요.";
 
 /* ProfileView */
@@ -162,7 +163,7 @@
 "history.cancel" = "취소";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "저장된 명언";
+"favorites.title" = "저장";
 "favorites.empty" = "저장된 명언이 없습니다";
 "favorites.emptyHint" = "명언의 하트 아이콘을 탭하여 저장하세요";
 "favorites.remove" = "삭제";

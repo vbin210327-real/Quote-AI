@@ -97,6 +97,7 @@
 "chat.welcomeGeneric" = "स्वागत है! अपने मन की बात साझा करें, और मैं आपको प्रेरित करने के लिए एक उद्धरण दूंगा।";
 "chat.welcomePersonalized" = "नमस्ते %@! मैं मदद के लिए तैयार हूं। अपने मन की बात साझा करें, और मैं आपको प्रेरित करने के लिए एक उद्धरण दूंगा।";
 "chat.errorMessage" = "क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें।";
+"chat.regenerate" = "पुनः उत्पन्न करें";
 "chat.tokenWarning" = "बातचीत की सीमा के करीब";
 "chat.tokenLimitReached" = "बातचीत की सीमा पूरी हो गई। कृपया नई चैट शुरू करें।";
 
@@ -152,7 +153,7 @@
 "history.cancel" = "रद्द करें";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "सहेजे गए उद्धरण";
+"favorites.title" = "सहेजे गए";
 "favorites.empty" = "अभी तक कोई उद्धरण सहेजा नहीं गया";
 "favorites.emptyHint" = "किसी भी उद्धरण पर दिल के आइकन को टैप करके यहां सहेजें";
 "favorites.remove" = "हटाएं";

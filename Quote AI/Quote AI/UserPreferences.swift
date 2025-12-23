@@ -210,6 +210,12 @@ class UserPreferences: ObservableObject {
     @Published var userName: String {
         didSet { UserDefaults.standard.set(userName, forKey: "userName") }
     }
+
+    @Published var profileImage: Data? {
+        didSet {
+            UserDefaults.standard.set(profileImage, forKey: "userProfileImage")
+        }
+    }
     
     @Published var userGender: String {
         didSet {
@@ -269,6 +275,7 @@ class UserPreferences: ObservableObject {
     }
     private init() {
         self.userName = UserDefaults.standard.string(forKey: "userName") ?? ""
+        self.profileImage = UserDefaults.standard.data(forKey: "userProfileImage")
         self.userGender = UserDefaults.standard.string(forKey: "userGender") ?? ""
         
         if let toneString = UserDefaults.standard.string(forKey: "quoteTone"),

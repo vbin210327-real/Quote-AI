@@ -56,6 +56,7 @@ struct SavedQuotesView: View {
                     Button(localization.string(for: "profile.done")) {
                         dismiss()
                     }
+                    .foregroundColor(.black)
                 }
             }
             .alert(localization.string(for: "favorites.removeConfirm"), isPresented: $showingDeleteAlert) {

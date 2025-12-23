@@ -97,6 +97,7 @@
 "chat.welcomeGeneric" = "¡Bienvenido! Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
 "chat.welcomePersonalized" = "¡Hola %@! Estoy listo para ayudarte. Comparte lo que tienes en mente y te responderé con una cita para inspirarte y motivarte.";
 "chat.errorMessage" = "Lo siento, encontré un error. Por favor, inténtalo de nuevo.";
+"chat.regenerate" = "Regenerar";
 "chat.tokenWarning" = "Acercándose al límite de conversación";
 "chat.tokenLimitReached" = "Límite de conversación alcanzado. Por favor, inicia un nuevo chat.";
 
@@ -152,7 +153,7 @@
 "history.cancel" = "Cancelar";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "Citas Guardadas";
+"favorites.title" = "Guardados";
 "favorites.empty" = "No hay citas guardadas";
 "favorites.emptyHint" = "Toca el icono del corazón en cualquier cita para guardarla aquí";
 "favorites.remove" = "Eliminar";
