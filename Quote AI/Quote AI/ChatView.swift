@@ -456,7 +456,7 @@ struct ProfileView: View {
                                 onClose?()
                             }) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(conversation.title)
+                                    highlightedSnippet(conversation.title, query: searchText)
                                         .font(.body)
                                         .foregroundColor(.primary)
                                         .lineLimit(1)
@@ -581,27 +581,24 @@ struct ProfileView: View {
     }
 
     private func highlightedSnippet(_ content: String, query: String) -> Text {
-        if query.isEmpty { return Text(content) }
-
-        let lowerContent = content.lowercased()
-        let lowerQuery = query.lowercased()
-        var lastIndex = lowerContent.startIndex
-        var result = Text("")
-
-        while let range = lowerContent.range(of: lowerQuery, range: lastIndex..<lowerContent.endIndex) {
-            let before = String(content[lastIndex..<range.lowerBound])
-            let match = String(content[range])
-
-            result = result + Text(before)
-            result = result + Text(match).foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.3)).bold()
-
-            lastIndex = range.upperBound
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return Text(content)
         }
 
-        let remaining = String(content[lastIndex..<content.endIndex])
-        result = result + Text(remaining)
+        var attributedString = AttributedString(content)
+        let lowerContent = content.lowercased()
+        let lowerQuery = query.lowercased()
 
-        return result
+        var searchIndex = lowerContent.startIndex
+        while let range = lowerContent.range(of: lowerQuery, range: searchIndex..<lowerContent.endIndex) {
+            if let attrRange = Range(range, in: attributedString) {
+                attributedString[attrRange].foregroundColor = Color(red: 0.83, green: 0.69, blue: 0.22) // Gold color
+                attributedString[attrRange].inlinePresentationIntent = .stronglyEmphasized
+            }
+            searchIndex = range.upperBound
+        }
+
+        return Text(attributedString)
     }
 
     private func deleteConversation(_ conversation: Conversation) async {

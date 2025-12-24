@@ -15,6 +15,8 @@ RETURNS TABLE (
   updated_at TIMESTAMPTZ,
   match_snippet TEXT
 ) AS $$
+DECLARE
+  snippet_padding INTEGER := 40;
 BEGIN
   RETURN QUERY
   SELECT
@@ -24,7 +26,12 @@ BEGIN
     c.created_at,
     c.updated_at,
     (
-      SELECT m.content
+      SELECT 
+        CASE 
+          WHEN position(lower(search_query) in lower(m.content)) > snippet_padding 
+          THEN '...' || substring(m.content from (position(lower(search_query) in lower(m.content)) - snippet_padding) for (length(search_query) + (snippet_padding * 2)))
+          ELSE substring(m.content from 1 for (length(search_query) + (snippet_padding * 2)))
+        END
       FROM messages m
       WHERE m.conversation_id = c.id
       AND m.content ILIKE '%' || search_query || '%'
