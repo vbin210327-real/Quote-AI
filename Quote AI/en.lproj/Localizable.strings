@@ -105,6 +105,11 @@
 "profile.title" = "Profile";
 "profile.email" = "Email";
 "profile.userId" = "User ID";
+"profile.edit" = "Edit profile";
+"profile.name" = "Name";
+"profile.namePlaceholder" = "Your name";
+"profile.save" = "Save profile";
+"profile.cancel" = "Cancel";
 "profile.signOut" = "Sign Out";
 "profile.done" = "Done";
 
@@ -143,12 +148,15 @@
 "settings.language" = "Language";
 "settings.personality" = "Personality";
 "settings.background" = "Appearance";
+"settings.account" = "ACCOUNT";
 
 /* Conversation History */
 "history.search" = "Search";
 "history.title" = "History";
 "history.loading" = "Loading conversations...";
 "history.empty" = "No conversations yet";
+"history.noConversations" = "No conversations yet";
+"history.noConversationsFound" = "No conversations found";
 "history.emptyDescription" = "Start a chat and your conversations will appear here.";
 "history.startChat" = "Start Chatting";
 "history.newChat" = "New Chat";
@@ -162,7 +170,7 @@
 /* Favorites/Saved Quotes */
 "favorites.title" = "Saves";
 "favorites.empty" = "No saved quotes yet";
-"favorites.emptyHint" = "Tap the heart icon on any quote to save it here";
+"favorites.emptyHint" = "Tap the bookmark icon on any quote to save it here";
 "favorites.remove" = "Remove";
 "favorites.removeConfirm" = "Remove Quote?";
 "favorites.removeMessage" = "This quote will be removed from your saved quotes.";

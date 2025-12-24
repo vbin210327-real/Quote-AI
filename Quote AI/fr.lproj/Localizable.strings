@@ -105,6 +105,11 @@
 "profile.title" = "Profil";
 "profile.email" = "E-mail";
 "profile.userId" = "ID Utilisateur";
+"profile.edit" = "Modifier le profil";
+"profile.name" = "Nom";
+"profile.namePlaceholder" = "Votre nom";
+"profile.save" = "Enregistrer le profil";
+"profile.cancel" = "Annuler";
 "profile.signOut" = "Déconnexion";
 "profile.done" = "Terminé";
 
@@ -142,6 +147,8 @@
 "settings.title" = "Paramètres";
 "settings.language" = "Langue";
 "settings.personality" = "Personnalité";
+"settings.background" = "Apparence";
+"settings.account" = "COMPTE";
 
 /* Conversation History */
 "history.search" = "Rechercher";
@@ -151,11 +158,13 @@
 "history.deleteConfirm" = "Supprimer la conversation ?";
 "history.deleteMessage" = "Cela supprimera définitivement cette conversation et tous ses messages.";
 "history.cancel" = "Annuler";
+"history.noConversations" = "Aucune conversation pour le moment";
+"history.noConversationsFound" = "Aucune conversation trouvée";
 
 /* Favorites/Saved Quotes */
 "favorites.title" = "Enregistrements";
 "favorites.empty" = "Aucune citation sauvegardée";
-"favorites.emptyHint" = "Appuyez sur l'icône coeur sur une citation pour la sauvegarder ici";
+"favorites.emptyHint" = "Appuyez sur l'icône signet sur une citation pour la sauvegarder ici";
 "favorites.remove" = "Supprimer";
 "favorites.removeConfirm" = "Supprimer la citation ?";
 "favorites.removeMessage" = "Cette citation sera supprimée de vos citations sauvegardées.";

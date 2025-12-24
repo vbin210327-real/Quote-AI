@@ -411,7 +411,7 @@ struct ProfileView: View {
                         showingSavedQuotes = true
                     }) {
                         HStack {
-                            Image(systemName: "heart")
+                            Image(systemName: "bookmark")
                                 .foregroundColor(.primary)
                             Text(localization.string(for: "favorites.title"))
                                 .foregroundColor(.primary)
@@ -443,10 +443,10 @@ struct ProfileView: View {
                         }
                     } else if conversations.isEmpty {
                         if searchText.isEmpty {
-                            Text("No conversations yet")
+                            Text(localization.string(for: "history.noConversations"))
                                 .foregroundColor(.secondary)
                         } else {
-                            Text("No conversations found")
+                            Text(localization.string(for: "history.noConversationsFound"))
                                 .foregroundColor(.secondary)
                         }
                     } else {
@@ -637,183 +637,11 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    // Profile Header
-                    VStack(spacing: 12) {
-                        // Avatar
-                        ZStack {
-                            if let data = preferences.profileImage, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 100, height: 100)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(width: 100, height: 100)
-                                    .overlay(
-                                        Image(systemName: "person.fill")
-                                            .font(.system(size: 40))
-                                            .foregroundColor(.gray)
-                                    )
-                            }
-                        }
-                        .id(preferences.profileImage) // Force redraw when data changes
+                    profileHeader
+                        .padding(.top, 20)
+                        .padding(.bottom, 30)
 
-                        // User name
-                        Text(preferences.userName.isEmpty
-                            ? (supabaseManager.currentUser?.email?.components(separatedBy: "@").first?.capitalized ?? "User")
-                            : preferences.userName)
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .overlay(alignment: .trailing) {
-                                if preferences.userGender.lowercased() == "male" || preferences.userGender.lowercased() == "female" {
-                                    Circle()
-                                        .fill(genderColor)
-                                        .frame(width: 20, height: 20)
-                                        .overlay(
-                                            Text(preferences.userGender.lowercased() == "male" ? "♂" : "♀")
-                                                .font(.system(size: 12, weight: .bold))
-                                                .foregroundColor(.white)
-                                        )
-                                        .offset(x: 28)
-                                }
-                            }
-
-                        // Email
-                        Text(supabaseManager.currentUser?.email ?? "")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-
-                        // Edit profile button
-                        Button(action: {
-                            showingEditProfile = true
-                        }) {
-                            Text("Edit profile")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                                )
-                        }
-                        .padding(.top, 4)
-                    }
-                    .padding(.top, 20)
-                    .padding(.bottom, 30)
-
-                    // Account Section
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("ACCOUNT")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 8)
-
-                        VStack(spacing: 0) {
-                            // Email row
-                            SettingsRow(icon: "envelope", title: localization.string(for: "profile.email")) {
-                                Text(supabaseManager.currentUser?.email ?? "")
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
-                            }
-
-                            Divider().padding(.leading, 56)
-
-                            // Personality row
-                            SettingsRow(icon: "face.smiling", title: localization.string(for: "settings.personality")) {
-                                Menu {
-                                    Picker(localization.string(for: "settings.personality"), selection: $preferences.quoteTone) {
-                                        ForEach(QuoteTone.allCases, id: \.self) { tone in
-                                            Text(tone.localizedName).tag(tone)
-                                        }
-                                    }
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Text(preferences.quoteTone.localizedName)
-                                            .foregroundColor(.secondary)
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-
-                            Divider().padding(.leading, 56)
-
-                            // Language row
-                            SettingsRow(icon: "globe", title: localization.string(for: "settings.language")) {
-                                Menu {
-                                    Picker(localization.string(for: "settings.language"), selection: $localization.currentLanguage) {
-                                        ForEach(AppLanguage.allCases, id: \.self) { language in
-                                            Text("\(language.flag) \(language.displayName)").tag(language)
-                                        }
-                                    }
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Text(localization.currentLanguage.displayName)
-                                            .foregroundColor(.secondary)
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-
-                            Divider().padding(.leading, 56)
-
-                            // Appearance row
-                            SettingsRow(icon: "paintpalette", title: localization.string(for: "settings.background")) {
-                                Menu {
-                                    Picker(localization.string(for: "settings.background"), selection: $preferences.chatBackground) {
-                                        ForEach(ChatBackground.allCases, id: \.self) { background in
-                                            Text(background.displayName).tag(background)
-                                        }
-                                    }
-                                } label: {
-                                    HStack(spacing: 4) {
-                                        Text(preferences.chatBackground.displayName)
-                                            .foregroundColor(.secondary)
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-
-                            Divider().padding(.leading, 56)
-
-                            // Sign Out row
-                            Button(action: { handleSignOut() }) {
-                                HStack(spacing: 16) {
-                                    Image(systemName: "rectangle.portrait.and.arrow.right")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(.red)
-                                        .frame(width: 24)
-
-                                    Text(localization.string(for: "profile.signOut"))
-                                        .foregroundColor(.red)
-
-                                    Spacer()
-
-                                    if isSigningOut {
-                                        ProgressView()
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 14)
-                            }
-                            .disabled(isSigningOut)
-                        }
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(12)
-                        .padding(.horizontal, 16)
-                    }
-
-                    Spacer()
+                    accountSection
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -830,11 +658,188 @@ struct SettingsView: View {
             }
         }
         .environment(\.locale, localization.currentLanguage.locale)
+        .id(localization.currentLanguage)
         .sheet(isPresented: $showingEditProfile) {
             EditProfileView()
                 .presentationDetents([.fraction(0.7)])
                 .presentationDragIndicator(.hidden)
                 .presentationCornerRadius(20)
+        }
+    }
+
+    private var profileHeader: some View {
+        VStack(spacing: 12) {
+            // Avatar
+            ZStack {
+                if let data = preferences.profileImage, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 100, height: 100)
+                        .overlay(
+                            Image(systemName: "person.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.gray)
+                        )
+                }
+            }
+            .id(preferences.profileImage)
+
+            // User name
+            Text(preferences.userName.isEmpty
+                ? (supabaseManager.currentUser?.email?.components(separatedBy: "@").first?.capitalized ?? "User")
+                : preferences.userName)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .overlay(alignment: .trailing) {
+                    if preferences.userGender.lowercased() == "male" || preferences.userGender.lowercased() == "female" {
+                        Circle()
+                            .fill(genderColor)
+                            .frame(width: 20, height: 20)
+                            .overlay(
+                                Text(preferences.userGender.lowercased() == "male" ? "♂" : "♀")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            )
+                            .offset(x: 28)
+                    }
+                }
+
+            // Email
+            Text(supabaseManager.currentUser?.email ?? "")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            // Edit profile button
+            Button(action: {
+                showingEditProfile = true
+            }) {
+                Text(localization.string(for: "profile.edit"))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                    )
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(localization.string(for: "settings.account"))
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
+
+            VStack(spacing: 0) {
+                // Email row
+                SettingsRow(icon: "envelope", title: localization.string(for: "profile.email")) {
+                    Text(supabaseManager.currentUser?.email ?? "")
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+
+                Divider().padding(.leading, 56)
+
+                // Personality row
+                SettingsRow(icon: "face.smiling", title: localization.string(for: "settings.personality")) {
+                    Menu {
+                        Picker(localization.string(for: "settings.personality"), selection: $preferences.quoteTone) {
+                            ForEach(QuoteTone.allCases, id: \.self) { tone in
+                                Text(tone.localizedName).tag(tone)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(preferences.quoteTone.localizedName)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Divider().padding(.leading, 56)
+
+                // Language row
+                SettingsRow(icon: "globe", title: localization.string(for: "settings.language")) {
+                    Menu {
+                        Picker(localization.string(for: "settings.language"), selection: $localization.currentLanguage) {
+                            ForEach(AppLanguage.allCases, id: \.self) { language in
+                                Text("\(language.flag) \(language.displayName)").tag(language)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(localization.currentLanguage.displayName)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Divider().padding(.leading, 56)
+
+                // Appearance row
+                SettingsRow(icon: "paintpalette", title: localization.string(for: "settings.background")) {
+                    Menu {
+                        Picker(localization.string(for: "settings.background"), selection: $preferences.chatBackground) {
+                            ForEach(ChatBackground.allCases, id: \.self) { background in
+                                Text(background.localizedName).tag(background)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(preferences.chatBackground.localizedName)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Divider().padding(.leading, 56)
+
+                // Sign Out row
+                Button(action: { handleSignOut() }) {
+                    HStack(spacing: 16) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 18))
+                            .foregroundColor(.red)
+                            .frame(width: 24)
+
+                        Text(localization.string(for: "profile.signOut"))
+                            .foregroundColor(.red)
+
+                        Spacer()
+
+                        if isSigningOut {
+                            ProgressView()
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                }
+                .disabled(isSigningOut)
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(12)
+            .padding(.horizontal, 16)
         }
     }
 
@@ -939,12 +944,12 @@ struct EditProfileView: View {
 
             // Name field
             VStack(alignment: .leading, spacing: 6) {
-                Text("Name")
+                Text(LocalizationManager.shared.string(for: "profile.name"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .padding(.leading, 4)
 
-                TextField("Your name", text: $displayName)
+                TextField(LocalizationManager.shared.string(for: "profile.namePlaceholder"), text: $displayName)
                     .font(.body)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -963,26 +968,26 @@ struct EditProfileView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: colorScheme == .dark ? .black : .white))
                             .padding(.trailing, 8)
                     }
-                    Text("Save profile")
-                        .fontWeight(.semibold)
+                    Text(LocalizationManager.shared.string(for: "profile.save"))
+                        .font(.system(size: 18, weight: .semibold))
                 }
                 .foregroundColor(colorScheme == .dark ? .black : .white)
-                .frame(width: 180)
-                .padding(.vertical, 12)
+                .frame(width: 240)
+                .frame(height: 60)
                 .background(colorScheme == .dark ? Color.white : Color.black)
-                .cornerRadius(24)
+                .cornerRadius(30)
             }
             .disabled(isSaving)
-            .padding(.top, 12)
+            .padding(.top, 40)
 
             // Cancel button
             Button(action: { dismiss() }) {
-                Text("Cancel")
-                    .fontWeight(.medium)
+                Text(LocalizationManager.shared.string(for: "profile.cancel"))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.primary)
             }
-            .padding(.top, 4)
-            .padding(.bottom, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(UIColor.systemBackground).ignoresSafeArea())
@@ -1102,7 +1107,7 @@ struct MessageBubble: View {
 
                         // Save/Favorite button
                         LikeButton(
-                            isLiked: favoritesManager.isSaved(message.content),
+                            isSaved: favoritesManager.isSaved(message.content),
                             color: actionColor,
                             action: {
                                 favoritesManager.toggleSave(message.content)
@@ -1206,12 +1211,12 @@ struct LoadingIndicator: View {
 }
 
 struct LikeButton: View {
-    let isLiked: Bool
+    let isSaved: Bool
     let color: Color
     let action: () -> Void
     
     @State private var showParticles = false
-    @State private var heartScale: CGFloat = 1.0
+    @State private var bookmarkScale: CGFloat = 1.0
     
     var body: some View {
         Button(action: {
@@ -1219,20 +1224,20 @@ struct LikeButton: View {
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             
-            if !isLiked { // Turning ON (since action already toggled state, actually check might be tricky if async, but here sync)
-                // Wait, if action() toggles, then isLiked passed in *next* render will be true.
-                // But inside this action block, isLiked is the old value?
+            if !isSaved { // Turning ON (since action already toggled state, actually check might be tricky if async, but here sync)
+                // Wait, if action() toggles, then isSaved passed in *next* render will be true.
+                // But inside this action block, isSaved is the old value?
                 // Actually, action() might be async or SwiftUI updates later.
-                // Assuming immediate toggle is NOT guaranteed to be reflected in `isLiked` variable *instantly* inside this closure if it's a let property.
-                // But we know the intent: if current `isLiked` is false, we are turning it on.
+                // Assuming immediate toggle is NOT guaranteed to be reflected in `isSaved` variable *instantly* inside this closure if it's a let property.
+                // But we know the intent: if current `isSaved` is false, we are turning it on.
                 animate()
             } else {
                 // Unlike animation
                 withAnimation(.easeInOut(duration: 0.1)) {
-                    heartScale = 0.8
+                    bookmarkScale = 0.8
                 }
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(0.1)) {
-                    heartScale = 1.0
+                    bookmarkScale = 1.0
                 }
             }
         }) {
@@ -1244,25 +1249,25 @@ struct LikeButton: View {
                     }
                 }
                 
-                Image(systemName: isLiked ? "heart.fill" : "heart")
+                Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(isLiked ? .red : color)
-                    .scaleEffect(heartScale)
+                    .foregroundColor(isSaved ? .blue : color)
+                    .scaleEffect(bookmarkScale)
             }
             .padding(6)
         }
         // Watch for external changes if needed, but the button triggers it mostly.
-        // Actually, if we use local state logic based on `isLiked` (which is external), we might rely on the button tap.
+        // Actually, if we use local state logic based on `isSaved` (which is external), we might rely on the button tap.
         // However, if we want to ensure animation happens even if we tap quickly, we trigger it on tap.
     }
     
     private func animate() {
-        // Heart Pulse
+        // Bookmark Pulse
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-            heartScale = 1.4
+            bookmarkScale = 1.4
         }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5).delay(0.1)) {
-            heartScale = 1.0
+            bookmarkScale = 1.0
         }
         
         // Particles
@@ -1283,7 +1288,7 @@ struct ParticleView: View {
     
     var body: some View {
         Circle()
-            .fill(Color.red)
+            .fill(Color.blue)
             .frame(width: 3, height: 3)
             .scaleEffect(scale)
             .opacity(opacity)
@@ -1329,15 +1334,4 @@ extension Color {
 
 #Preview {
     ChatView()
-}
-
-extension QuoteTone {
-    var localizedName: String {
-        switch self {
-        case .gentle: return LocalizationManager.shared.string(for: "tone.gentle")
-        case .toughLove: return LocalizationManager.shared.string(for: "tone.toughLove")
-        case .philosophical: return LocalizationManager.shared.string(for: "tone.philosophical")
-        case .realist: return LocalizationManager.shared.string(for: "tone.realist")
-        }
-    }
 }

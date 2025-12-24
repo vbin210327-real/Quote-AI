@@ -105,6 +105,11 @@
 "profile.title" = "프로필";
 "profile.email" = "이메일";
 "profile.userId" = "사용자 ID";
+"profile.edit" = "프로필 편집";
+"profile.name" = "이름";
+"profile.namePlaceholder" = "이름을 입력하세요";
+"profile.save" = "프로필 저장";
+"profile.cancel" = "취소";
 "profile.signOut" = "로그아웃";
 "profile.done" = "완료";
 
@@ -142,6 +147,8 @@
 "settings.title" = "설정";
 "settings.language" = "언어";
 "settings.personality" = "성격";
+"settings.background" = "디자인";
+"settings.account" = "계정";
 
 /* Conversation History */
 "history.search" = "검색";
@@ -165,7 +172,7 @@
 /* Favorites/Saved Quotes */
 "favorites.title" = "저장";
 "favorites.empty" = "저장된 명언이 없습니다";
-"favorites.emptyHint" = "명언의 하트 아이콘을 탭하여 저장하세요";
+"favorites.emptyHint" = "명언의 북마크 아이콘을 탭하여 저장하세요";
 "favorites.remove" = "삭제";
 "favorites.removeConfirm" = "명언을 삭제하시겠습니까?";
 "favorites.removeMessage" = "이 명언이 저장 목록에서 삭제됩니다.";

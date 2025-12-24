@@ -105,6 +105,11 @@
 "profile.title" = "プロフィール";
 "profile.email" = "メールアドレス";
 "profile.userId" = "ユーザーID";
+"profile.edit" = "プロフィールを編集";
+"profile.name" = "名前";
+"profile.namePlaceholder" = "あなたの名前";
+"profile.save" = "プロフィールを保存";
+"profile.cancel" = "キャンセル";
 "profile.signOut" = "サインアウト";
 "profile.done" = "完了";
 
@@ -142,6 +147,8 @@
 "settings.title" = "設定";
 "settings.language" = "言語";
 "settings.personality" = "パーソナリティ";
+"settings.background" = "外観";
+"settings.account" = "アカウント";
 
 /* Conversation History */
 "history.search" = "検索";
@@ -165,7 +172,7 @@
 /* Favorites/Saved Quotes */
 "favorites.title" = "保存";
 "favorites.empty" = "保存した名言はまだありません";
-"favorites.emptyHint" = "名言のハートアイコンをタップして保存できます";
+"favorites.emptyHint" = "名言のブックマークアイコンをタップして保存できます";
 "favorites.remove" = "削除";
 "favorites.removeConfirm" = "名言を削除しますか？";
 "favorites.removeMessage" = "この名言は保存リストから削除されます。";

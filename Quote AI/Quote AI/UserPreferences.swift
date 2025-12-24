@@ -22,6 +22,19 @@ enum QuoteTone: String, CaseIterable, Codable {
         case .realist: return "Practical, grounded, and honest. Focus on facts and actionable steps. Skip the fluff."
         }
     }
+
+    var displayName: String {
+        return localizedName
+    }
+
+    var localizedName: String {
+        switch self {
+        case .gentle: return LocalizationManager.shared.string(for: "tone.gentle")
+        case .toughLove: return LocalizationManager.shared.string(for: "tone.toughLove")
+        case .philosophical: return LocalizationManager.shared.string(for: "tone.philosophical")
+        case .realist: return LocalizationManager.shared.string(for: "tone.realist")
+        }
+    }
     
     var icon: String {
         switch self {
@@ -192,6 +205,14 @@ enum ChatBackground: String, CaseIterable, Codable {
         case .summit: return "Icy Peak"
         case .ascent: return "Shadow Staircase"
         case .defaultBackground: return "Default"
+        }
+    }
+
+    var localizedName: String {
+        switch self {
+        case .summit: return LocalizationManager.shared.string(for: "background.summit")
+        case .ascent: return LocalizationManager.shared.string(for: "background.ascent")
+        case .defaultBackground: return LocalizationManager.shared.string(for: "background.default")
         }
     }
 

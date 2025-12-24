@@ -105,6 +105,11 @@
 "profile.title" = "个人资料";
 "profile.email" = "邮箱";
 "profile.userId" = "用户ID";
+"profile.edit" = "编辑资料";
+"profile.name" = "姓名";
+"profile.namePlaceholder" = "你的名字";
+"profile.save" = "保存资料";
+"profile.cancel" = "取消";
 "profile.signOut" = "退出登录";
 "profile.done" = "完成";
 
@@ -142,12 +147,16 @@
 "settings.title" = "设置";
 "settings.language" = "语言";
 "settings.personality" = "个性";
+"settings.background" = "外观";
+"settings.account" = "账号";
 
 /* Conversation History */
 "history.search" = "搜索";
 "history.title" = "历史记录";
 "history.loading" = "正在加载对话...";
 "history.empty" = "暂无对话";
+"history.noConversations" = "暂无对话";
+"history.noConversationsFound" = "未找到相关对话";
 "history.emptyDescription" = "开始聊天后，你的对话将显示在这里。";
 "history.startChat" = "开始聊天";
 "history.newChat" = "新建聊天";
@@ -161,7 +170,7 @@
 /* Favorites/Saved Quotes */
 "favorites.title" = "收藏";
 "favorites.empty" = "暂无收藏的语录";
-"favorites.emptyHint" = "点击任意语录上的心形图标来收藏";
+"favorites.emptyHint" = "点击任意语录上的书签图标来收藏";
 "favorites.remove" = "移除";
 "favorites.removeConfirm" = "移除语录？";
 "favorites.removeMessage" = "此语录将从您的收藏中移除。";

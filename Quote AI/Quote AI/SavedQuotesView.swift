@@ -19,7 +19,7 @@ struct SavedQuotesView: View {
             Group {
                 if favoritesManager.savedQuotes.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "heart.slash")
+                        Image(systemName: "bookmark.slash")
                             .font(.system(size: 48))
                             .foregroundColor(.secondary)
                         Text(localization.string(for: "favorites.empty"))

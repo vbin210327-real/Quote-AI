@@ -105,6 +105,11 @@
 "profile.title" = "Perfil";
 "profile.email" = "Correo electrónico";
 "profile.userId" = "ID de Usuario";
+"profile.edit" = "Editar perfil";
+"profile.name" = "Nombre";
+"profile.namePlaceholder" = "Tu nombre";
+"profile.save" = "Guardar perfil";
+"profile.cancel" = "Cancelar";
 "profile.signOut" = "Cerrar Sesión";
 "profile.done" = "Listo";
 
@@ -142,6 +147,8 @@
 "settings.title" = "Ajustes";
 "settings.language" = "Idioma";
 "settings.personality" = "Personalidad";
+"settings.background" = "Apariencia";
+"settings.account" = "CUENTA";
 
 /* Conversation History */
 "history.search" = "Buscar";
@@ -151,11 +158,13 @@
 "history.deleteConfirm" = "¿Eliminar conversación?";
 "history.deleteMessage" = "Esto eliminará permanentemente esta conversación y todos sus mensajes.";
 "history.cancel" = "Cancelar";
+"history.noConversations" = "No hay conversaciones todavía";
+"history.noConversationsFound" = "No se encontraron conversaciones";
 
 /* Favorites/Saved Quotes */
 "favorites.title" = "Guardados";
 "favorites.empty" = "No hay citas guardadas";
-"favorites.emptyHint" = "Toca el icono del corazón en cualquier cita para guardarla aquí";
+"favorites.emptyHint" = "Toca el icono del marcapáginas en cualquier cita para guardarla aquí";
 "favorites.remove" = "Eliminar";
 "favorites.removeConfirm" = "¿Eliminar cita?";
 "favorites.removeMessage" = "Esta cita será eliminada de tus citas guardadas.";

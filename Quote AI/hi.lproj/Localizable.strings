@@ -105,6 +105,11 @@
 "profile.title" = "प्रोफ़ाइल";
 "profile.email" = "ईमेल";
 "profile.userId" = "यूज़र आईडी";
+"profile.edit" = "प्रोफ़ाइल संपादित करें";
+"profile.name" = "नाम";
+"profile.namePlaceholder" = "आपका नाम";
+"profile.save" = "प्रोफ़ाइल सहेजें";
+"profile.cancel" = "रद्द करें";
 "profile.signOut" = "साइन आउट";
 "profile.done" = "हो गया";
 
@@ -142,6 +147,8 @@
 "settings.title" = "सेटिंग्स";
 "settings.language" = "भाषा";
 "settings.personality" = "व्यक्तित्व";
+"settings.background" = "दिखावट";
+"settings.account" = "खाता";
 
 /* Conversation History */
 "history.search" = "खोजें";
@@ -155,7 +162,7 @@
 /* Favorites/Saved Quotes */
 "favorites.title" = "सहेजे गए";
 "favorites.empty" = "अभी तक कोई उद्धरण सहेजा नहीं गया";
-"favorites.emptyHint" = "किसी भी उद्धरण पर दिल के आइकन को टैप करके यहां सहेजें";
+"favorites.emptyHint" = "किसी भी उद्धरण पर बुकमार्क आइकन को टैप करके यहां सहेजें";
 "favorites.remove" = "हटाएं";
 "favorites.removeConfirm" = "उद्धरण हटाएं?";
 "favorites.removeMessage" = "यह उद्धरण आपके सहेजे गए उद्धरणों से हटा दिया जाएगा।";
