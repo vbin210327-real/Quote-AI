@@ -71,6 +71,16 @@ struct ChatView: View {
                                         },
                                         onRegenerate: { tone in
                                             viewModel.regenerateMessage(for: message, tone: tone)
+                                        },
+                                        onShare: { content in
+                                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                               let rootViewController = windowScene.windows.first?.rootViewController {
+                                                var topController = rootViewController
+                                                while let presentedController = topController.presentedViewController {
+                                                    topController = presentedController
+                                                }
+                                                ShareManager.shared.shareQuote(content, from: topController)
+                                            }
                                         }
                                     )
                                     .id(message.id)
@@ -1020,6 +1030,7 @@ struct MessageBubble: View {
     var onTypingComplete: (() -> Void)? = nil
     var onCopy: (() -> Void)? = nil
     var onRegenerate: ((QuoteTone?) -> Void)? = nil
+    var onShare: ((String) -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
     @StateObject private var favoritesManager = FavoriteQuotesManager.shared
     @State private var isAnimationCompleted = false
@@ -1110,6 +1121,17 @@ struct MessageBubble: View {
                                 favoritesManager.toggleSave(message.content)
                             }
                         )
+                        
+                        if let onShare {
+                            Button(action: {
+                                onShare(message.content)
+                            }) {
+                                Image(systemName: "arrowshape.turn.up.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(actionColor)
+                                    .padding(6)
+                            }
+                        }
 
                         if let onRegenerate {
                             Menu {
@@ -1155,6 +1177,7 @@ struct MessageBubble: View {
         : Color.white.opacity(0.8)
     }
 }
+
 
 struct LoadingIndicator: View {
     @StateObject private var localization = LocalizationManager.shared

@@ -120,10 +120,20 @@ struct SavedQuoteRow: View {
                 .buttonStyle(.plain)
 
                 // Share button
-                ShareLink(item: quote.content) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 14))
+                Button(action: {
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let rootViewController = windowScene.windows.first?.rootViewController {
+                        var topController = rootViewController
+                        while let presentedController = topController.presentedViewController {
+                            topController = presentedController
+                        }
+                        ShareManager.shared.shareQuote(quote.content, from: topController)
+                    }
+                }) {
+                    Image(systemName: "arrowshape.turn.up.right")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.secondary)
+                        .padding(6)
                 }
                 .buttonStyle(.plain)
             }
