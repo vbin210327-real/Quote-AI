@@ -621,8 +621,6 @@ struct SettingsView: View {
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
-    @State private var showingPersonality = false
-    @State private var showingLanguage = false
     @State private var showingEditProfile = false
 
     var onClose: (() -> Void)?
@@ -717,34 +715,73 @@ struct SettingsView: View {
 
                         VStack(spacing: 0) {
                             // Email row
-                            SettingsRow(
-                                icon: "envelope",
-                                title: localization.string(for: "profile.email"),
-                                value: supabaseManager.currentUser?.email ?? ""
-                            )
+                            SettingsRow(icon: "envelope", title: localization.string(for: "profile.email")) {
+                                Text(supabaseManager.currentUser?.email ?? "")
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
 
                             Divider().padding(.leading, 56)
 
                             // Personality row
-                            Button(action: { showingPersonality = true }) {
-                                SettingsRow(
-                                    icon: "face.smiling",
-                                    title: localization.string(for: "settings.personality"),
-                                    value: preferences.quoteTone.localizedName,
-                                    showChevron: true
-                                )
+                            SettingsRow(icon: "face.smiling", title: localization.string(for: "settings.personality")) {
+                                Menu {
+                                    Picker(localization.string(for: "settings.personality"), selection: $preferences.quoteTone) {
+                                        ForEach(QuoteTone.allCases, id: \.self) { tone in
+                                            Text(tone.localizedName).tag(tone)
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text(preferences.quoteTone.localizedName)
+                                            .foregroundColor(.secondary)
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
 
                             Divider().padding(.leading, 56)
 
                             // Language row
-                            Button(action: { showingLanguage = true }) {
-                                SettingsRow(
-                                    icon: "globe",
-                                    title: localization.string(for: "settings.language"),
-                                    value: localization.currentLanguage.displayName,
-                                    showChevron: true
-                                )
+                            SettingsRow(icon: "globe", title: localization.string(for: "settings.language")) {
+                                Menu {
+                                    Picker(localization.string(for: "settings.language"), selection: $localization.currentLanguage) {
+                                        ForEach(AppLanguage.allCases, id: \.self) { language in
+                                            Text("\(language.flag) \(language.displayName)").tag(language)
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text(localization.currentLanguage.displayName)
+                                            .foregroundColor(.secondary)
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+
+                            Divider().padding(.leading, 56)
+
+                            // Appearance row
+                            SettingsRow(icon: "paintpalette", title: localization.string(for: "settings.background")) {
+                                Menu {
+                                    Picker(localization.string(for: "settings.background"), selection: $preferences.chatBackground) {
+                                        ForEach(ChatBackground.allCases, id: \.self) { background in
+                                            Text(background.displayName).tag(background)
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text(preferences.chatBackground.displayName)
+                                            .foregroundColor(.secondary)
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
 
                             Divider().padding(.leading, 56)
@@ -793,12 +830,6 @@ struct SettingsView: View {
             }
         }
         .environment(\.locale, localization.currentLanguage.locale)
-        .sheet(isPresented: $showingPersonality) {
-            PersonalityPickerView()
-        }
-        .sheet(isPresented: $showingLanguage) {
-            LanguagePickerView()
-        }
         .sheet(isPresented: $showingEditProfile) {
             EditProfileView()
                 .presentationDetents([.fraction(0.7)])
@@ -823,11 +854,16 @@ struct SettingsView: View {
 }
 
 // MARK: - Settings Row
-struct SettingsRow: View {
+struct SettingsRow<Content: View>: View {
     let icon: String
     let title: String
-    var value: String = ""
-    var showChevron: Bool = false
+    let content: Content
+
+    init(icon: String, title: String, @ViewBuilder content: () -> Content) {
+        self.icon = icon
+        self.title = title
+        self.content = content()
+    }
 
     var body: some View {
         HStack(spacing: 16) {
@@ -841,102 +877,10 @@ struct SettingsRow: View {
 
             Spacer()
 
-            if !value.isEmpty {
-                Text(value)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-
-            if showChevron {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
+            content
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
-    }
-}
-
-// MARK: - Personality Picker View
-struct PersonalityPickerView: View {
-    @StateObject private var preferences = UserPreferences.shared
-    @StateObject private var localization = LocalizationManager.shared
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(QuoteTone.allCases, id: \.self) { tone in
-                    Button(action: {
-                        preferences.quoteTone = tone
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: tone.icon)
-                                .foregroundColor(.primary)
-                            Text(tone.localizedName)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            if preferences.quoteTone == tone {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle(localization.string(for: "settings.personality"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Language Picker View
-struct LanguagePickerView: View {
-    @StateObject private var localization = LocalizationManager.shared
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(AppLanguage.allCases, id: \.self) { language in
-                    Button(action: {
-                        localization.setLanguage(language)
-                        dismiss()
-                    }) {
-                        HStack {
-                            Text(language.flag)
-                            Text(language.displayName)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            if localization.currentLanguage == language {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle(localization.string(for: "settings.language"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -1170,7 +1114,7 @@ struct MessageBubble: View {
                                 Button {
                                     onRegenerate(nil)
                                 } label: {
-                                    Label(LocalizationManager.shared.string(for: "chat.regenerate"), systemImage: "arrow.clockwise")
+                                    Text(LocalizationManager.shared.string(for: "chat.regenerate"))
                                 }
                                 
                                 Divider()
@@ -1179,7 +1123,7 @@ struct MessageBubble: View {
                                     Button {
                                         onRegenerate(tone)
                                     } label: {
-                                        Label(tone.localizedName, systemImage: tone.icon)
+                                        Text(tone.localizedName)
                                     }
                                 }
                             } label: {

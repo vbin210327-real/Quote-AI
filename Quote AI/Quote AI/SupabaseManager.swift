@@ -87,6 +87,9 @@ class SupabaseManager: ObservableObject {
             let session = try await client.auth.session
             self.currentUser = session.user
             self.isAuthenticated = true
+
+            // Sync data from cloud on app launch if authenticated
+            await syncFromCloud()
         } catch {
             self.currentUser = nil
             self.isAuthenticated = false
@@ -121,9 +124,12 @@ class SupabaseManager: ObservableObject {
                 accessToken: accessToken
             )
         )
-        
+
         self.currentUser = session.user
         self.isAuthenticated = true
+
+        // Sync data from cloud after login
+        await syncFromCloud()
     }
 
     // Sign in with Apple
@@ -166,6 +172,9 @@ class SupabaseManager: ObservableObject {
 
         self.currentUser = session.user
         self.isAuthenticated = true
+
+        // Sync data from cloud after login
+        await syncFromCloud()
     }
 
     // Sign out
@@ -174,6 +183,23 @@ class SupabaseManager: ObservableObject {
         GIDSignIn.sharedInstance.signOut()
         self.currentUser = nil
         self.isAuthenticated = false
+
+        // Clear local data on logout
+        clearLocalData()
+    }
+
+    // MARK: - Data Sync
+
+    /// Sync all user data from cloud after login
+    private func syncFromCloud() async {
+        await UserPreferences.shared.syncFromCloud()
+        await FavoriteQuotesManager.shared.syncFromCloud()
+    }
+
+    /// Clear all local user data on logout
+    private func clearLocalData() {
+        UserPreferences.shared.clearLocalData()
+        FavoriteQuotesManager.shared.clearLocalData()
     }
     
     // MARK: - Conversation Management
@@ -211,7 +237,7 @@ class SupabaseManager: ObservableObject {
             .from("conversations")
             .select()
             .eq("user_id", value: userId)
-            .order("updated_at", ascending: false)
+            .order("created_at", ascending: false)
             .execute()
             .value
         
@@ -290,8 +316,170 @@ class SupabaseManager: ObservableObject {
             .execute()
     }
     
+    // MARK: - User Profile Management
+
+    /// Fetch user profile from cloud
+    func fetchUserProfile() async throws -> UserProfile? {
+        guard let userId = currentUser?.id.uuidString.lowercased() else {
+            return nil
+        }
+
+        let profiles: [UserProfile] = try await client
+            .from("user_profiles")
+            .select()
+            .eq("user_id", value: userId)
+            .limit(1)
+            .execute()
+            .value
+
+        return profiles.first
+    }
+
+    /// Save or update user profile to cloud
+    func saveUserProfile(
+        name: String?,
+        gender: String?,
+        profileImageUrl: String?,
+        birthYear: Int?,
+        quoteTone: String?,
+        userFocus: String?,
+        userBarrier: String?,
+        energyDrain: String?,
+        mentalEnergy: Double?,
+        chatBackground: String?,
+        language: String?,
+        hasCompletedOnboarding: Bool?
+    ) async throws {
+        guard let userId = currentUser?.id.uuidString.lowercased() else {
+            throw NSError(domain: "SupabaseManager", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "User not authenticated"
+            ])
+        }
+
+        let request = UpsertUserProfileRequest(
+            userId: userId,
+            name: name,
+            gender: gender,
+            profileImageUrl: profileImageUrl,
+            birthYear: birthYear,
+            quoteTone: quoteTone,
+            userFocus: userFocus,
+            userBarrier: userBarrier,
+            energyDrain: energyDrain,
+            mentalEnergy: mentalEnergy,
+            chatBackground: chatBackground,
+            language: language,
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            updatedAt: Date()
+        )
+
+        try await client
+            .from("user_profiles")
+            .upsert(request, onConflict: "user_id")
+            .execute()
+    }
+
+    /// Upload profile image to Supabase Storage
+    func uploadProfileImage(imageData: Data) async throws -> String {
+        guard let userId = currentUser?.id.uuidString.lowercased() else {
+            throw NSError(domain: "SupabaseManager", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "User not authenticated"
+            ])
+        }
+
+        let fileName = "\(userId)/profile.jpg"
+
+        // Upload to storage bucket
+        try await client.storage
+            .from("profile-images")
+            .upload(
+                fileName,
+                data: imageData,
+                options: FileOptions(
+                    contentType: "image/jpeg",
+                    upsert: true
+                )
+            )
+
+        // Get public URL
+        let publicURL = try client.storage
+            .from("profile-images")
+            .getPublicURL(path: fileName)
+
+        return publicURL.absoluteString
+    }
+
+    /// Download profile image from URL
+    func downloadProfileImage(from urlString: String) async throws -> Data? {
+        guard let url = URL(string: urlString) else { return nil }
+
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return data
+    }
+
+    // MARK: - Saved Quotes Management
+
+    /// Fetch all saved quotes from cloud
+    func fetchSavedQuotes() async throws -> [CloudSavedQuote] {
+        guard let userId = currentUser?.id.uuidString.lowercased() else {
+            return []
+        }
+
+        let quotes: [CloudSavedQuote] = try await client
+            .from("saved_quotes")
+            .select()
+            .eq("user_id", value: userId)
+            .order("saved_at", ascending: false)
+            .execute()
+            .value
+
+        return quotes
+    }
+
+    /// Save a quote to cloud
+    func saveQuoteToCloud(content: String) async throws -> CloudSavedQuote {
+        guard let userId = currentUser?.id.uuidString.lowercased() else {
+            throw NSError(domain: "SupabaseManager", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "User not authenticated"
+            ])
+        }
+
+        let request = SaveQuoteRequest(userId: userId, content: content)
+
+        let quote: CloudSavedQuote = try await client
+            .from("saved_quotes")
+            .insert(request)
+            .select()
+            .single()
+            .execute()
+            .value
+
+        return quote
+    }
+
+    /// Delete a quote from cloud
+    func deleteQuoteFromCloud(quoteId: UUID) async throws {
+        try await client
+            .from("saved_quotes")
+            .delete()
+            .eq("id", value: quoteId.uuidString)
+            .execute()
+    }
+
+    /// Delete a quote by content (for sync purposes)
+    func deleteQuoteFromCloud(content: String) async throws {
+        guard let userId = currentUser?.id.uuidString.lowercased() else { return }
+
+        try await client
+            .from("saved_quotes")
+            .delete()
+            .eq("user_id", value: userId)
+            .eq("content", value: content)
+            .execute()
+    }
+
     // MARK: - Private Helpers
-    
+
     private func updateConversationTimestamp(conversationId: UUID) async throws {
         struct UpdateTimestamp: Codable {
             let updatedAt: Date

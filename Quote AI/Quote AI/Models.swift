@@ -9,14 +9,15 @@ import Foundation
 
 // MARK: - Chat Message
 struct ChatMessage: Identifiable, Equatable {
-    let id = UUID()
+    let id: UUID
     let content: String
     let isUser: Bool
     let timestamp: Date
     let shouldAnimate: Bool
     let isWelcome: Bool
 
-    init(content: String, isUser: Bool, shouldAnimate: Bool = false, isWelcome: Bool = false) {
+    init(id: UUID = UUID(), content: String, isUser: Bool, shouldAnimate: Bool = false, isWelcome: Bool = false) {
+        self.id = id
         self.content = content
         self.isUser = isUser
         self.timestamp = Date()

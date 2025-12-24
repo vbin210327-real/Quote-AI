@@ -142,6 +142,7 @@
 "settings.title" = "Settings";
 "settings.language" = "Language";
 "settings.personality" = "Personality";
+"settings.background" = "Appearance";
 
 /* Conversation History */
 "history.search" = "Search";

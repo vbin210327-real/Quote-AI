@@ -150,11 +150,15 @@ class ChatViewModel: ObservableObject {
                 
                 // Save user message to database
                 if let conversationId = currentConversation?.id {
-                    _ = try await supabaseManager.saveMessage(
+                    let storedUserMsg = try await supabaseManager.saveMessage(
                         conversationId: conversationId,
                         content: input,
                         isUser: true
                     )
+                    // Update local message ID to match DB ID
+                    if let index = messages.firstIndex(where: { $0.content == input && $0.isUser && $0.id != storedUserMsg.id }) {
+                        messages[index] = storedUserMsg.toChatMessage()
+                    }
                 }
                 
                 // Pass conversation history (filter out welcome message)
@@ -164,18 +168,22 @@ class ChatViewModel: ObservableObject {
                 // Stop loading FIRST, then add message (prevents flash)
                 isLoading = false
                 
-                // Add bot response
+                // Add bot response (temporary ID)
                 let botMessage = ChatMessage(content: quote, isUser: false, shouldAnimate: true)
                 messages.append(botMessage)
                 updateTokenCount()
 
-                // Save bot message to database (in background, doesn't affect UI)
+                // Save bot message to database
                 if let conversationId = currentConversation?.id {
-                    _ = try await supabaseManager.saveMessage(
+                    let storedBotMsg = try await supabaseManager.saveMessage(
                         conversationId: conversationId,
                         content: quote,
                         isUser: false
                     )
+                    // Update local message ID to match DB ID
+                    if let index = messages.firstIndex(where: { $0.content == quote && !$0.isUser && $0.id != storedBotMsg.id }) {
+                        messages[index] = storedBotMsg.toChatMessage()
+                    }
                 }
 
             } catch {
@@ -218,25 +226,30 @@ class ChatViewModel: ObservableObject {
         let aiMessageId = message.id
         let userMessageId = messages[pIndex].id
         
-        // Remove both messages from local state immediately
-        // Remove higher index first to avoid index shifting problems
-        let indicesToRemove = [messageIndex, pIndex].sorted(by: >)
-        for index in indicesToRemove {
-            messages.remove(at: index)
+        // Remove both messages from local state immediately with animation
+        withAnimation(.easeOut(duration: 0.2)) {
+            // Remove higher index first to avoid index shifting problems
+            let indicesToRemove = [messageIndex, pIndex].sorted(by: >)
+            for index in indicesToRemove {
+                messages.remove(at: index)
+            }
         }
         
-        // Delete from database in background
+        // Handle deletion and re-sending in a background task
         Task {
+            // Delete from database
             do {
                 try await supabaseManager.deleteMessage(messageId: aiMessageId)
                 try await supabaseManager.deleteMessage(messageId: userMessageId)
             } catch {
-                print("Error deleting messages: \(error)")
+                print("Error deleting messages for regeneration: \(error)")
             }
+            
+            // Resend the original question to generate a new answer at the bottom
+            // Using a slight delay to ensure the removal animation finishes or is noticed
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+            sendMessage(text: userPrompt, tone: tone)
         }
-        
-        // Resend the original question to generate a new answer at the bottom
-        sendMessage(text: userPrompt, tone: tone)
     }
 
     func clearChat() {

@@ -66,10 +66,15 @@ class LocalizationManager: ObservableObject {
         didSet {
             UserDefaults.standard.set(currentLanguage.rawValue, forKey: "appLanguage")
             updateBundle()
+            // Sync language change to cloud
+            if !isSyncingFromCloud {
+                syncLanguageToCloud()
+            }
         }
     }
 
     private var bundle: Bundle = Bundle.main
+    private var isSyncingFromCloud = false
 
     private init() {
         if let savedLanguage = UserDefaults.standard.string(forKey: "appLanguage"),
@@ -97,6 +102,19 @@ class LocalizationManager: ObservableObject {
 
     func setLanguage(_ language: AppLanguage) {
         currentLanguage = language
+    }
+
+    /// Set language from cloud sync (doesn't trigger sync back)
+    func setLanguageFromCloud(_ language: AppLanguage) {
+        isSyncingFromCloud = true
+        currentLanguage = language
+        isSyncingFromCloud = false
+    }
+
+    private func syncLanguageToCloud() {
+        Task { @MainActor in
+            await UserPreferences.shared.syncToCloud()
+        }
     }
 }
 

@@ -173,9 +173,9 @@ enum ChatBackground: String, CaseIterable, Codable {
 
     var icon: String {
         switch self {
-        case .summit: return "mountain.2.fill"
-        case .ascent: return "stairs"
-        case .defaultBackground: return "circle.grid.2x2.fill"
+        case .summit: return "mountain.2"
+        case .ascent: return "list.bullet.indent"
+        case .defaultBackground: return "square.grid.2x2"
         }
     }
 
@@ -206,44 +206,78 @@ enum ChatBackground: String, CaseIterable, Codable {
 
 class UserPreferences: ObservableObject {
     static let shared = UserPreferences()
-    
+
+    /// Cloud profile image URL (stored in Supabase)
+    @Published var profileImageUrl: String? {
+        didSet {
+            UserDefaults.standard.set(profileImageUrl, forKey: "profileImageUrl")
+        }
+    }
+
     @Published var userName: String {
-        didSet { UserDefaults.standard.set(userName, forKey: "userName") }
+        didSet {
+            UserDefaults.standard.set(userName, forKey: "userName")
+            syncToCloudDebounced()
+        }
     }
 
     @Published var profileImage: Data? {
         didSet {
             UserDefaults.standard.set(profileImage, forKey: "userProfileImage")
+            // Upload image to cloud when changed
+            if profileImage != nil {
+                uploadProfileImageToCloud()
+            }
         }
     }
-    
+
     @Published var userGender: String {
         didSet {
             UserDefaults.standard.set(userGender, forKey: "userGender")
+            syncToCloudDebounced()
         }
     }
+
     @Published var quoteTone: QuoteTone {
-        didSet { UserDefaults.standard.set(quoteTone.rawValue, forKey: "quoteTone") }
+        didSet {
+            UserDefaults.standard.set(quoteTone.rawValue, forKey: "quoteTone")
+            syncToCloudDebounced()
+        }
     }
-    
+
     @Published var userFocus: UserFocus {
-        didSet { UserDefaults.standard.set(userFocus.rawValue, forKey: "userFocus") }
+        didSet {
+            UserDefaults.standard.set(userFocus.rawValue, forKey: "userFocus")
+            syncToCloudDebounced()
+        }
     }
-    
+
     @Published var userBarrier: UserBarrier {
-        didSet { UserDefaults.standard.set(userBarrier.rawValue, forKey: "userBarrier") }
+        didSet {
+            UserDefaults.standard.set(userBarrier.rawValue, forKey: "userBarrier")
+            syncToCloudDebounced()
+        }
     }
-    
+
     @Published var userEnergyDrain: UserEnergyDrain {
-        didSet { UserDefaults.standard.set(userEnergyDrain.rawValue, forKey: "userEnergyDrain") }
+        didSet {
+            UserDefaults.standard.set(userEnergyDrain.rawValue, forKey: "userEnergyDrain")
+            syncToCloudDebounced()
+        }
     }
-    
+
     @Published var mentalEnergy: Double {
-        didSet { UserDefaults.standard.set(mentalEnergy, forKey: "mentalEnergy") }
+        didSet {
+            UserDefaults.standard.set(mentalEnergy, forKey: "mentalEnergy")
+            syncToCloudDebounced()
+        }
     }
 
     @Published var userBirthYear: Int {
-        didSet { UserDefaults.standard.set(userBirthYear, forKey: "userBirthYear") }
+        didSet {
+            UserDefaults.standard.set(userBirthYear, forKey: "userBirthYear")
+            syncToCloudDebounced()
+        }
     }
 
     var userGeneration: UserGeneration {
@@ -253,9 +287,10 @@ class UserPreferences: ObservableObject {
     @Published var hasCompletedOnboarding: Bool {
         didSet {
             UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding")
+            syncToCloudDebounced()
         }
     }
-    
+
     @Published var hasSeenWelcome: Bool {
         didSet {
             UserDefaults.standard.set(hasSeenWelcome, forKey: "hasSeenWelcome")
@@ -271,41 +306,47 @@ class UserPreferences: ObservableObject {
     @Published var chatBackground: ChatBackground {
         didSet {
             UserDefaults.standard.set(chatBackground.rawValue, forKey: "chatBackground")
+            syncToCloudDebounced()
         }
     }
+
+    /// Flag to prevent sync during initial load from cloud
+    private var isSyncingFromCloud = false
+    private var syncTask: Task<Void, Never>?
     private init() {
+        self.profileImageUrl = UserDefaults.standard.string(forKey: "profileImageUrl")
         self.userName = UserDefaults.standard.string(forKey: "userName") ?? ""
         self.profileImage = UserDefaults.standard.data(forKey: "userProfileImage")
         self.userGender = UserDefaults.standard.string(forKey: "userGender") ?? ""
-        
+
         if let toneString = UserDefaults.standard.string(forKey: "quoteTone"),
            let tone = QuoteTone(rawValue: toneString) {
             self.quoteTone = tone
         } else {
             self.quoteTone = .gentle
         }
-        
+
         if let focusString = UserDefaults.standard.string(forKey: "userFocus"),
            let focus = UserFocus(rawValue: focusString) {
             self.userFocus = focus
         } else {
             self.userFocus = .innerPeace
         }
-        
+
         if let barrierString = UserDefaults.standard.string(forKey: "userBarrier"),
            let barrier = UserBarrier(rawValue: barrierString) {
             self.userBarrier = barrier
         } else {
             self.userBarrier = .procrastination
         }
-        
+
         if let energyDrainString = UserDefaults.standard.string(forKey: "userEnergyDrain"),
            let energyDrain = UserEnergyDrain(rawValue: energyDrainString) {
             self.userEnergyDrain = energyDrain
         } else {
             self.userEnergyDrain = .career
         }
-        
+
         let savedMentalEnergy = UserDefaults.standard.double(forKey: "mentalEnergy")
         if savedMentalEnergy == 0 && !UserDefaults.standard.bool(forKey: "mentalEnergySet") {
             self.mentalEnergy = 0.5 // Default to middle
@@ -331,12 +372,147 @@ class UserPreferences: ObservableObject {
             self.chatBackground = .defaultBackground
         }
     }
-    
+
     func completeOnboarding() {
         hasCompletedOnboarding = true
     }
-    
+
     func resetOnboarding() {
         hasCompletedOnboarding = false
+    }
+
+    // MARK: - Cloud Sync
+
+    /// Debounced sync to avoid excessive API calls
+    private func syncToCloudDebounced() {
+        guard !isSyncingFromCloud else { return }
+
+        syncTask?.cancel()
+        syncTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
+            guard !Task.isCancelled else { return }
+            await syncToCloud()
+        }
+    }
+
+    /// Upload profile image to cloud storage
+    private func uploadProfileImageToCloud() {
+        guard !isSyncingFromCloud else { return }
+        guard let imageData = profileImage else { return }
+
+        Task { @MainActor in
+            do {
+                let url = try await SupabaseManager.shared.uploadProfileImage(imageData: imageData)
+                self.profileImageUrl = url
+                await syncToCloud()
+            } catch {
+                print("Failed to upload profile image: \(error)")
+            }
+        }
+    }
+
+    /// Sync current preferences to cloud
+    @MainActor
+    func syncToCloud() async {
+        guard !isSyncingFromCloud else { return }
+        guard SupabaseManager.shared.isAuthenticated else { return }
+
+        do {
+            try await SupabaseManager.shared.saveUserProfile(
+                name: userName.isEmpty ? nil : userName,
+                gender: userGender.isEmpty ? nil : userGender,
+                profileImageUrl: profileImageUrl,
+                birthYear: userBirthYear,
+                quoteTone: quoteTone.rawValue,
+                userFocus: userFocus.rawValue,
+                userBarrier: userBarrier.rawValue,
+                energyDrain: userEnergyDrain.rawValue,
+                mentalEnergy: mentalEnergy,
+                chatBackground: chatBackground.rawValue,
+                language: LocalizationManager.shared.currentLanguage.rawValue,
+                hasCompletedOnboarding: hasCompletedOnboarding
+            )
+        } catch {
+            print("Failed to sync profile to cloud: \(error)")
+        }
+    }
+
+    /// Load preferences from cloud (called on login)
+    @MainActor
+    func syncFromCloud() async {
+        guard SupabaseManager.shared.isAuthenticated else { return }
+
+        isSyncingFromCloud = true
+        defer { isSyncingFromCloud = false }
+
+        do {
+            guard let profile = try await SupabaseManager.shared.fetchUserProfile() else {
+                // No cloud profile exists, upload current local settings
+                await syncToCloud()
+                return
+            }
+
+            // Apply cloud data to local (cloud wins)
+            if let name = profile.name {
+                userName = name
+            }
+            if let gender = profile.gender {
+                userGender = gender
+            }
+            if let imageUrl = profile.profileImageUrl {
+                profileImageUrl = imageUrl
+                // Download and cache the image locally
+                if let imageData = try await SupabaseManager.shared.downloadProfileImage(from: imageUrl) {
+                    profileImage = imageData
+                }
+            }
+            if let birthYear = profile.birthYear {
+                userBirthYear = birthYear
+            }
+            if let tone = profile.quoteTone, let quoteToneValue = QuoteTone(rawValue: tone) {
+                quoteTone = quoteToneValue
+            }
+            if let focus = profile.userFocus, let focusValue = UserFocus(rawValue: focus) {
+                userFocus = focusValue
+            }
+            if let barrier = profile.userBarrier, let barrierValue = UserBarrier(rawValue: barrier) {
+                userBarrier = barrierValue
+            }
+            if let drain = profile.energyDrain, let drainValue = UserEnergyDrain(rawValue: drain) {
+                userEnergyDrain = drainValue
+            }
+            if let energy = profile.mentalEnergy {
+                mentalEnergy = energy
+            }
+            if let background = profile.chatBackground, let bgValue = ChatBackground(rawValue: background) {
+                chatBackground = bgValue
+            }
+            if let language = profile.language, let langValue = AppLanguage(rawValue: language) {
+                LocalizationManager.shared.setLanguageFromCloud(langValue)
+            }
+            if let onboarding = profile.hasCompletedOnboarding {
+                hasCompletedOnboarding = onboarding
+            }
+        } catch {
+            print("Failed to sync profile from cloud: \(error)")
+        }
+    }
+
+    /// Clear local data on logout
+    func clearLocalData() {
+        userName = ""
+        userGender = ""
+        profileImage = nil
+        profileImageUrl = nil
+        quoteTone = .gentle
+        userFocus = .innerPeace
+        userBarrier = .procrastination
+        userEnergyDrain = .career
+        mentalEnergy = 0.5
+        userBirthYear = 2000
+        hasCompletedOnboarding = false
+        hasSeenWelcome = false
+        hasPlayedWelcomeIntro = false
+        chatBackground = .defaultBackground
     }
 }
