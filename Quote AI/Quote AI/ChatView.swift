@@ -629,6 +629,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
     @State private var showingEditProfile = false
+    @State private var showingSignOutAlert = false
 
     var onClose: (() -> Void)?
 
@@ -819,11 +820,14 @@ struct SettingsView: View {
                         }
                     }
                 }
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(12)
+            .padding(.horizontal, 16)
 
-                Divider().padding(.leading, 56)
-
-                // Sign Out row
-                Button(action: { handleSignOut() }) {
+            // Separate Logout section to prevent accidental taps
+            VStack(spacing: 0) {
+                Button(action: { showingSignOutAlert = true }) {
                     HStack(spacing: 16) {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.system(size: 18))
@@ -847,6 +851,15 @@ struct SettingsView: View {
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(12)
             .padding(.horizontal, 16)
+            .padding(.top, 24)
+            .alert(localization.string(for: "profile.signOut"), isPresented: $showingSignOutAlert) {
+                Button(localization.string(for: "profile.signOut"), role: .destructive) {
+                    handleSignOut()
+                }
+                Button(localization.string(for: "history.cancel"), role: .cancel) { }
+            } message: {
+                Text(localization.string(for: "profile.signOutMessage") == "profile.signOutMessage" ? "Are you sure you want to sign out?" : localization.string(for: "profile.signOutMessage"))
+            }
         }
     }
 
