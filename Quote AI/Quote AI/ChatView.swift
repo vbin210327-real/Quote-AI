@@ -100,7 +100,7 @@ struct ChatView: View {
                         .onTapGesture {
                             isInputFocused = false
                         }
-                        .onChange(of: viewModel.messages.count) { _ in
+                        .onChange(of: viewModel.messages.count) { _, _ in
                             // Scroll to bottom when new message arrives
                             if let lastMessage = viewModel.messages.last {
                                 if lastMessage.shouldAnimate {
@@ -111,7 +111,7 @@ struct ChatView: View {
                                 }
                             }
                         }
-                        .onChange(of: typingMessageId) { newValue in
+                        .onChange(of: typingMessageId) { _, newValue in
                             guard newValue != nil else { return }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                                 withAnimation {
@@ -119,7 +119,7 @@ struct ChatView: View {
                                 }
                             }
                         }
-                        .onChange(of: viewModel.isLoading) { isLoading in
+                        .onChange(of: viewModel.isLoading) { _, isLoading in
                             if isLoading {
                                 // Slightly longer delay to ensure the loading view is actually rendered and layout is updated
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -129,7 +129,7 @@ struct ChatView: View {
                                 }
                             }
                         }
-                        .onChange(of: isInputFocused) { focused in
+                        .onChange(of: isInputFocused) { _, focused in
                             if let lastMessage = viewModel.messages.last {
                                 if focused {
                                     // Keyboard appearing - scroll after a short delay
@@ -233,7 +233,7 @@ struct ChatView: View {
             }
             .blur(radius: showingProfile ? 3 : 0)
             .disabled(showingProfile) // Disable interaction with chat when profile is open
-            .onChange(of: showingProfile) { isOpen in
+            .onChange(of: showingProfile) { _, isOpen in
                 if isOpen {
                     isInputFocused = false // Dismiss keyboard when drawer opens
                 }
@@ -391,7 +391,7 @@ struct ProfileView: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                         TextField(localization.string(for: "history.search"), text: $searchText)
-                            .onChange(of: searchText) { newValue in
+                            .onChange(of: searchText) { _, _ in
                                 searchTask?.cancel()
                                 searchTask = Task {
                                     try? await Task.sleep(nanoseconds: 300_000_000)
@@ -825,6 +825,47 @@ struct SettingsView: View {
             .cornerRadius(12)
             .padding(.horizontal, 16)
 
+            // Notifications section
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Notifications")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+                    .padding(.top, 24)
+
+                VStack(spacing: 0) {
+                    // Daily Toggle
+                    SettingsRow(icon: "bell.badge", title: "Daily Calibration") {
+                        Toggle("", isOn: $preferences.notificationsEnabled)
+                            .labelsHidden()
+                            .tint(.black)
+                    }
+
+                    if preferences.notificationsEnabled {
+                        Divider().padding(.leading, 56)
+
+                        // Time Picker
+                        SettingsRow(icon: "clock", title: "Calibration Time") {
+                            DatePicker("", selection: Binding(
+                                get: {
+                                    Calendar.current.date(bySettingHour: preferences.notificationHour, minute: preferences.notificationMinute, second: 0, of: Date()) ?? Date()
+                                },
+                                set: { newDate in
+                                    let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+                                    preferences.notificationHour = components.hour ?? 8
+                                    preferences.notificationMinute = components.minute ?? 0
+                                }
+                            ), displayedComponents: .hourAndMinute)
+                            .labelsHidden()
+                        }
+                    }
+                }
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .padding(.horizontal, 16)
+            }
+
             // Separate Logout section to prevent accidental taps
             VStack(spacing: 0) {
                 Button(action: { showingSignOutAlert = true }) {
@@ -1015,7 +1056,7 @@ struct EditProfileView: View {
             displayName = preferences.userName
             selectedImageData = preferences.profileImage
         }
-        .onChange(of: selectedItem) { newItem in
+        .onChange(of: selectedItem) { _, newItem in
             Task {
                 if let data = try? await newItem?.loadTransferable(type: Data.self) {
                     selectedImageData = data

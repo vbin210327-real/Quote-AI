@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import UserNotifications
 
 enum QuoteTone: String, CaseIterable, Codable {
     case gentle = "Gentle"
@@ -244,10 +245,28 @@ class UserPreferences: ObservableObject {
 
     @Published var profileImage: Data? {
         didSet {
+            // Only act if the data actually changed to avoid redundant work and UI flickering
+            guard profileImage != oldValue else { return }
+            
+            print("[ProfileImage] didSet called, size: \(profileImage?.count ?? 0) bytes")
+            
+            // Save to disk immediately
             UserDefaults.standard.set(profileImage, forKey: "userProfileImage")
-            // Upload image to cloud when changed
-            if profileImage != nil {
-                uploadProfileImageToCloud()
+            UserDefaults.standard.synchronize()
+            
+            // Wrap in MainActor and async to avoid SwiftUI List warnings (cell visiting errors)
+            Task { @MainActor in
+                if !isSyncingFromCloud {
+                    if let data = profileImage, data.count > 0 {
+                        // New image: Upload it
+                        uploadProfileImageToCloud()
+                    } else if profileImage == nil {
+                        // Image cleared: Update URL and sync to cloud
+                        print("[ProfileImage] Image cleared, updating URL")
+                        profileImageUrl = nil
+                        await syncToCloud()
+                    }
+                }
             }
         }
     }
@@ -262,13 +281,15 @@ class UserPreferences: ObservableObject {
     @Published var quoteTone: QuoteTone {
         didSet {
             UserDefaults.standard.set(quoteTone.rawValue, forKey: "quoteTone")
-            syncToCloudDebounced()
+            UserDefaults.standard.synchronize()
+            syncToCloudImmediate()
         }
     }
 
     @Published var userFocus: UserFocus {
         didSet {
             UserDefaults.standard.set(userFocus.rawValue, forKey: "userFocus")
+            UserDefaults.standard.synchronize()
             syncToCloudDebounced()
         }
     }
@@ -276,6 +297,7 @@ class UserPreferences: ObservableObject {
     @Published var userBarrier: UserBarrier {
         didSet {
             UserDefaults.standard.set(userBarrier.rawValue, forKey: "userBarrier")
+            UserDefaults.standard.synchronize()
             syncToCloudDebounced()
         }
     }
@@ -283,6 +305,7 @@ class UserPreferences: ObservableObject {
     @Published var userEnergyDrain: UserEnergyDrain {
         didSet {
             UserDefaults.standard.set(userEnergyDrain.rawValue, forKey: "userEnergyDrain")
+            UserDefaults.standard.synchronize()
             syncToCloudDebounced()
         }
     }
@@ -327,12 +350,47 @@ class UserPreferences: ObservableObject {
     @Published var chatBackground: ChatBackground {
         didSet {
             UserDefaults.standard.set(chatBackground.rawValue, forKey: "chatBackground")
+            UserDefaults.standard.synchronize()
+            syncToCloudImmediate()
+        }
+    }
+
+    @Published var notificationsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled")
             syncToCloudDebounced()
+            if notificationsEnabled {
+                NotificationManager.shared.requestPermission()
+            } else {
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_calibration"])
+            }
+        }
+    }
+
+    @Published var notificationHour: Int {
+        didSet {
+            UserDefaults.standard.set(notificationHour, forKey: "notificationHour")
+            syncToCloudDebounced()
+            if notificationsEnabled {
+                NotificationManager.shared.scheduleDailyNotification(at: notificationHour, minute: notificationMinute)
+            }
+        }
+    }
+
+    @Published var notificationMinute: Int {
+        didSet {
+            UserDefaults.standard.set(notificationMinute, forKey: "notificationMinute")
+            syncToCloudDebounced()
+            if notificationsEnabled {
+                NotificationManager.shared.scheduleDailyNotification(at: notificationHour, minute: notificationMinute)
+            }
         }
     }
 
     /// Flag to prevent sync during initial load from cloud
     private var isSyncingFromCloud = false
+    /// Flag to prevent syncFromCloud from overwriting a new local image while it's uploading
+    private var isUploadingProfileImage = false
     private var syncTask: Task<Void, Never>?
     private init() {
         self.profileImageUrl = UserDefaults.standard.string(forKey: "profileImageUrl")
@@ -392,6 +450,13 @@ class UserPreferences: ObservableObject {
         } else {
             self.chatBackground = .defaultBackground
         }
+
+        self.notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        self.notificationHour = UserDefaults.standard.integer(forKey: "notificationHour") == 0 && !UserDefaults.standard.bool(forKey: "notificationSet") ? 8 : UserDefaults.standard.integer(forKey: "notificationHour")
+        self.notificationMinute = UserDefaults.standard.integer(forKey: "notificationMinute")
+
+        print("[ProfileImage] Init loaded from UserDefaults, size: \(self.profileImage?.count ?? 0) bytes")
+        print("[ProfileImage] Init profileImageUrl: \(self.profileImageUrl ?? "nil")")
     }
 
     func completeOnboarding() {
@@ -404,30 +469,59 @@ class UserPreferences: ObservableObject {
 
     // MARK: - Cloud Sync
 
+    /// Sync current preferences to cloud
+    func syncToCloudImmediate() {
+        guard !isSyncingFromCloud else { return }
+        Task { @MainActor in
+            await syncToCloud()
+        }
+    }
+
     /// Debounced sync to avoid excessive API calls
     private func syncToCloudDebounced() {
         guard !isSyncingFromCloud else { return }
 
         syncTask?.cancel()
         syncTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second debounce
+            try? await Task.sleep(nanoseconds: 300_000_000) // Shorter 0.3 second debounce
             guard !Task.isCancelled else { return }
             await syncToCloud()
         }
     }
 
+    /// Flush any pending sync immediately (called when app goes to background)
+    @MainActor
+    func flushPendingSync() async {
+        // Cancel the debounced task and sync immediately
+        syncTask?.cancel()
+        syncTask = nil
+        await syncToCloud()
+    }
+
     /// Upload profile image to cloud storage
     private func uploadProfileImageToCloud() {
-        guard !isSyncingFromCloud else { return }
-        guard let imageData = profileImage else { return }
+        print("[ProfileImage] uploadProfileImageToCloud called")
+        guard !isSyncingFromCloud else {
+            print("[ProfileImage] Skipped: isSyncingFromCloud is true")
+            return
+        }
+        guard let imageData = profileImage, imageData.count > 0 else {
+            print("[ProfileImage] Skipped: profileImage is nil or empty")
+            return
+        }
+        
+        isUploadingProfileImage = true
+        print("[ProfileImage] Starting upload, image size: \(imageData.count) bytes")
 
         Task { @MainActor in
+            defer { isUploadingProfileImage = false }
             do {
                 let url = try await SupabaseManager.shared.uploadProfileImage(imageData: imageData)
+                print("[ProfileImage] Upload success! URL: \(url)")
                 self.profileImageUrl = url
                 await syncToCloud()
             } catch {
-                print("Failed to upload profile image: \(error)")
+                print("[ProfileImage] Upload FAILED: \(error)")
             }
         }
     }
@@ -450,6 +544,9 @@ class UserPreferences: ObservableObject {
                 energyDrain: userEnergyDrain.rawValue,
                 mentalEnergy: mentalEnergy,
                 chatBackground: chatBackground.rawValue,
+                notificationsEnabled: notificationsEnabled,
+                notificationHour: notificationHour,
+                notificationMinute: notificationMinute,
                 language: LocalizationManager.shared.currentLanguage.rawValue,
                 hasCompletedOnboarding: hasCompletedOnboarding
             )
@@ -473,46 +570,73 @@ class UserPreferences: ObservableObject {
                 return
             }
 
-            // Apply cloud data to local (cloud wins)
-            if let name = profile.name {
+            // Apply cloud data to local (cloud wins ONLY if different)
+            if let name = profile.name, name != userName {
                 userName = name
             }
-            if let gender = profile.gender {
+            if let gender = profile.gender, gender != userGender {
                 userGender = gender
             }
-            if let imageUrl = profile.profileImageUrl {
-                profileImageUrl = imageUrl
-                // Download and cache the image locally
-                if let imageData = try await SupabaseManager.shared.downloadProfileImage(from: imageUrl) {
-                    profileImage = imageData
+            if let imageUrl = profile.profileImageUrl, imageUrl != profileImageUrl {
+                // DON'T download if we are currently uploading a new image!
+                if isUploadingProfileImage {
+                    print("[ProfileImage] syncFromCloud: Skipped download because an upload is in progress")
+                } else {
+                    print("[ProfileImage] syncFromCloud: Cloud URL different, downloading from: \(imageUrl)")
+                    profileImageUrl = imageUrl
+                    // Download and cache the image locally
+                    if let imageData = try await SupabaseManager.shared.downloadProfileImage(from: imageUrl) {
+                        print("[ProfileImage] syncFromCloud: Downloaded \(imageData.count) bytes")
+                        profileImage = imageData
+                    } else {
+                        print("[ProfileImage] syncFromCloud: Download returned nil")
+                    }
                 }
+            } else if profile.profileImageUrl == nil && profileImageUrl != nil {
+                // Cloud has no image, but we do: Clear local if we're not currently uploading
+                if !isUploadingProfileImage {
+                    print("[ProfileImage] syncFromCloud: Cloud cleared image, clearing locally")
+                    profileImageUrl = nil
+                    profileImage = nil
+                }
+            } else {
+                print("[ProfileImage] syncFromCloud: URL unchanged or both nil, skipping download")
             }
-            if let birthYear = profile.birthYear {
+            if let birthYear = profile.birthYear, birthYear != userBirthYear {
                 userBirthYear = birthYear
             }
-            if let tone = profile.quoteTone, let quoteToneValue = QuoteTone(rawValue: tone) {
+            if let tone = profile.quoteTone, let quoteToneValue = QuoteTone(rawValue: tone), quoteToneValue != quoteTone {
                 quoteTone = quoteToneValue
             }
-            if let focus = profile.userFocus, let focusValue = UserFocus(rawValue: focus) {
+            if let focus = profile.userFocus, let focusValue = UserFocus(rawValue: focus), focusValue != userFocus {
                 userFocus = focusValue
             }
-            if let barrier = profile.userBarrier, let barrierValue = UserBarrier(rawValue: barrier) {
+            if let barrier = profile.userBarrier, let barrierValue = UserBarrier(rawValue: barrier), barrierValue != userBarrier {
                 userBarrier = barrierValue
             }
-            if let drain = profile.energyDrain, let drainValue = UserEnergyDrain(rawValue: drain) {
+            if let drain = profile.energyDrain, let drainValue = UserEnergyDrain(rawValue: drain), drainValue != userEnergyDrain {
                 userEnergyDrain = drainValue
             }
-            if let energy = profile.mentalEnergy {
+            if let energy = profile.mentalEnergy, energy != mentalEnergy {
                 mentalEnergy = energy
             }
-            if let background = profile.chatBackground, let bgValue = ChatBackground(rawValue: background) {
+            if let background = profile.chatBackground, let bgValue = ChatBackground(rawValue: background), bgValue != chatBackground {
                 chatBackground = bgValue
             }
-            if let language = profile.language, let langValue = AppLanguage(rawValue: language) {
+            if let language = profile.language, let langValue = AppLanguage(rawValue: language), langValue != LocalizationManager.shared.currentLanguage {
                 LocalizationManager.shared.setLanguageFromCloud(langValue)
             }
-            if let onboarding = profile.hasCompletedOnboarding {
+            if let onboarding = profile.hasCompletedOnboarding, onboarding != hasCompletedOnboarding {
                 hasCompletedOnboarding = onboarding
+            }
+            if let notifEnabled = profile.notificationsEnabled, notifEnabled != notificationsEnabled {
+                notificationsEnabled = notifEnabled
+            }
+            if let hour = profile.notificationHour, hour != notificationHour {
+                notificationHour = hour
+            }
+            if let minute = profile.notificationMinute, minute != notificationMinute {
+                notificationMinute = minute
             }
         } catch {
             print("Failed to sync profile from cloud: \(error)")

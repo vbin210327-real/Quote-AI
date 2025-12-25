@@ -136,4 +136,25 @@ class KimiService {
             throw KimiServiceError.decodingError(decodingError)
         }
     }
+    func generateDailyCalibration() async throws -> String {
+        let preferences = UserPreferences.shared
+        
+        let prompt = """
+        DAILY CALIBRATION REQUEST
+        
+        Generate one deeply personal, soulful insight for the user.
+        
+        CONTEXT:
+        - Primary Obstacle: \(preferences.userBarrier.rawValue) (\(preferences.userBarrier.description))
+        - Tone: \(preferences.quoteTone.rawValue)
+        
+        STRICT RULES:
+        1. Focus ONLY on addressing their obstacle.
+        2. LENGTH: Maximum 15 words. Keep it punchy and powerful.
+        3. Do not use their name.
+        4. No labels or conversational filler.
+        """
+        
+        return try await getQuote(for: prompt)
+    }
 }

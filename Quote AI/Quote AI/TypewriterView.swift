@@ -51,7 +51,7 @@ struct TypewriterView: View {
                     .opacity(isStrikethrough ? 1 : 0)
                     .animation(.easeOut(duration: 0.25), value: isStrikethrough)
             )
-            .onChange(of: isActive) { active in
+            .onChange(of: isActive) { _, active in
                 if active && !hasStartedTyping {
                     startAnimationSequence()
                 }

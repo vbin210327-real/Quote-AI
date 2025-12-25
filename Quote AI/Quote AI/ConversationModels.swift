@@ -87,6 +87,9 @@ struct UserProfile: Codable {
     var chatBackground: String?
     var language: String?
     var hasCompletedOnboarding: Bool?
+    var notificationsEnabled: Bool?
+    var notificationHour: Int?
+    var notificationMinute: Int?
     var updatedAt: Date?
     var createdAt: Date?
 
@@ -105,6 +108,9 @@ struct UserProfile: Codable {
         case chatBackground = "chat_background"
         case language
         case hasCompletedOnboarding = "has_completed_onboarding"
+        case notificationsEnabled = "notifications_enabled"
+        case notificationHour = "notification_hour"
+        case notificationMinute = "notification_minute"
         case updatedAt = "updated_at"
         case createdAt = "created_at"
     }
@@ -124,6 +130,9 @@ struct UpsertUserProfileRequest: Codable {
     let chatBackground: String?
     let language: String?
     let hasCompletedOnboarding: Bool?
+    let notificationsEnabled: Bool?
+    let notificationHour: Int?
+    let notificationMinute: Int?
     let updatedAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -140,6 +149,9 @@ struct UpsertUserProfileRequest: Codable {
         case chatBackground = "chat_background"
         case language
         case hasCompletedOnboarding = "has_completed_onboarding"
+        case notificationsEnabled = "notifications_enabled"
+        case notificationHour = "notification_hour"
+        case notificationMinute = "notification_minute"
         case updatedAt = "updated_at"
     }
 }

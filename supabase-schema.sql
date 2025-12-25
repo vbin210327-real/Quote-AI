@@ -115,3 +115,76 @@ BEGIN
   ORDER BY c.updated_at DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+-- 1. Create user_profiles table
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT UNIQUE NOT NULL,
+    name TEXT,
+    gender TEXT,
+    profile_image_url TEXT,
+    birth_year INTEGER,
+    quote_tone TEXT,
+    user_focus TEXT,
+    user_barrier TEXT,
+    energy_drain TEXT,
+    mental_energy DOUBLE PRECISION,
+    chat_background TEXT,
+    language TEXT,
+    has_completed_onboarding BOOLEAN DEFAULT false,
+    notifications_enabled BOOLEAN DEFAULT false,
+    notification_hour INTEGER DEFAULT 8,
+    notification_minute INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- 2. Create saved_quotes table
+CREATE TABLE IF NOT EXISTS saved_quotes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    saved_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- 3. Enable RLS
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE saved_quotes ENABLE ROW LEVEL SECURITY;
+
+-- 4. Set RLS Policies for User Profiles
+CREATE POLICY "Users can view own profile" ON user_profiles
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can update own profile" ON user_profiles
+    FOR UPDATE USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own profile" ON user_profiles
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+-- 5. Set RLS Policies for Saved Quotes
+CREATE POLICY "Users can view own saved quotes" ON saved_quotes
+    FOR SELECT USING (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can insert own saved quotes" ON saved_quotes
+    FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+
+CREATE POLICY "Users can delete own saved quotes" ON saved_quotes
+    FOR DELETE USING (auth.uid()::text = user_id);
+
+-- 6. Storage Bucket Setup (Run these manually in SQL Editor or Storage Tab)
+-- Make sure a bucket named 'profile-images' exists and is set to PUBLIC.
+
+-- 7. Storage Policies
+-- Allow anyone to read (if public), but only owners to upload
+-- Note: Replace 'profile-images' with your actual bucket name
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'profile-images');
+
+CREATE POLICY "User Upload Access" ON storage.objects FOR INSERT 
+    WITH CHECK (bucket_id = 'profile-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "User Update Access" ON storage.objects FOR UPDATE 
+    USING (bucket_id = 'profile-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "User Delete Access" ON storage.objects FOR DELETE 
+    USING (bucket_id = 'profile-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+```

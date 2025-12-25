@@ -88,9 +88,11 @@ class SupabaseManager: ObservableObject {
             self.currentUser = session.user
             self.isAuthenticated = true
 
-            // Sync data from cloud on app launch if authenticated
+            print("[SupabaseManager] Active session found, syncing from cloud...")
+            // Sync data from cloud on app launch to ensure cross-device consistency
             await syncFromCloud()
         } catch {
+            print("[SupabaseManager] No active session found: \(error)")
             self.currentUser = nil
             self.isAuthenticated = false
         }
@@ -179,7 +181,12 @@ class SupabaseManager: ObservableObject {
 
     // Sign out
     func signOut() async throws {
-        try await client.auth.signOut()
+        do {
+            try await client.auth.signOut()
+        } catch {
+            print("[SupabaseManager] Sign out error (safe to ignore if session missing): \(error)")
+        }
+        
         GIDSignIn.sharedInstance.signOut()
         self.currentUser = nil
         self.isAuthenticated = false
@@ -347,6 +354,9 @@ class SupabaseManager: ObservableObject {
         energyDrain: String?,
         mentalEnergy: Double?,
         chatBackground: String?,
+        notificationsEnabled: Bool?,
+        notificationHour: Int?,
+        notificationMinute: Int?,
         language: String?,
         hasCompletedOnboarding: Bool?
     ) async throws {
@@ -370,6 +380,9 @@ class SupabaseManager: ObservableObject {
             chatBackground: chatBackground,
             language: language,
             hasCompletedOnboarding: hasCompletedOnboarding,
+            notificationsEnabled: notificationsEnabled,
+            notificationHour: notificationHour,
+            notificationMinute: notificationMinute,
             updatedAt: Date()
         )
 
@@ -382,31 +395,64 @@ class SupabaseManager: ObservableObject {
     /// Upload profile image to Supabase Storage
     func uploadProfileImage(imageData: Data) async throws -> String {
         guard let userId = currentUser?.id.uuidString.lowercased() else {
+            print("[SupabaseManager] Upload failed: User not authenticated")
             throw NSError(domain: "SupabaseManager", code: -1, userInfo: [
                 NSLocalizedDescriptionKey: "User not authenticated"
             ])
         }
 
+        var bucketName = "profile-images"
         let fileName = "\(userId)/profile.jpg"
+        
+        // Performance: First try to list buckets to verify ID and case-sensitivity
+        do {
+            let buckets = try await client.storage.listBuckets()
+            print("[SupabaseManager] Available buckets: \(buckets.map { $0.id })")
+            
+            // Try to find a bucket that matches "profile-images" case-insensitively
+            if let foundBucket = buckets.first(where: { $0.id.lowercased() == "profile-images" }) {
+                bucketName = foundBucket.id
+                print("[SupabaseManager] Using discovered bucket ID: \(bucketName)")
+            } else if !buckets.isEmpty {
+                // If not found, maybe it's named differently? 
+                // Let's stick with the default but log heavily
+                print("[SupabaseManager] WARNING: 'profile-images' bucket not found among \(buckets.map { $0.id })")
+            }
+        } catch {
+            print("[SupabaseManager] Error listing buckets: \(error)")
+            // Continue with default name if listing fails
+        }
 
-        // Upload to storage bucket
-        try await client.storage
-            .from("profile-images")
-            .upload(
-                fileName,
-                data: imageData,
-                options: FileOptions(
-                    contentType: "image/jpeg",
-                    upsert: true
+        print("[SupabaseManager] Uploading image to bucket: \(bucketName), path: \(fileName)")
+
+        do {
+            // Upload to storage bucket
+            try await client.storage
+                .from(bucketName)
+                .upload(
+                    fileName,
+                    data: imageData,
+                    options: FileOptions(
+                        contentType: "image/jpeg",
+                        upsert: true
+                    )
                 )
-            )
+            
+            print("[SupabaseManager] Upload successful to path: \(fileName)")
 
-        // Get public URL
-        let publicURL = try client.storage
-            .from("profile-images")
-            .getPublicURL(path: fileName)
-
-        return publicURL.absoluteString
+            // Get public URL
+            let publicURL = try client.storage
+                .from(bucketName)
+                .getPublicURL(path: fileName)
+            
+            // Add a timestamp to the URL to bypass any image caching
+            let finalURL = "\(publicURL.absoluteString)?t=\(Int(Date().timeIntervalSince1970))"
+            print("[SupabaseManager] Final Public URL (with cache-buster): \(finalURL)")
+            return finalURL
+        } catch {
+            print("[SupabaseManager] Upload Error: \(error)")
+            throw error
+        }
     }
 
     /// Download profile image from URL

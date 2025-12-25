@@ -225,14 +225,14 @@ struct OnboardingView: View {
             // We don't initialize the others here to ensure "None" is selected initially during onboarding
             // unless we are coming back from a later step (handled by navigationCounter)
         }
-        .onChange(of: setupLoadingComplete) { complete in
+        .onChange(of: setupLoadingComplete) { _, complete in
             guard complete, currentStep == 11 else { return }
             withAnimation {
                 currentStep = 12
                 navigationCounter += 1
             }
         }
-        .onChange(of: supabaseManager.isAuthenticated) { isAuthenticated in
+        .onChange(of: supabaseManager.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated {
                 preferences.completeOnboarding()
             }
@@ -806,7 +806,7 @@ struct ToneStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -878,7 +878,7 @@ struct ChatBackgroundStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -952,7 +952,7 @@ struct FocusStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1027,7 +1027,7 @@ struct BarrierStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1101,7 +1101,7 @@ struct EnergyDrainStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1159,7 +1159,7 @@ struct GenderStepView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1405,7 +1405,7 @@ struct MentalEnergyStepView: View {
                 }
             }
         }
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1604,7 +1604,7 @@ struct BirthYearStepView: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -1816,7 +1816,7 @@ struct MindsetChartStepView: View {
             Spacer()
         }
         .padding(.horizontal, 24)
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 animateChart = false
@@ -1921,7 +1921,7 @@ struct PersonalizeStepView: View {
             .padding(.top, 10)
             .padding(.bottom, 30)
         }
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 showContent = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -2101,7 +2101,7 @@ struct SetupLoadingStepView: View {
 
             Spacer()
         }
-        .onChange(of: isActive) { active in
+        .onChange(of: isActive) { _, active in
             if active {
                 startLoadingAnimation()
             } else {
