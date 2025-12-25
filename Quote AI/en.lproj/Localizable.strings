@@ -168,7 +168,7 @@
 "history.cancel" = "Cancel";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "Saves";
+"favorites.title" = "Favorites";
 "favorites.empty" = "No saved quotes yet";
 "favorites.emptyHint" = "Tap the bookmark icon on any quote to save it here";
 "favorites.remove" = "Remove";

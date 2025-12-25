@@ -64,7 +64,7 @@ struct Quote_AIApp: App {
                 }
                 
                 // Daily Quote Overlay - Appears over everything when triggered by notification
-                if notificationManager.showDailyQuoteOverlay, let quote = notificationManager.selectedDailyQuote {
+                if !showSplash, notificationManager.showDailyQuoteOverlay, let quote = notificationManager.selectedDailyQuote {
                     DailyQuoteOverlay(
                         initialQuote: quote,
                         isPresented: $notificationManager.showDailyQuoteOverlay

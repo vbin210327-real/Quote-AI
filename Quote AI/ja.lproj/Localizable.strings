@@ -170,7 +170,7 @@
 "history.cancel" = "キャンセル";
 
 /* Favorites/Saved Quotes */
-"favorites.title" = "保存";
+"favorites.title" = "お気に入り";
 "favorites.empty" = "保存した名言はまだありません";
 "favorites.emptyHint" = "名言のブックマークアイコンをタップして保存できます";
 "favorites.remove" = "削除";

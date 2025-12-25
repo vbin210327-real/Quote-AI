@@ -47,7 +47,7 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_calibration"])
         
         let content = UNMutableNotificationContent()
-        content.title = "Daily Calibration"
+        content.title = "Quote AI"
         
         // Use a generic inviting message
         let userName = UserPreferences.shared.userName
