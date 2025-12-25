@@ -22,6 +22,14 @@ struct OnboardingView: View {
     @State private var navigationCounter = 0
     @State private var setupLoadingComplete = false
     @State private var animateSuccessIcon = false
+    
+    // Local state for selections to avoid "auto-choosing" defaults
+    @State private var selectedTone: QuoteTone?
+    @State private var selectedFocus: UserFocus?
+    @State private var selectedBarrier: UserBarrier?
+    @State private var selectedEnergyDrain: UserEnergyDrain?
+    @State private var selectedBackground: ChatBackground?
+    
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -184,8 +192,8 @@ struct OnboardingView: View {
                             .background(Color.black)
                             .cornerRadius(30)
                     }
-                    .disabled((currentStep == 0 && selectedGender.isEmpty) || (currentStep == 1 && nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
-                    .opacity((currentStep == 0 && selectedGender.isEmpty) || (currentStep == 1 && nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ? 0.5 : 1.0)
+                    .disabled(isContinueDisabled)
+                    .opacity(isContinueDisabled ? 0.5 : 1.0)
                     .padding(.bottom, 20)
                 }
 
@@ -214,6 +222,8 @@ struct OnboardingView: View {
         .onAppear {
             selectedGender = preferences.userGender
             nameInput = preferences.userName
+            // We don't initialize the others here to ensure "None" is selected initially during onboarding
+            // unless we are coming back from a later step (handled by navigationCounter)
         }
         .onChange(of: setupLoadingComplete) { complete in
             guard complete, currentStep == 11 else { return }
@@ -226,6 +236,21 @@ struct OnboardingView: View {
             if isAuthenticated {
                 preferences.completeOnboarding()
             }
+        }
+    }
+
+    private var isContinueDisabled: Bool {
+        switch currentStep {
+        case 0: return selectedGender.isEmpty
+        case 1: return nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case 2: return false // Birth year always has a value
+        case 3: return false // Mental energy always has a initial value
+        case 4: return selectedEnergyDrain == nil
+        case 5: return selectedFocus == nil
+        case 6: return selectedBarrier == nil
+        case 8: return selectedBackground == nil
+        case 9: return selectedTone == nil
+        default: return false
         }
     }
 
@@ -340,7 +365,7 @@ struct OnboardingView: View {
     var energyDrainStep: some View {
         EnergyDrainStepView(
             isActive: .constant(currentStep == 4),
-            selectedEnergyDrain: $preferences.userEnergyDrain
+            selectedEnergyDrain: $selectedEnergyDrain
         )
     }
 
@@ -348,7 +373,7 @@ struct OnboardingView: View {
     var focusStep: some View {
         FocusStepView(
             isActive: .constant(currentStep == 5),
-            selectedFocus: $preferences.userFocus
+            selectedFocus: $selectedFocus
         )
     }
 
@@ -356,7 +381,7 @@ struct OnboardingView: View {
     var barrierStep: some View {
         BarrierStepView(
             isActive: .constant(currentStep == 6),
-            selectedBarrier: $preferences.userBarrier
+            selectedBarrier: $selectedBarrier
         )
     }
 
@@ -371,7 +396,7 @@ struct OnboardingView: View {
     var chatBackgroundStep: some View {
         ChatBackgroundStepView(
             isActive: .constant(currentStep == 8),
-            selectedBackground: $preferences.chatBackground
+            selectedBackground: $selectedBackground
         )
     }
 
@@ -379,7 +404,7 @@ struct OnboardingView: View {
     var toneStep: some View {
         ToneStepView(
             isActive: .constant(currentStep == 9),
-            selectedTone: $preferences.quoteTone
+            selectedTone: $selectedTone
         )
     }
 
@@ -601,6 +626,36 @@ struct OnboardingView: View {
                 // Birth year is already bound to preferences, just move on
                 currentStep += 1
                 navigationCounter += 1
+            } else if currentStep == 4 {
+                if let drain = selectedEnergyDrain {
+                    preferences.userEnergyDrain = drain
+                }
+                currentStep += 1
+                navigationCounter += 1
+            } else if currentStep == 5 {
+                if let focus = selectedFocus {
+                    preferences.userFocus = focus
+                }
+                currentStep += 1
+                navigationCounter += 1
+            } else if currentStep == 6 {
+                if let barrier = selectedBarrier {
+                    preferences.userBarrier = barrier
+                }
+                currentStep += 1
+                navigationCounter += 1
+            } else if currentStep == 8 {
+                if let bg = selectedBackground {
+                    preferences.chatBackground = bg
+                }
+                currentStep += 1
+                navigationCounter += 1
+            } else if currentStep == 9 {
+                if let tone = selectedTone {
+                    preferences.quoteTone = tone
+                }
+                currentStep += 1
+                navigationCounter += 1
             } else if currentStep < 11 {
                 currentStep += 1
                 navigationCounter += 1
@@ -712,7 +767,7 @@ struct SelectionCard: View {
 
 struct ToneStepView: View {
     @Binding var isActive: Bool
-    @Binding var selectedTone: QuoteTone
+    @Binding var selectedTone: QuoteTone?
     @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
@@ -771,7 +826,7 @@ struct ToneStepView: View {
 
 struct ChatBackgroundStepView: View {
     @Binding var isActive: Bool
-    @Binding var selectedBackground: ChatBackground
+    @Binding var selectedBackground: ChatBackground?
     @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
@@ -843,7 +898,7 @@ struct ChatBackgroundStepView: View {
 
 struct FocusStepView: View {
     @Binding var isActive: Bool
-    @Binding var selectedFocus: UserFocus
+    @Binding var selectedFocus: UserFocus?
     @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
@@ -917,7 +972,7 @@ struct FocusStepView: View {
 
 struct BarrierStepView: View {
     @Binding var isActive: Bool
-    @Binding var selectedBarrier: UserBarrier
+    @Binding var selectedBarrier: UserBarrier?
     @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
@@ -992,7 +1047,7 @@ struct BarrierStepView: View {
 
 struct EnergyDrainStepView: View {
     @Binding var isActive: Bool
-    @Binding var selectedEnergyDrain: UserEnergyDrain
+    @Binding var selectedEnergyDrain: UserEnergyDrain?
     @StateObject private var localization = LocalizationManager.shared
     @State private var showContent = false
 
