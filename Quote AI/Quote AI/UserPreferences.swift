@@ -9,21 +9,7 @@ import Foundation
 import Combine
 import UserNotifications
 
-enum QuoteTone: String, CaseIterable, Codable {
-    case gentle = "Gentle"
-    case toughLove = "Tough Love"
-    case philosophical = "Philosophical"
-    case realist = "Realist"
-    
-    var description: String {
-        switch self {
-        case .gentle: return "Warm, nurturing, and reassuring. Focus on comfort and emotional support. Speak softly and kindly."
-        case .toughLove: return "Direct, no-nonsense, and challenging. Push the user to take action. Be blunt and straightforward."
-        case .philosophical: return "Deep, contemplative, and thought-provoking. Reference philosophy, existentialism, stoicism. Make them think."
-        case .realist: return "Practical, grounded, and honest. Focus on facts and actionable steps. Skip the fluff."
-        }
-    }
-
+extension QuoteTone {
     var displayName: String {
         return localizedName
     }
@@ -47,12 +33,7 @@ enum QuoteTone: String, CaseIterable, Codable {
     }
 }
 
-enum UserFocus: String, CaseIterable, Codable {
-    case anxiety = "Overcoming Anxiety"
-    case innerPeace = "Finding Inner Peace"
-    case perspective = "Gaining Perspective"
-    case confidence = "Building Confidence"
-    
+extension UserFocus {
     var description: String {
         switch self {
         case .anxiety: return "I need calm and grounding."
@@ -72,13 +53,7 @@ enum UserFocus: String, CaseIterable, Codable {
     }
 }
 
-enum UserBarrier: String, CaseIterable, Codable {
-    case procrastination = "Procrastination"
-    case selfDoubt = "Self-Doubt"
-    case burnout = "Burnout"
-    case lackOfClarity = "Lack of Clarity"
-    case externalFactors = "External Factors"
-    
+extension UserBarrier {
     var description: String {
         switch self {
         case .procrastination: return "I keep putting things off."
@@ -100,12 +75,7 @@ enum UserBarrier: String, CaseIterable, Codable {
     }
 }
 
-enum UserEnergyDrain: String, CaseIterable, Codable {
-    case career = "Career"
-    case relationship = "Relationship"
-    case mediaNews = "Media & News"
-    case healthFitness = "Health & Fitness"
-
+extension UserEnergyDrain {
     var description: String {
         switch self {
         case .career: return "Work stress is weighing on me."
@@ -124,6 +94,7 @@ enum UserEnergyDrain: String, CaseIterable, Codable {
         }
     }
 }
+
 
 enum UserGeneration: String, CaseIterable, Codable {
     case genAlpha = "Gen Alpha"       // 2013-2024
@@ -180,11 +151,7 @@ enum UserGeneration: String, CaseIterable, Codable {
     }
 }
 
-enum ChatBackground: String, CaseIterable, Codable {
-    case summit = "summit"
-    case ascent = "ascent"
-    case defaultBackground = "default"
-
+extension ChatBackground {
     var icon: String {
         switch self {
         case .summit: return "mountain.2"
@@ -282,6 +249,7 @@ class UserPreferences: ObservableObject {
         didSet {
             UserDefaults.standard.set(quoteTone.rawValue, forKey: "quoteTone")
             UserDefaults.standard.synchronize()
+            updateSharedDefaults(key: SharedConstants.Keys.quoteTone, value: quoteTone.rawValue)
             syncToCloudImmediate()
         }
     }
@@ -298,6 +266,7 @@ class UserPreferences: ObservableObject {
         didSet {
             UserDefaults.standard.set(userBarrier.rawValue, forKey: "userBarrier")
             UserDefaults.standard.synchronize()
+            updateSharedDefaults(key: SharedConstants.Keys.userBarrier, value: userBarrier.rawValue)
             syncToCloudDebounced()
         }
     }
@@ -659,5 +628,11 @@ class UserPreferences: ObservableObject {
         hasSeenWelcome = false
         hasPlayedWelcomeIntro = false
         chatBackground = .defaultBackground
+    }
+    private func updateSharedDefaults(key: String, value: String) {
+        if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
+            sharedDefaults.set(value, forKey: key)
+            sharedDefaults.synchronize()
+        }
     }
 }

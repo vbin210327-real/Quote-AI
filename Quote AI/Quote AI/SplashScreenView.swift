@@ -27,18 +27,10 @@ struct SplashScreenView: View {
                     // Horizontal layout: Icon + App Name
                     HStack(spacing: 12) {
                         // App Icon
-                        if let iconPath = Bundle.main.path(forResource: "quote_icon_black", ofType: "png"),
-                           let uiImage = UIImage(contentsOfFile: iconPath) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 64, height: 64)
-                        } else {
-                            // Fallback: SF Symbol quote bubble
-                            Image(systemName: "quote.bubble.fill")
-                                .font(.system(size: 52))
-                                .foregroundColor(.black)
-                        }
+                        Image("WidgetBrandIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 64, height: 64)
                         
                         // App Name
                         Text("Quote AI")

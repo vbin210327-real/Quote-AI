@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB595E712EFE4DE8006832DF /* QuoteWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ABB3AF892EFD3D1200D89F9F /* QuoteWidgetExtension.appex */; };
+		AB5961702EFE6D51006832DF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB59616F2EFE6D51006832DF /* Assets.xcassets */; };
 		ABB3AE162EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE142EF251D000D89F9F /* Localizable.strings */; };
 		ABB3AE172EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE0E2EF251D000D89F9F /* Localizable.strings */; };
 		ABB3AE182EF251D000D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE112EF251D000D89F9F /* Localizable.strings */; };
@@ -14,6 +16,10 @@
 		ABB3AE282EF3C28E00D89F9F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE262EF3C28E00D89F9F /* Localizable.strings */; };
 		ABB3AE2D2EF3C28E00D89B1 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE2B2EF3C28E00D89B1 /* Localizable.strings */; };
 		ABB3AE312EF3C28E00D89B1 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ABB3AE2F2EF3C28E00D89B1 /* Localizable.strings */; };
+		ABB3AF8C2EFD3D1200D89F9F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB3AF8B2EFD3D1200D89F9F /* WidgetKit.framework */; };
+		ABB3AF8E2EFD3D1200D89F9F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB3AF8D2EFD3D1200D89F9F /* SwiftUI.framework */; };
+		ABB3AFAA2EFD3F1C00D89F9F /* QuoteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB3AFA52EFD3F1C00D89F9F /* QuoteWidget.swift */; };
+		ABB3AFAB2EFD3F1C00D89F9F /* WidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB3AFA62EFD3F1C00D89F9F /* WidgetBundle.swift */; };
 		ABEB15422EDA023C00D0F7E3 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15412EDA023C00D0F7E3 /* Auth */; };
 		ABEB15442EDA023C00D0F7E3 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15432EDA023C00D0F7E3 /* Functions */; };
 		ABEB15462EDA023C00D0F7E3 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15452EDA023C00D0F7E3 /* PostgREST */; };
@@ -22,6 +28,8 @@
 		ABEB154C2EDA023C00D0F7E3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB154B2EDA023C00D0F7E3 /* Supabase */; };
 		ABEB154F2EDA026B00D0F7E3 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB154E2EDA026B00D0F7E3 /* GoogleSignIn */; };
 		ABEB15512EDA026B00D0F7E3 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = ABEB15502EDA026B00D0F7E3 /* GoogleSignInSwift */; };
+		DEADBEEF0000000000000002 /* brand_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = DEADBEEF0000000000000001 /* brand_icon.png */; };
+		CAFEBEEF0000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAFEBEEF0000000000000002 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,9 +47,31 @@
 			remoteGlobalIDString = AB8E8C072ED7509900C3DF49;
 			remoteInfo = "Quote AI";
 		};
+		ABB3AF9B2EFD3D1400D89F9F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AB8E8C002ED7509800C3DF49 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ABB3AF882EFD3D1200D89F9F;
+			remoteInfo = QuoteWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		ABB3AFA22EFD3D1400D89F9F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AB595E712EFE4DE8006832DF /* QuoteWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		AB59616F2EFE6D51006832DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AB8E8C082ED7509900C3DF49 /* Quote AI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Quote AI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB8E8C152ED7509B00C3DF49 /* Quote AITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Quote AITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB8E8C1F2ED7509B00C3DF49 /* Quote AIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Quote AIUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,11 +82,38 @@
 		ABB3AE252EF3C28E00D89F9F /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = Localizable.strings; sourceTree = "<group>"; };
 		ABB3AE2A2EF3C28E00D89B1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Localizable.strings; sourceTree = "<group>"; };
 		ABB3AE2E2EF3C28E00D89B1 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = Localizable.strings; sourceTree = "<group>"; };
+		ABB3AF892EFD3D1200D89F9F /* QuoteWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABB3AF8B2EFD3D1200D89F9F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		ABB3AF8D2EFD3D1200D89F9F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		ABB3AFA52EFD3F1C00D89F9F /* QuoteWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteWidget.swift; sourceTree = "<group>"; };
+		ABB3AFA62EFD3F1C00D89F9F /* WidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBundle.swift; sourceTree = "<group>"; };
+		ABB3AFB22EFD411800D89F9F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ABB3AFB42EFD427A00D89F9F /* QuoteWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteWidgetExtension.entitlements; sourceTree = "<group>"; };
+		DEADBEEF0000000000000001 /* brand_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = brand_icon.png; sourceTree = "<group>"; };
+		CAFEBEEF0000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ABB3AFAD2EFD3FCF00D89F9F /* Exceptions for "Quote AI" folder in "QuoteWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				CommonTypes.swift,
+				Config.swift,
+				KimiService.swift,
+				Models.swift,
+				SharedConstants.swift,
+			);
+			target = ABB3AF882EFD3D1200D89F9F /* QuoteWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AB8E8C0A2ED7509900C3DF49 /* Quote AI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ABB3AFAD2EFD3FCF00D89F9F /* Exceptions for "Quote AI" folder in "QuoteWidgetExtension" target */,
+			);
 			path = "Quote AI";
 			sourceTree = "<group>";
 		};
@@ -102,12 +159,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ABB3AF862EFD3D1200D89F9F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABB3AF8E2EFD3D1200D89F9F /* SwiftUI.framework in Frameworks */,
+				ABB3AF8C2EFD3D1200D89F9F /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		AB8E8BFF2ED7509800C3DF49 = {
 			isa = PBXGroup;
 			children = (
+				AB59616F2EFE6D51006832DF /* Assets.xcassets */,
+				ABB3AFB42EFD427A00D89F9F /* QuoteWidgetExtension.entitlements */,
+				ABB3AFA72EFD3F1C00D89F9F /* QuoteWidget */,
 				ABB3AE302EF3C28E00D89B1 /* ko.lproj */,
 				ABB3AE2C2EF3C28E00D89B1 /* ja.lproj */,
 				ABB3AE272EF3C28E00D89F9F /* hi.lproj */,
@@ -118,6 +187,7 @@
 				AB8E8C0A2ED7509900C3DF49 /* Quote AI */,
 				AB8E8C182ED7509B00C3DF49 /* Quote AITests */,
 				AB8E8C222ED7509B00C3DF49 /* Quote AIUITests */,
+				ABB3AF8A2EFD3D1200D89F9F /* Frameworks */,
 				AB8E8C092ED7509900C3DF49 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -128,6 +198,7 @@
 				AB8E8C082ED7509900C3DF49 /* Quote AI.app */,
 				AB8E8C152ED7509B00C3DF49 /* Quote AITests.xctest */,
 				AB8E8C1F2ED7509B00C3DF49 /* Quote AIUITests.xctest */,
+				ABB3AF892EFD3D1200D89F9F /* QuoteWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -188,6 +259,27 @@
 			path = ko.lproj;
 			sourceTree = "<group>";
 		};
+		ABB3AF8A2EFD3D1200D89F9F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ABB3AF8B2EFD3D1200D89F9F /* WidgetKit.framework */,
+				ABB3AF8D2EFD3D1200D89F9F /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		ABB3AFA72EFD3F1C00D89F9F /* QuoteWidget */ = {
+			isa = PBXGroup;
+			children = (
+				CAFEBEEF0000000000000002 /* Assets.xcassets */,
+				ABB3AFB22EFD411800D89F9F /* Info.plist */,
+				ABB3AFA52EFD3F1C00D89F9F /* QuoteWidget.swift */,
+				ABB3AFA62EFD3F1C00D89F9F /* WidgetBundle.swift */,
+				DEADBEEF0000000000000001 /* brand_icon.png */,
+			);
+			path = QuoteWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -198,10 +290,12 @@
 				AB8E8C042ED7509900C3DF49 /* Sources */,
 				AB8E8C052ED7509900C3DF49 /* Frameworks */,
 				AB8E8C062ED7509900C3DF49 /* Resources */,
+				ABB3AFA22EFD3D1400D89F9F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				ABB3AF9C2EFD3D1400D89F9F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AB8E8C0A2ED7509900C3DF49 /* Quote AI */,
@@ -232,6 +326,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				ABB3AF9C2EFD3D1400D89F9F /* PBXTargetDependency */,
 				AB8E8C172ED7509B00C3DF49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -255,6 +350,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				ABB3AF9C2EFD3D1400D89F9F /* PBXTargetDependency */,
 				AB8E8C212ED7509B00C3DF49 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -266,6 +362,26 @@
 			productName = "Quote AIUITests";
 			productReference = AB8E8C1F2ED7509B00C3DF49 /* Quote AIUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		ABB3AF882EFD3D1200D89F9F /* QuoteWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABB3AF9F2EFD3D1400D89F9F /* Build configuration list for PBXNativeTarget "QuoteWidgetExtension" */;
+			buildPhases = (
+				ABB3AF852EFD3D1200D89F9F /* Sources */,
+				ABB3AF862EFD3D1200D89F9F /* Frameworks */,
+				ABB3AF872EFD3D1200D89F9F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ABB3AF9C2EFD3D1400D89F9F /* PBXTargetDependency */,
+			);
+			name = QuoteWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = QuoteWidgetExtension;
+			productReference = ABB3AF892EFD3D1200D89F9F /* QuoteWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -287,6 +403,9 @@
 					AB8E8C1E2ED7509B00C3DF49 = {
 						CreatedOnToolsVersion = 26.0.1;
 						TestTargetID = AB8E8C072ED7509900C3DF49;
+					};
+					ABB3AF882EFD3D1200D89F9F = {
+						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
 			};
@@ -317,6 +436,7 @@
 				AB8E8C072ED7509900C3DF49 /* Quote AI */,
 				AB8E8C142ED7509B00C3DF49 /* Quote AITests */,
 				AB8E8C1E2ED7509B00C3DF49 /* Quote AIUITests */,
+				ABB3AF882EFD3D1200D89F9F /* QuoteWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -350,6 +470,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ABB3AF872EFD3D1200D89F9F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAFEBEEF0000000000000001 /* Assets.xcassets in Resources */,
+				DEADBEEF0000000000000002 /* brand_icon.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -374,6 +503,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ABB3AF852EFD3D1200D89F9F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABB3AFAA2EFD3F1C00D89F9F /* QuoteWidget.swift in Sources */,
+				ABB3AFAB2EFD3F1C00D89F9F /* WidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -386,6 +524,11 @@
 			isa = PBXTargetDependency;
 			target = AB8E8C072ED7509900C3DF49 /* Quote AI */;
 			targetProxy = AB8E8C202ED7509B00C3DF49 /* PBXContainerItemProxy */;
+		};
+		ABB3AF9C2EFD3D1400D89F9F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ABB3AF882EFD3D1200D89F9F /* QuoteWidgetExtension */;
+			targetProxy = ABB3AF9B2EFD3D1400D89F9F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -454,6 +597,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -485,6 +629,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -502,13 +647,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -518,6 +665,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -549,6 +697,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -560,12 +709,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -579,6 +730,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -610,6 +762,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -625,6 +778,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -656,6 +810,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -669,14 +824,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.Quote-AITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -691,14 +848,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.Quote-AITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -712,6 +871,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.Quote-AIUITests";
@@ -719,6 +879,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -732,6 +893,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.Quote-AIUITests";
@@ -739,10 +901,83 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "Quote AI";
+			};
+			name = Release;
+		};
+		ABB3AFA02EFD3D1400D89F9F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = QuoteWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QuoteWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.QuoteWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited) WIDGET";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ABB3AFA12EFD3D1400D89F9F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = QuoteWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V7439G9SY8;
+				ENABLE_APP_INTENTS_SSU_TRAINING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QuoteWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Quote-AI.dev.QuoteWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EXTRACT_APPLICATION_INTENTS_METADATA = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -781,6 +1016,15 @@
 			buildConfigurations = (
 				AB8E8C302ED7509B00C3DF49 /* Debug */,
 				AB8E8C312ED7509B00C3DF49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ABB3AF9F2EFD3D1400D89F9F /* Build configuration list for PBXNativeTarget "QuoteWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ABB3AFA02EFD3D1400D89F9F /* Debug */,
+				ABB3AFA12EFD3D1400D89F9F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

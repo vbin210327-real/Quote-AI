@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 struct DailyQuoteOverlay: View {
     let initialQuote: String
@@ -180,6 +181,13 @@ struct DailyQuoteOverlay: View {
         Task {
             do {
                 let aiQuote = try await KimiService.shared.generateDailyCalibration()
+                
+                // Update Widget
+                if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
+                    sharedDefaults.set(aiQuote, forKey: SharedConstants.Keys.latestQuote)
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+                
                 await MainActor.run {
                     withAnimation(.easeInOut(duration: 0.5)) {
                         self.currentQuote = aiQuote

@@ -30,12 +30,20 @@ enum KimiServiceError: Error, LocalizedError {
     }
 }
 
-class KimiService {
-    static let shared = KimiService()
+final class KimiService: @unchecked Sendable {
+    nonisolated static let shared = KimiService()
 
     private init() {}
 
-    func getQuote(for userMessage: String, conversationHistory: [ChatMessage] = [], tone: QuoteTone? = nil) async throws -> String {
+    func getQuote(
+        for userMessage: String,
+        conversationHistory: [ChatMessage] = [],
+        tone: QuoteTone? = nil,
+        userName: String? = nil,
+        languageName: String? = nil,
+        languageCode: String? = nil,
+        useWidgetModel: Bool = false
+    ) async throws -> String {
         guard let url = URL(string: Config.kimiAPIEndpoint) else {
             throw KimiServiceError.invalidURL
         }
@@ -46,31 +54,36 @@ class KimiService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(Config.kimiAPIKey)", forHTTPHeaderField: "Authorization")
 
-        // Build dynamic system prompt based on user preferences
-        let preferences = UserPreferences.shared
-        let localization = LocalizationManager.shared
-        let language = localization.currentLanguage
-        let languageName = language.promptName
-        let languageCode = language.rawValue
+        // Determine context values (passed in vs singletons)
+        var finalUserName = userName ?? "User"
+        var finalLanguageName = languageName ?? "English"
+        var finalLanguageCode = languageCode ?? "en"
+        var finalTone = tone ?? .philosophical
 
-        let activeTone = tone ?? preferences.quoteTone
+        #if !WIDGET
+        // Use singletons if we're in the main app and values weren't provided
+        if userName == nil { finalUserName = UserPreferences.shared.userName }
+        if languageName == nil { finalLanguageName = LocalizationManager.shared.currentLanguage.promptName }
+        if languageCode == nil { finalLanguageCode = LocalizationManager.shared.currentLanguage.rawValue }
+        if tone == nil { finalTone = UserPreferences.shared.quoteTone }
+        #endif
 
-        let vibeInstruction = activeTone == .philosophical
+        let vibeInstruction = finalTone == .philosophical
             ? "Present all wisdom as your own original insight. DO NOT cite philosophers, authors, or schools of thought (e.g. 'The Stoics', 'Nietzsche'). DO NOT use phrases like 'As X said'. Speak the wisdom directly as if it comes from you."
             : ""
 
         let dynamicPrompt = """
         \(Config.systemPrompt)
 
-        USER: \(preferences.userName)
-        VOICE STYLE: \(activeTone.description)
-        LANGUAGE: \(languageName) (\(languageCode))
+        USER: \(finalUserName)
+        VOICE STYLE: \(finalTone.description)
+        LANGUAGE: \(finalLanguageName) (\(finalLanguageCode))
 
         YOUR RESPONSE MUST fully embody the voice style described above. This is non-negotiable.
         NEVER describe your tone or style in your response - just BE that style naturally.
         \(vibeInstruction)
         Use their name sparingly (not every message).
-        IMPORTANT: You MUST respond in \(languageName) (\(languageCode)). All your responses should be in \(languageName), even if the user writes in another language.
+        IMPORTANT: You MUST respond in \(finalLanguageName) (\(finalLanguageCode)). All your responses should be in \(finalLanguageName), even if the user writes in another language.
         """
 
         // Build messages array with conversation history
@@ -89,9 +102,10 @@ class KimiService {
         // Add current user message
         apiMessages.append(KimiMessage(role: "user", content: userMessage))
 
-        // Prepare request body
+        // Prepare request body - use turbo model for widget
+        let modelToUse = useWidgetModel ? Config.widgetModelName : Config.modelName
         let kimiRequest = KimiRequest(
-            model: Config.modelName,
+            model: modelToUse,
             messages: apiMessages,
             temperature: 0.7,
             maxTokens: 300
@@ -137,16 +151,31 @@ class KimiService {
         }
     }
     func generateDailyCalibration() async throws -> String {
+        var barrier = "Self-Doubt"
+        var tone = QuoteTone.philosophical
+        
+        #if !WIDGET
         let preferences = UserPreferences.shared
+        barrier = "\(preferences.userBarrier.rawValue) (\(preferences.userBarrier.description))"
+        tone = preferences.quoteTone
+        #else
+        // In Widget mode, randomize for variety and motivation
+        if let randomBarrier = UserBarrier.allCases.randomElement() {
+            barrier = randomBarrier.rawValue
+        }
+        if let randomTone = QuoteTone.allCases.randomElement() {
+            tone = randomTone
+        }
+        #endif
         
         let prompt = """
         DAILY CALIBRATION REQUEST
         
-        Generate one deeply personal, soulful insight for the user.
+        Generate one deeply personal, soulful, and motivational insight for the user.
         
         CONTEXT:
-        - Primary Obstacle: \(preferences.userBarrier.rawValue) (\(preferences.userBarrier.description))
-        - Tone: \(preferences.quoteTone.rawValue)
+        - Primary Obstacle: \(barrier)
+        - Tone: \(tone.rawValue)
         
         STRICT RULES:
         1. Focus ONLY on addressing their obstacle.
@@ -155,6 +184,7 @@ class KimiService {
         4. No labels or conversational filler.
         """
         
-        return try await getQuote(for: prompt)
+        // Use turbo model for faster widget response
+        return try await getQuote(for: prompt, tone: tone, useWidgetModel: true)
     }
 }

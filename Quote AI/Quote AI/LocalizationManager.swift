@@ -9,15 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-enum AppLanguage: String, CaseIterable, Codable {
-    case english = "en"
-    case spanish = "es"
-    case french = "fr"
-    case chinese = "zh"
-    case hindi = "hi"
-    case japanese = "ja"
-    case korean = "ko"
-
+extension AppLanguage {
     var displayName: String {
         switch self {
         case .english: return "English"
@@ -27,18 +19,6 @@ enum AppLanguage: String, CaseIterable, Codable {
         case .hindi: return "हिन्दी"
         case .japanese: return "日本語"
         case .korean: return "한국어"
-        }
-    }
-
-    var promptName: String {
-        switch self {
-        case .english: return "English"
-        case .spanish: return "Spanish"
-        case .french: return "French"
-        case .chinese: return "Chinese"
-        case .hindi: return "Hindi"
-        case .japanese: return "Japanese"
-        case .korean: return "Korean"
         }
     }
 
@@ -53,7 +33,6 @@ enum AppLanguage: String, CaseIterable, Codable {
         case .korean: return "🇰🇷"
         }
     }
-
     var locale: Locale {
         return Locale(identifier: self.rawValue)
     }
