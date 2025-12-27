@@ -107,7 +107,7 @@ final class KimiService: @unchecked Sendable {
         let kimiRequest = KimiRequest(
             model: modelToUse,
             messages: apiMessages,
-            temperature: 0.7,
+            temperature: useWidgetModel ? 1.0 : 0.7,
             maxTokens: 300
         )
 
@@ -151,39 +151,47 @@ final class KimiService: @unchecked Sendable {
         }
     }
     func generateDailyCalibration() async throws -> String {
-        var barrier = "Self-Doubt"
         var tone = QuoteTone.philosophical
-        
-        #if !WIDGET
-        let preferences = UserPreferences.shared
-        barrier = "\(preferences.userBarrier.rawValue) (\(preferences.userBarrier.description))"
-        tone = preferences.quoteTone
-        #else
-        // In Widget mode, randomize for variety and motivation
-        if let randomBarrier = UserBarrier.allCases.randomElement() {
-            barrier = randomBarrier.rawValue
+        var language = AppLanguage.english
+
+        // Read user's saved preferences from shared UserDefaults
+        if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
+            if let toneString = sharedDefaults.string(forKey: SharedConstants.Keys.quoteTone),
+               let savedTone = QuoteTone(rawValue: toneString) {
+                tone = savedTone
+            }
+            if let langString = sharedDefaults.string(forKey: SharedConstants.Keys.appLanguage),
+               let savedLang = AppLanguage(rawValue: langString) {
+                language = savedLang
+            }
         }
-        if let randomTone = QuoteTone.allCases.randomElement() {
-            tone = randomTone
-        }
-        #endif
-        
+
+        // Random variety - natural topics and conversational styles
+        let topics = ["a hard truth", "something counterintuitive", "a simple reminder", "a different angle on struggle", "what matters today", "a quiet observation", "something most people forget", "a reality check", "an uncomfortable truth", "permission to rest"]
+        let styles = ["like texting a friend", "as a passing thought", "bluntly", "gently", "with dry humor", "matter-of-factly"]
+
+        let randomTopic = topics.randomElement() ?? "a simple reminder"
+        let randomStyle = styles.randomElement() ?? "like texting a friend"
+
         let prompt = """
-        DAILY CALIBRATION REQUEST
-        
-        Generate one deeply personal, soulful, and motivational insight for the user.
-        
-        CONTEXT:
-        - Primary Obstacle: \(barrier)
-        - Tone: \(tone.rawValue)
-        
-        STRICT RULES:
-        1. Focus ONLY on addressing their obstacle.
-        2. LENGTH: Maximum 15 words. Keep it punchy and powerful.
-        3. Do not use their name.
-        4. No labels or conversational filler.
+        Share \(randomTopic), \(randomStyle).
+
+        VOICE: \(tone.rawValue)
+        LANGUAGE: \(language.promptName)
+
+        BE HUMAN:
+        - 1-2 short sentences max
+        - Talk like a smart friend, not a motivational poster
+        - No "journey", "embrace", "empower", "unlock potential"
+        - No forced positivity or generic encouragement
+        - Be specific, not vague
+        - Okay to be blunt, funny, or real
+        - Sound like something a person would actually say
+
+        BAD: "Embrace your journey and unlock your potential"
+        GOOD: "You don't have to feel ready. Just start."
         """
-        
+
         // Use turbo model for faster widget response
         return try await getQuote(for: prompt, tone: tone, useWidgetModel: true)
     }

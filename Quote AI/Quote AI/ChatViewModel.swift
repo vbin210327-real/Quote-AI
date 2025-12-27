@@ -168,13 +168,7 @@ class ChatViewModel: ObservableObject {
 
                 // Stop loading FIRST, then add message (prevents flash)
                 isLoading = false
-                
-                // Update Widget with the new quote
-                if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
-                    sharedDefaults.set(quote, forKey: SharedConstants.Keys.latestQuote)
-                    WidgetCenter.shared.reloadAllTimelines()
-                }
-                
+
                 // Add bot response (temporary ID)
                 let botMessage = ChatMessage(content: quote, isUser: false, shouldAnimate: true)
                 messages.append(botMessage)

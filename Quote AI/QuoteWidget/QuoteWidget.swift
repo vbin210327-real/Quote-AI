@@ -15,7 +15,6 @@ struct Provider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         let currentDate = Date()
         let entry = SimpleEntry(date: currentDate, quote: getLatestQuote())
-        // Refresh every minute to pick up changes
         let timeline = Timeline(entries: [entry], policy: .after(currentDate.addingTimeInterval(60)))
         completion(timeline)
     }
@@ -37,74 +36,57 @@ struct QuoteWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        Button(intent: QuoteWidgetIntent()) {
-            content
+        if family == .accessoryRectangular || family == .accessoryCircular || family == .accessoryInline {
+            // Lock screen widgets - tappable
+            Button(intent: QuoteWidgetIntent()) {
+                lockScreenContent
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            // Home screen widgets - static
+            homeScreenContent
         }
-        .buttonStyle(.plain)
     }
 
     @ViewBuilder
-    private var content: some View {
-        if family == .accessoryRectangular {
-            // Lock Screen widget
-            VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    Image(systemName: "quote.opening")
-                        .font(.system(size: 10, weight: .bold))
-                    Text("QUOTE AI")
-                        .font(.system(size: 9, weight: .black))
-                        .tracking(1)
-                    Spacer()
-                }
-                .opacity(0.8)
-
-                Text(entry.quote)
-                    .font(.system(size: 13, weight: .medium, design: .serif))
-                    .italic()
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        } else if family == .accessoryCircular {
-            // Circular widget
-            VStack {
+    private var lockScreenContent: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 2) {
                 Image(systemName: "quote.opening")
-                    .font(.title3)
+                    .font(.system(size: 7, weight: .bold))
+                Text("QUOTE AI")
+                    .font(.system(size: 7, weight: .black))
+                    .tracking(0.3)
             }
-        } else if family == .accessoryInline {
-            // Inline widget
-            Text("Tap for wisdom")
-        } else {
-            // Home Screen Widgets
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Image(systemName: "quote.opening")
-                        .foregroundColor(.yellow)
-                        .font(.subheadline)
-                    Text("DAILY WISDOM")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Image(systemName: "arrow.clockwise")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.bottom, 2)
+            .opacity(0.6)
 
-                Text(entry.quote)
-                    .font(.system(family == .systemSmall ? .subheadline : .title3, design: .serif))
-                    .italic()
-                    .minimumScaleFactor(0.4)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                if family != .systemSmall {
-                    Spacer()
-                }
-            }
-            .padding()
+            Text(entry.quote)
+                .font(.system(size: 13, weight: .medium, design: .serif))
+                .italic()
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var homeScreenContent: some View {
+        VStack(alignment: .leading, spacing: family == .systemSmall ? 4 : 8) {
+            Image(systemName: "quote.opening")
+                .foregroundColor(.primary)
+                .font(family == .systemSmall ? .title3 : .title2)
+
+            Text(entry.quote)
+                .font(.system(family == .systemSmall ? .callout : (family == .systemMedium ? .title2 : .title), design: .serif))
+                .fontWeight(family == .systemSmall ? .medium : .regular)
+                .italic()
+                .lineLimit(nil)
+                .minimumScaleFactor(0.5)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+        .padding()
     }
 }
 
@@ -114,15 +96,19 @@ struct QuoteWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            QuoteWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+            if #available(iOSApplicationExtension 17.0, *) {
+                QuoteWidgetEntryView(entry: entry)
+                    .containerBackground(for: .widget) {
+                        Color.clear
+                    }
+            } else {
+                QuoteWidgetEntryView(entry: entry)
+            }
         }
         .configurationDisplayName("Daily Wisdom")
         .description("Tap to generate AI-powered quotes.")
         .supportedFamilies([
             .accessoryRectangular,
-            .accessoryCircular,
-            .accessoryInline,
             .systemSmall,
             .systemMedium,
             .systemLarge

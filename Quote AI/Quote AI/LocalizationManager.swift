@@ -44,6 +44,10 @@ class LocalizationManager: ObservableObject {
     @Published var currentLanguage: AppLanguage {
         didSet {
             UserDefaults.standard.set(currentLanguage.rawValue, forKey: "appLanguage")
+            // Also save to shared UserDefaults for widget
+            if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
+                sharedDefaults.set(currentLanguage.rawValue, forKey: SharedConstants.Keys.appLanguage)
+            }
             updateBundle()
             // Sync language change to cloud
             if !isSyncingFromCloud {
@@ -61,6 +65,10 @@ class LocalizationManager: ObservableObject {
             self.currentLanguage = language
         } else {
             self.currentLanguage = .english
+        }
+        // Sync to shared UserDefaults for widget
+        if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
+            sharedDefaults.set(currentLanguage.rawValue, forKey: SharedConstants.Keys.appLanguage)
         }
         updateBundle()
     }

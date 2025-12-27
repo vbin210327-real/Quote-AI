@@ -10,5 +10,6 @@ struct SharedConstants {
         nonisolated static let quoteTone = "quoteTone"
         nonisolated static let userBarrier = "userBarrier"
         nonisolated static let isGeneratingQuote = "isGeneratingQuote"
+        nonisolated static let appLanguage = "appLanguage"
     }
 }
