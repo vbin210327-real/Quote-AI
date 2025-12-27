@@ -32,6 +32,13 @@
 "onboarding.continue" = "जारी रखें";
 "onboarding.letsGetStarted" = "चलिए शुरू करें!";
 
+/* OnboardingView - Notification */
+"onboarding.notification.title" = "आप अपना दैनिक उद्धरण कब चाहते हैं?";
+"onboarding.notification.subtitle" = "हम आपको इस समय सूचना भेजेंगे";
+"notification.morning" = "सुबह";
+"notification.afternoon" = "दोपहर";
+"notification.evening" = "शाम";
+
 /* OnboardingView - Gender */
 "gender.male" = "पुरुष";
 "gender.female" = "महिला";

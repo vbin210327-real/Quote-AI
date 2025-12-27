@@ -29,6 +29,7 @@ struct OnboardingView: View {
     @State private var selectedBarrier: UserBarrier?
     @State private var selectedEnergyDrain: UserEnergyDrain?
     @State private var selectedBackground: ChatBackground?
+    @State private var selectedNotificationTime: NotificationTime?
     
     @Environment(\.dismiss) var dismiss
     
@@ -40,7 +41,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 // Top Navigation & Progress - Hidden only during setup loading step
-                if currentStep != 11 {
+                if currentStep != 12 {
                     HStack(spacing: 16) {
                         // Back Button - Always visible
                         Button(action: {
@@ -48,9 +49,9 @@ struct OnboardingView: View {
                             impact.impactOccurred()
                             if currentStep > 0 {
                                 withAnimation {
-                                    // Skip loading (11) and congrats (12) when going back from sign-in (13) or congrats (12)
-                                    if currentStep >= 12 {
-                                        currentStep = 10 // Go directly to personalize page
+                                    // Skip loading (12) and congrats (13) when going back from sign-in (14) or congrats (13)
+                                    if currentStep >= 13 {
+                                        currentStep = 11 // Go directly to notification step
                                         setupLoadingComplete = false // Reset loading state
                                     } else {
                                         currentStep -= 1
@@ -70,7 +71,7 @@ struct OnboardingView: View {
 
                         // Linear Progress Bar
                         GeometryReader { geometry in
-                            let totalSteps: CGFloat = 14 // steps 0-13 = 14 total steps
+                            let totalSteps: CGFloat = 15 // steps 0-14 = 15 total steps
                             // Add 1 so step 0 shows 1/14, step 1 shows 2/14, etc.
                             let progressRatio = min(1, CGFloat(currentStep + 1) / totalSteps)
                             ZStack(alignment: .leading) {
@@ -95,16 +96,16 @@ struct OnboardingView: View {
                     .padding(.top, 10)
                 }
                 
-                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (11) and setup complete step (12)
-                if currentStep != 11 && currentStep != 12 {
+                // Title and Subtitle (dynamic based on step) - Hidden for setup loading step (12) and setup complete step (13)
+                if currentStep != 12 && currentStep != 13 {
                     VStack(alignment: .leading, spacing: 12) {
 	                        Text(stepTitle)
 	                            .font(.system(size: 32, weight: .bold))
 	                            .foregroundColor(.black)
 	                            .multilineTextAlignment(.leading)
-	                            .lineLimit(currentStep == 8 ? 2 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? nil : 1))
-	                            .minimumScaleFactor(currentStep == 8 ? 0.75 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? 1.0 : 0.5))
-	                            .allowsTightening(currentStep == 8)
+	                            .lineLimit(currentStep == 8 || currentStep == 10 ? 2 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? nil : 1))
+	                            .minimumScaleFactor(currentStep == 8 || currentStep == 10 ? 0.75 : (currentStep == 3 || currentStep == 4 || currentStep == 6 || currentStep == 7 || currentStep == 9 ? 1.0 : 0.5))
+	                            .allowsTightening(currentStep == 8 || currentStep == 10)
 	                            .fixedSize(horizontal: false, vertical: true)
 
                         Text(stepSubtitle)
@@ -117,7 +118,7 @@ struct OnboardingView: View {
                     .padding(.top, 0)
                 }
 
-                if currentStep != 12 && currentStep != 13 {
+                if currentStep != 13 && currentStep != 14 {
                     Spacer()
                 }
 
@@ -154,15 +155,18 @@ struct OnboardingView: View {
                         toneStep
                             .id("tone-\(navigationCounter)")
                     case 10:
+                        notificationStep
+                            .id("notification-\(navigationCounter)")
+                    case 11:
                         personalizeStep
                             .id("personalize-\(navigationCounter)")
-                    case 11:
+                    case 12:
                         setupLoadingStep
                             .id("setup-\(navigationCounter)")
-                    case 12:
+                    case 13:
                         setupCompleteStep
                             .id("complete-\(navigationCounter)")
-                    case 13:
+                    case 14:
                         signInStep
                             .id("signin-\(navigationCounter)")
                     default:
@@ -171,13 +175,13 @@ struct OnboardingView: View {
                 }
                 .animation(.easeInOut(duration: 0.3), value: currentStep)
 
-                if currentStep != 12 {
+                if currentStep != 13 {
                     Spacer()
                 }
-                
+
                 // Continue Button - Same position as Get Started in WelcomeView
-                // Hide for setup loading step (11) which shows its own button, and sign-in step (13)
-                if currentStep < 11 {
+                // Hide for setup loading step (12) which shows its own button, and sign-in step (14)
+                if currentStep < 12 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
@@ -197,12 +201,12 @@ struct OnboardingView: View {
                     .padding(.bottom, 20)
                 }
 
-                if currentStep == 12 {
+                if currentStep == 13 {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
                         withAnimation {
-                            currentStep = 13
+                            currentStep = 14
                             navigationCounter += 1
                         }
                     }) {
@@ -226,9 +230,9 @@ struct OnboardingView: View {
             // unless we are coming back from a later step (handled by navigationCounter)
         }
         .onChange(of: setupLoadingComplete) { _, complete in
-            guard complete, currentStep == 11 else { return }
+            guard complete, currentStep == 12 else { return }
             withAnimation {
-                currentStep = 12
+                currentStep = 13
                 navigationCounter += 1
             }
         }
@@ -250,6 +254,7 @@ struct OnboardingView: View {
         case 6: return selectedBarrier == nil
         case 8: return selectedBackground == nil
         case 9: return selectedTone == nil
+        case 10: return selectedNotificationTime == nil
         default: return false
         }
     }
@@ -267,10 +272,11 @@ struct OnboardingView: View {
         case 7: return localization.string(for: "onboarding.mindset.title")
         case 8: return localization.string(for: "onboarding.background.title")
         case 9: return localization.string(for: "onboarding.tone.title")
-        case 10: return ""
+        case 10: return localization.string(for: "onboarding.notification.title")
         case 11: return ""
         case 12: return ""
-        case 13: return localization.string(for: "onboarding.saveProgress.title")
+        case 13: return ""
+        case 14: return localization.string(for: "onboarding.saveProgress.title")
         default: return ""
         }
     }
@@ -288,9 +294,10 @@ struct OnboardingView: View {
         case 7: return ""
         case 8: return localization.string(for: "onboarding.personalize.subtitle")
         case 9: return localization.string(for: "onboarding.personalize.subtitle")
-        case 10: return ""
+        case 10: return localization.string(for: "onboarding.notification.subtitle")
         case 11: return ""
         case 12: return ""
+        case 13: return ""
         default: return ""
         }
     }
@@ -408,14 +415,14 @@ struct OnboardingView: View {
         )
     }
 
-    // Step 10: Personalize
+    // Step 11: Personalize
     var personalizeStep: some View {
         PersonalizeStepView(
-            isActive: .constant(currentStep == 10)
+            isActive: .constant(currentStep == 11)
         )
     }
 
-    // Step 11: Setup Complete
+    // Step 13: Setup Complete
     var setupCompleteStep: some View {
         ScrollView {
             VStack(spacing: 22) {
@@ -500,16 +507,24 @@ struct OnboardingView: View {
 
 
 
-    // Step 11: Setup Loading
+    // Step 10: Notification Time
+    var notificationStep: some View {
+        NotificationStepView(
+            isActive: .constant(currentStep == 10),
+            selectedNotificationTime: $selectedNotificationTime
+        )
+    }
+
+    // Step 12: Setup Loading
     var setupLoadingStep: some View {
         SetupLoadingStepView(
-            isActive: .constant(currentStep == 11),
+            isActive: .constant(currentStep == 12),
             isLoadingComplete: $setupLoadingComplete,
             preferences: preferences
         )
     }
 
-    // Step 13: Sign In
+    // Step 14: Sign In
     var signInStep: some View {
         VStack(spacing: 30) {
             Text(localization.string(for: "signIn.oneLastStep"))
@@ -656,7 +671,20 @@ struct OnboardingView: View {
                 }
                 currentStep += 1
                 navigationCounter += 1
-            } else if currentStep < 11 {
+            } else if currentStep == 10 {
+                // Save notification time
+                if let notificationTime = selectedNotificationTime {
+                    preferences.notificationHour = notificationTime.hour
+                    preferences.notificationMinute = 0
+                }
+                currentStep += 1
+                navigationCounter += 1
+
+                // Request permission AFTER animation (outside withAnimation block)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    NotificationManager.shared.requestPermission()
+                }
+            } else if currentStep < 12 {
                 currentStep += 1
                 navigationCounter += 1
             }
@@ -2237,5 +2265,109 @@ struct ReadyCheckIconView: View {
         Image("SetupReadyIcon")
             .resizable()
             .scaledToFit()
+    }
+}
+
+// MARK: - Notification Time Options
+enum NotificationTime: String, CaseIterable {
+    case morning
+    case afternoon
+    case evening
+
+    var hour: Int {
+        switch self {
+        case .morning: return 8
+        case .afternoon: return 13
+        case .evening: return 20
+        }
+    }
+
+    var displayTime: String {
+        switch self {
+        case .morning: return "8:00 AM"
+        case .afternoon: return "1:00 PM"
+        case .evening: return "8:00 PM"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .morning: return "sun.horizon.fill"
+        case .afternoon: return "sun.max.fill"
+        case .evening: return "moon.stars.fill"
+        }
+    }
+}
+
+struct NotificationStepView: View {
+    @Binding var isActive: Bool
+    @Binding var selectedNotificationTime: NotificationTime?
+    @StateObject private var localization = LocalizationManager.shared
+    @State private var showContent = false
+
+    private func localizedTime(_ time: NotificationTime) -> String {
+        switch time {
+        case .morning: return localization.string(for: "notification.morning")
+        case .afternoon: return localization.string(for: "notification.afternoon")
+        case .evening: return localization.string(for: "notification.evening")
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            ForEach(Array(NotificationTime.allCases.enumerated()), id: \.element) { index, time in
+                Button(action: {
+                    let impact = UIImpactFeedbackGenerator(style: .medium)
+                    impact.impactOccurred()
+                    selectedNotificationTime = time
+                }) {
+                    HStack(spacing: 16) {
+                        // Icon with circular white background
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 44, height: 44)
+
+                            Image(systemName: time.icon)
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.black)
+                        }
+
+                        Text("\(localizedTime(time)) (\(time.displayTime))")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(selectedNotificationTime == time ? .white : .black)
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
+                    .background(selectedNotificationTime == time ? Color.black : Color.gray.opacity(0.08))
+                    .cornerRadius(16)
+                }
+                .offset(y: showContent ? 0 : 100)
+                .opacity(showContent ? 1 : 0)
+                .animation(
+                    .spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)
+                    .delay(0.1 + Double(index) * 0.15),
+                    value: showContent
+                )
+            }
+        }
+        .padding(.horizontal, 24)
+        .onChange(of: isActive) { _, active in
+            if active {
+                showContent = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showContent = true
+                }
+            }
+        }
+        .onAppear {
+            if isActive {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showContent = true
+                }
+            }
+        }
     }
 }

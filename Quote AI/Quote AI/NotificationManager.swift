@@ -37,7 +37,12 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             self.checkPermissionStatus()
             if granted {
-                self.scheduleDailyNotification()
+                // Use user's saved notification time
+                DispatchQueue.main.async {
+                    let hour = UserPreferences.shared.notificationHour
+                    let minute = UserPreferences.shared.notificationMinute
+                    self.scheduleDailyNotification(at: hour, minute: minute)
+                }
             }
         }
     }
@@ -49,9 +54,18 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         let content = UNMutableNotificationContent()
         content.title = "Quote AI"
         
-        // Use a generic inviting message
+        // Use appropriate greeting based on scheduled time
         let userName = UserPreferences.shared.userName
-        let greeting = userName.isEmpty ? "Good morning." : "Good morning, \(userName)."
+        let timeGreeting: String
+        switch hour {
+        case 5..<12:
+            timeGreeting = "Good morning"
+        case 12..<18:
+            timeGreeting = "Good afternoon"
+        default:
+            timeGreeting = "Good evening"
+        }
+        let greeting = userName.isEmpty ? "\(timeGreeting)." : "\(timeGreeting), \(userName)."
         content.body = "\(greeting) Time for your daily calibration. Here's a thought for you..."
         content.sound = .default
         

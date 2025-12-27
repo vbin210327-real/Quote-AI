@@ -32,6 +32,13 @@
 "onboarding.continue" = "次へ";
 "onboarding.letsGetStarted" = "はじめましょう！";
 
+/* OnboardingView - Notification */
+"onboarding.notification.title" = "いつ毎日の名言を受け取りたいですか？";
+"onboarding.notification.subtitle" = "この時間に通知をお送りします";
+"notification.morning" = "朝";
+"notification.afternoon" = "午後";
+"notification.evening" = "夜";
+
 /* OnboardingView - Gender */
 "gender.male" = "男性";
 "gender.female" = "女性";

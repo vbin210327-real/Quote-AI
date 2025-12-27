@@ -32,6 +32,13 @@
 "onboarding.continue" = "계속";
 "onboarding.letsGetStarted" = "시작해 봅시다!";
 
+/* OnboardingView - Notification */
+"onboarding.notification.title" = "언제 매일 명언을 받고 싶으신가요?";
+"onboarding.notification.subtitle" = "이 시간에 알림을 보내드립니다";
+"notification.morning" = "아침";
+"notification.afternoon" = "오후";
+"notification.evening" = "저녁";
+
 /* OnboardingView - Gender */
 "gender.male" = "남성";
 "gender.female" = "여성";

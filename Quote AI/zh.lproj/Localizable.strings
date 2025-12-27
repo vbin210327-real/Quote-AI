@@ -32,6 +32,13 @@
 "onboarding.continue" = "继续";
 "onboarding.letsGetStarted" = "开始吧！";
 
+/* OnboardingView - Notification */
+"onboarding.notification.title" = "你想什么时候收到每日语录？";
+"onboarding.notification.subtitle" = "我们会在这个时间给你发送通知";
+"notification.morning" = "早上";
+"notification.afternoon" = "下午";
+"notification.evening" = "晚上";
+
 /* OnboardingView - Gender */
 "gender.male" = "男";
 "gender.female" = "女";

@@ -32,6 +32,13 @@
 "onboarding.continue" = "Continue";
 "onboarding.letsGetStarted" = "Let's get started!";
 
+/* OnboardingView - Notification */
+"onboarding.notification.title" = "When do you want your daily quote?";
+"onboarding.notification.subtitle" = "We'll send you a notification at this time";
+"notification.morning" = "Morning";
+"notification.afternoon" = "Afternoon";
+"notification.evening" = "Evening";
+
 /* OnboardingView - Gender */
 "gender.male" = "Male";
 "gender.female" = "Female";
