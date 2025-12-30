@@ -121,7 +121,7 @@
 "profile.done" = "완료";
 
 /* Tones */
-"tone.gentle" = "부드러운";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "단호한";
 "tone.philosophical" = "철학적인";
 "tone.realist" = "현실적인";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "아이시 피크";
 "background.ascent" = "섀도우 스테어케이스";
+"background.dawnRun" = "새벽 달리기";
 "background.default" = "기본";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "성격";
 "settings.background" = "디자인";
 "settings.account" = "계정";
+"settings.subscription" = "구독";
+"settings.renewsOn" = "갱신일";
+"settings.expiresOn" = "만료일";
 
 /* Conversation History */
 "history.search" = "검색";
@@ -183,3 +187,58 @@
 "favorites.remove" = "삭제";
 "favorites.removeConfirm" = "명언을 삭제하시겠습니까?";
 "favorites.removeMessage" = "이 명언이 저장 목록에서 삭제됩니다.";
+
+/* Subscription Detail */
+"subscription.editTitle" = "구독 편집";
+"subscription.done" = "완료";
+"subscription.renewsOn" = "갱신일";
+"subscription.expiresOn" = "만료일";
+"subscription.priceWeekly" = "주당 $4.99";
+"subscription.priceMonthly" = "월 $9.99";
+"subscription.priceYearly" = "연간 $29.99";
+"subscription.pricePro" = "Pro 구독";
+"subscription.cancel" = "구독 취소";
+"subscription.cancelInfo" = "지금 취소하시면 {date}까지 구독을 계속 이용하실 수 있습니다.";
+"subscription.aboutPrivacy" = "구독 및 개인정보 처리방침";
+
+// Settings - Additional
+"settings.restorePurchases" = "구매 복원";
+"settings.notifications" = "알림";
+"settings.dailyQuote" = "오늘의 명언";
+"settings.calibrationTime" = "캘리브레이션 시간";
+"settings.upgradePlan" = "플랜 업그레이드";
+"settings.currentPlan" = "현재 플랜: %@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "이용 가능한 플랜";
+"upgrade.upgradePlan" = "플랜 업그레이드";
+"upgrade.upgrade" = "업그레이드";
+"upgrade.subscribe" = "구독하기";
+"upgrade.currentPlan" = "현재 플랜: %@";
+"upgrade.yearly" = "연간";
+"upgrade.monthly" = "월간";
+"upgrade.weekly" = "주간";
+"upgrade.perYear" = "연";
+"upgrade.perMonth" = "월";
+"upgrade.perWeek" = "주";
+
+// Paywall View
+"paywall.unlimitedAccess" = "무제한 이용";
+"paywall.subtitle" = "최고의 마인드셋을 잠금 해제";
+"paywall.yearly" = "연간";
+"paywall.monthly" = "월간";
+"paywall.weekly" = "주간";
+"paywall.freeTrial" = "3일 무료 체험";
+"paywall.cancelAnytime" = "언제든지 취소 가능";
+"paywall.savingsText" = "월간 대비 75% 절약";
+"paywall.perMonth" = "$2.49/월";
+"paywall.startTrial" = "3일 체험 시작";
+"paywall.continue" = "계속";
+"paywall.trialDetails" = "3일 무료 체험 후 연간 $29.99. 언제든지 취소 가능.";
+"paywall.termsOfUse" = "이용약관";
+"paywall.privacyPolicy" = "개인정보 처리방침";
+"paywall.restore" = "복원";
+"paywall.dismissTitle" = "확실합니까?";
+"paywall.dismissStay" = "체험 받기";
+"paywall.dismissLeave" = "나가기";
+"paywall.dismissMessage" = "3일 무료 체험과 Quote AI 무제한 이용 기회를 놓치게 됩니다.";

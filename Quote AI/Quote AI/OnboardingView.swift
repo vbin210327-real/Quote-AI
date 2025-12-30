@@ -8,21 +8,24 @@
 import SwiftUI
 import GoogleSignInSwift
 import AuthenticationServices
+import Auth
 
 struct OnboardingView: View {
     var onGoBack: (() -> Void)? = nil
     @StateObject private var preferences = UserPreferences.shared
     @StateObject private var supabaseManager = SupabaseManager.shared
     @StateObject private var localization = LocalizationManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var currentStep = 0
     @State private var selectedGender = ""
     @State private var nameInput = ""
     @State private var isSigningIn = false
     @State private var errorMessage: String?
+    @State private var showPaywall = false
     @State private var navigationCounter = 0
     @State private var setupLoadingComplete = false
     @State private var animateSuccessIcon = false
-    
+
     // Local state for selections to avoid "auto-choosing" defaults
     @State private var selectedTone: QuoteTone?
     @State private var selectedFocus: UserFocus?
@@ -30,7 +33,7 @@ struct OnboardingView: View {
     @State private var selectedEnergyDrain: UserEnergyDrain?
     @State private var selectedBackground: ChatBackground?
     @State private var selectedNotificationTime: NotificationTime?
-    
+
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -71,8 +74,8 @@ struct OnboardingView: View {
 
                         // Linear Progress Bar
                         GeometryReader { geometry in
-                            let totalSteps: CGFloat = 15 // steps 0-14 = 15 total steps
-                            // Add 1 so step 0 shows 1/14, step 1 shows 2/14, etc.
+                            let totalSteps: CGFloat = 16 // steps 0-14 + paywall = 16 total steps
+                            // Add 1 so step 0 shows 1/16, step 14 (sign-in) shows 15/16, paywall completes it
                             let progressRatio = min(1, CGFloat(currentStep + 1) / totalSteps)
                             ZStack(alignment: .leading) {
                                 // Track
@@ -205,9 +208,15 @@ struct OnboardingView: View {
                     Button(action: {
                         let impact = UIImpactFeedbackGenerator(style: .medium)
                         impact.impactOccurred()
-                        withAnimation {
-                            currentStep = 14
-                            navigationCounter += 1
+                        // If user is already authenticated (signed in from WelcomeView), show paywall directly
+                        // Otherwise, go to sign-in step
+                        if supabaseManager.isAuthenticated {
+                            showPaywall = true
+                        } else {
+                            withAnimation {
+                                currentStep = 14
+                                navigationCounter += 1
+                            }
                         }
                     }) {
                         Text(localization.string(for: "onboarding.letsGetStarted"))
@@ -236,10 +245,12 @@ struct OnboardingView: View {
                 navigationCounter += 1
             }
         }
-        .onChange(of: supabaseManager.isAuthenticated) { _, isAuthenticated in
-            if isAuthenticated {
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView {
                 preferences.completeOnboarding()
+                showPaywall = false
             }
+            .interactiveDismissDisabled(true)
         }
     }
 
@@ -706,7 +717,21 @@ struct OnboardingView: View {
         Task {
             do {
                 try await supabaseManager.signInWithGoogle(presentingViewController: rootViewController)
-                // On success, the onChange handler will complete onboarding
+
+                // Login to RevenueCat and check subscription status
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
+                await MainActor.run {
+                    isSigningIn = false
+                    // If already subscribed, skip paywall and complete onboarding
+                    if subscriptionManager.isProUser {
+                        preferences.completeOnboarding()
+                    } else {
+                        showPaywall = true
+                    }
+                }
             } catch {
                 // Ignore user cancellation error (code -5)
                 let nsError = error as NSError
@@ -714,7 +739,7 @@ struct OnboardingView: View {
                     isSigningIn = false
                     return
                 }
-                
+
                 errorMessage = "Sign-in failed: \(error.localizedDescription)"
                 isSigningIn = false
             }
@@ -728,7 +753,21 @@ struct OnboardingView: View {
         Task {
             do {
                 try await supabaseManager.signInWithApple()
-                // On success, the onChange handler will complete onboarding
+
+                // Login to RevenueCat and check subscription status
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
+                await MainActor.run {
+                    isSigningIn = false
+                    // If already subscribed, skip paywall and complete onboarding
+                    if subscriptionManager.isProUser {
+                        preferences.completeOnboarding()
+                    } else {
+                        showPaywall = true
+                    }
+                }
             } catch {
                 // Ignore user cancellation error (code 1001)
                 let nsError = error as NSError
@@ -801,7 +840,7 @@ struct ToneStepView: View {
 
     private func localizedTone(_ tone: QuoteTone) -> String {
         switch tone {
-        case .gentle: return localization.string(for: "tone.gentle")
+        case .naval: return localization.string(for: "tone.naval")
         case .toughLove: return localization.string(for: "tone.toughLove")
         case .philosophical: return localization.string(for: "tone.philosophical")
         case .realist: return localization.string(for: "tone.realist")
@@ -816,7 +855,7 @@ struct ToneStepView: View {
                     impact.impactOccurred()
                     selectedTone = tone
                 }) {
-                    Text(localizedTone(tone))
+                    Text(localizedTone(tone) + (tone == .naval ? " (Recommended)" : ""))
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(selectedTone == tone ? .white : .black)
                         .frame(maxWidth: .infinity)
@@ -862,39 +901,65 @@ struct ChatBackgroundStepView: View {
         switch background {
         case .summit: return localization.string(for: "background.summit")
         case .ascent: return localization.string(for: "background.ascent")
+        case .dawnRun: return localization.string(for: "background.dawnRun")
         case .defaultBackground: return localization.string(for: "background.default")
         }
     }
 
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
     var body: some View {
-        VStack(spacing: 16) {
+        LazyVGrid(columns: columns, spacing: 12) {
             ForEach(Array(ChatBackground.allCases.enumerated()), id: \.element) { index, background in
                 Button(action: {
                     let impact = UIImpactFeedbackGenerator(style: .medium)
                     impact.impactOccurred()
                     selectedBackground = background
                 }) {
-                    HStack(spacing: 16) {
+                    ZStack(alignment: .topTrailing) {
+                        VStack(spacing: 0) {
+                            // Background image
+                            Image(background.assetName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 120)
+                                .clipped()
+
+                            // Title at bottom
+                            Text(localizedBackground(background))
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.white)
+                        }
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(selectedBackground == background ? Color.black : Color.clear, lineWidth: 3)
+                        )
+
+                        // Circular checkbox
                         ZStack {
                             Circle()
-                                .fill(Color.white)
-                                .frame(width: 44, height: 44)
+                                .fill(selectedBackground == background ? Color.black : Color.white)
+                                .frame(width: 28, height: 28)
 
-                            Image(systemName: background.icon)
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(.black)
+                            if selectedBackground == background {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white)
+                            } else {
+                                Circle()
+                                    .stroke(Color.gray.opacity(0.4), lineWidth: 2)
+                                    .frame(width: 28, height: 28)
+                            }
                         }
-
-                        Text(localizedBackground(background))
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(selectedBackground == background ? .white : .black)
-
-                        Spacer()
+                        .padding(8)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(selectedBackground == background ? Color.black : Color.gray.opacity(0.08))
-                    .cornerRadius(16)
                 }
                 .offset(y: showContent ? 0 : 100)
                 .opacity(showContent ? 1 : 0)

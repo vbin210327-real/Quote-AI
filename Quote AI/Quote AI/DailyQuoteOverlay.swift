@@ -38,7 +38,7 @@ struct DailyQuoteOverlay: View {
                         .font(.title2)
                         .foregroundColor(.blue)
                     
-                    Text("Daily Calibration")
+                    Text(localization.string(for: "settings.dailyQuote"))
                         .font(.system(size: 16, weight: .bold, design: .serif))
                         .italic()
                         .foregroundColor(.secondary)

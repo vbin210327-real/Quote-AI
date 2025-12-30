@@ -121,7 +121,7 @@
 "profile.done" = "完成";
 
 /* Tones */
-"tone.gentle" = "温和";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "严厉关爱";
 "tone.philosophical" = "哲学";
 "tone.realist" = "现实主义";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "冰峰";
 "background.ascent" = "暗影阶梯";
+"background.dawnRun" = "晨跑";
 "background.default" = "默认";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "个性";
 "settings.background" = "外观";
 "settings.account" = "账号";
+"settings.subscription" = "订阅";
+"settings.renewsOn" = "续订日期";
+"settings.expiresOn" = "到期日期";
 
 /* Conversation History */
 "history.search" = "搜索";
@@ -181,3 +185,58 @@
 "favorites.remove" = "移除";
 "favorites.removeConfirm" = "移除语录？";
 "favorites.removeMessage" = "此语录将从您的收藏中移除。";
+
+/* Subscription Detail */
+"subscription.editTitle" = "编辑订阅";
+"subscription.done" = "完成";
+"subscription.renewsOn" = "续订日期";
+"subscription.expiresOn" = "到期日期";
+"subscription.priceWeekly" = "每周 $4.99";
+"subscription.priceMonthly" = "每月 $9.99";
+"subscription.priceYearly" = "每年 $29.99";
+"subscription.pricePro" = "Pro 订阅";
+"subscription.cancel" = "取消订阅";
+"subscription.cancelInfo" = "如果您现在取消，您仍可在 {date} 之前继续使用订阅。";
+"subscription.aboutPrivacy" = "关于订阅和隐私";
+
+// Settings - Additional
+"settings.restorePurchases" = "恢复购买";
+"settings.notifications" = "通知";
+"settings.dailyQuote" = "每日语录";
+"settings.calibrationTime" = "校准时间";
+"settings.upgradePlan" = "升级计划";
+"settings.currentPlan" = "当前计划：%@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "可用计划";
+"upgrade.upgradePlan" = "升级计划";
+"upgrade.upgrade" = "升级";
+"upgrade.subscribe" = "订阅";
+"upgrade.currentPlan" = "当前计划：%@";
+"upgrade.yearly" = "年度";
+"upgrade.monthly" = "月度";
+"upgrade.weekly" = "每周";
+"upgrade.perYear" = "每年";
+"upgrade.perMonth" = "每月";
+"upgrade.perWeek" = "每周";
+
+// Paywall View
+"paywall.unlimitedAccess" = "无限访问";
+"paywall.subtitle" = "解锁你的巅峰心态";
+"paywall.yearly" = "年度";
+"paywall.monthly" = "月度";
+"paywall.weekly" = "每周";
+"paywall.freeTrial" = "3天免费试用";
+"paywall.cancelAnytime" = "随时取消";
+"paywall.savingsText" = "比月付节省75%";
+"paywall.perMonth" = "$2.49/月";
+"paywall.startTrial" = "开始3天试用";
+"paywall.continue" = "继续";
+"paywall.trialDetails" = "3天免费试用，之后$29.99/年。随时取消。";
+"paywall.termsOfUse" = "使用条款";
+"paywall.privacyPolicy" = "隐私政策";
+"paywall.restore" = "恢复购买";
+"paywall.dismissTitle" = "确定要离开吗？";
+"paywall.dismissStay" = "留下获取试用";
+"paywall.dismissLeave" = "离开";
+"paywall.dismissMessage" = "您将错过3天免费试用和Quote AI的无限访问权限。";

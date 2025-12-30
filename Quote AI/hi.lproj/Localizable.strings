@@ -121,7 +121,7 @@
 "profile.done" = "हो गया";
 
 /* Tones */
-"tone.gentle" = "कोमल";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "कठोर प्रेम";
 "tone.philosophical" = "दार्शनिक";
 "tone.realist" = "यथार्थवादी";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "बर्फीली चोटी";
 "background.ascent" = "छाया सीढ़ी";
+"background.dawnRun" = "सुबह की दौड़";
 "background.default" = "डिफ़ॉल्ट";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "व्यक्तित्व";
 "settings.background" = "दिखावट";
 "settings.account" = "खाता";
+"settings.subscription" = "सदस्यता";
+"settings.renewsOn" = "नवीनीकरण";
+"settings.expiresOn" = "समाप्ति";
 
 /* Conversation History */
 "history.search" = "खोजें";
@@ -173,3 +177,58 @@
 "favorites.remove" = "हटाएं";
 "favorites.removeConfirm" = "उद्धरण हटाएं?";
 "favorites.removeMessage" = "यह उद्धरण आपके सहेजे गए उद्धरणों से हटा दिया जाएगा।";
+
+/* Subscription Detail */
+"subscription.editTitle" = "सदस्यता संपादित करें";
+"subscription.done" = "हो गया";
+"subscription.renewsOn" = "नवीनीकरण";
+"subscription.expiresOn" = "समाप्ति";
+"subscription.priceWeekly" = "$4.99 प्रति सप्ताह";
+"subscription.priceMonthly" = "$9.99 प्रति माह";
+"subscription.priceYearly" = "$29.99 प्रति वर्ष";
+"subscription.pricePro" = "Pro सदस्यता";
+"subscription.cancel" = "सदस्यता रद्द करें";
+"subscription.cancelInfo" = "यदि आप अभी रद्द करते हैं, तो आप {date} तक अपनी सदस्यता का उपयोग कर सकते हैं।";
+"subscription.aboutPrivacy" = "सदस्यता और गोपनीयता के बारे में";
+
+// Settings - Additional
+"settings.restorePurchases" = "खरीदारी पुनर्स्थापित करें";
+"settings.notifications" = "सूचनाएं";
+"settings.dailyQuote" = "दैनिक उद्धरण";
+"settings.calibrationTime" = "कैलिब्रेशन समय";
+"settings.upgradePlan" = "प्लान अपग्रेड करें";
+"settings.currentPlan" = "वर्तमान प्लान: %@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "उपलब्ध प्लान";
+"upgrade.upgradePlan" = "प्लान अपग्रेड करें";
+"upgrade.upgrade" = "अपग्रेड";
+"upgrade.subscribe" = "सब्सक्राइब करें";
+"upgrade.currentPlan" = "वर्तमान प्लान: %@";
+"upgrade.yearly" = "वार्षिक";
+"upgrade.monthly" = "मासिक";
+"upgrade.weekly" = "साप्ताहिक";
+"upgrade.perYear" = "प्रति वर्ष";
+"upgrade.perMonth" = "प्रति माह";
+"upgrade.perWeek" = "प्रति सप्ताह";
+
+// Paywall View
+"paywall.unlimitedAccess" = "असीमित पहुंच";
+"paywall.subtitle" = "अपनी चरम मानसिकता को अनलॉक करें";
+"paywall.yearly" = "वार्षिक";
+"paywall.monthly" = "मासिक";
+"paywall.weekly" = "साप्ताहिक";
+"paywall.freeTrial" = "3 दिन का मुफ्त ट्रायल";
+"paywall.cancelAnytime" = "कभी भी रद्द करें";
+"paywall.savingsText" = "मासिक से 75% बचाएं";
+"paywall.perMonth" = "$2.49/माह";
+"paywall.startTrial" = "3 दिन का ट्रायल शुरू करें";
+"paywall.continue" = "जारी रखें";
+"paywall.trialDetails" = "3 दिन का मुफ्त ट्रायल, फिर $29.99/वर्ष। कभी भी रद्द करें।";
+"paywall.termsOfUse" = "उपयोग की शर्तें";
+"paywall.privacyPolicy" = "गोपनीयता नीति";
+"paywall.restore" = "पुनर्स्थापित करें";
+"paywall.dismissTitle" = "क्या आप सुनिश्चित हैं?";
+"paywall.dismissStay" = "रुकें और ट्रायल पाएं";
+"paywall.dismissLeave" = "छोड़ें";
+"paywall.dismissMessage" = "आप अपना 3 दिन का मुफ्त ट्रायल और Quote AI की असीमित पहुंच खो देंगे।";

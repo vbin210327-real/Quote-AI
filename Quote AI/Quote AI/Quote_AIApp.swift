@@ -13,9 +13,15 @@ struct Quote_AIApp: App {
     @StateObject private var supabaseManager = SupabaseManager.shared
     @StateObject private var userPreferences = UserPreferences.shared
     @StateObject private var notificationManager = NotificationManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSplash = true
     @State private var showWelcome = false
+
+    init() {
+        // Configure RevenueCat
+        SubscriptionManager.shared.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -37,7 +43,8 @@ struct Quote_AIApp: App {
                             }
                     } else {
                         Group {
-                            if supabaseManager.isAuthenticated {
+                            // Only show ChatView if BOTH authenticated AND onboarding complete
+                            if supabaseManager.isAuthenticated && userPreferences.hasCompletedOnboarding {
                                 ChatView()
                             } else if showWelcome {
                                 WelcomeView {
@@ -62,7 +69,7 @@ struct Quote_AIApp: App {
                         }
                     }
                 }
-                
+
                 // Daily Quote Overlay - Appears over everything when triggered by notification
                 if !showSplash, notificationManager.showDailyQuoteOverlay, let quote = notificationManager.selectedDailyQuote {
                     DailyQuoteOverlay(

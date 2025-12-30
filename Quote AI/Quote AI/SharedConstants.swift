@@ -11,5 +11,6 @@ struct SharedConstants {
         nonisolated static let userBarrier = "userBarrier"
         nonisolated static let isGeneratingQuote = "isGeneratingQuote"
         nonisolated static let appLanguage = "appLanguage"
+        nonisolated static let recentQuotes = "recentQuotes"  // Array of last 5 quotes to avoid repetition
     }
 }

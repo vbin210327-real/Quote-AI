@@ -8,12 +8,14 @@
 import SwiftUI
 import GoogleSignInSwift
 import AuthenticationServices
+import Auth
 
 struct WelcomeView: View {
     var onGetStarted: () -> Void
     @StateObject private var supabaseManager = SupabaseManager.shared
     @StateObject private var userPreferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showSignInSheet = false
     @State private var isSigningIn = false
     @State private var errorMessage: String?
@@ -171,7 +173,7 @@ struct WelcomeView: View {
             }
         }
     }
-    
+
     // Sign In Sheet
     var signInSheet: some View {
         NavigationView {
@@ -295,7 +297,7 @@ struct WelcomeView: View {
     private func handleGoogleSignIn() {
         isSigningIn = true
         errorMessage = nil
-        
+
         // Get the root view controller
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
@@ -303,13 +305,26 @@ struct WelcomeView: View {
             isSigningIn = false
             return
         }
-        
+
         Task {
             do {
                 try await supabaseManager.signInWithGoogle(presentingViewController: rootViewController)
-                // On success, close sheet
+
+                // Login to RevenueCat and check subscription status
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
                 isSigningIn = false
                 showSignInSheet = false
+
+                // If already subscribed, complete onboarding and go to main app
+                // If not subscribed, navigate to OnboardingView (paywall shown at end)
+                if subscriptionManager.isProUser {
+                    userPreferences.completeOnboarding()
+                } else {
+                    onGetStarted()
+                }
             } catch {
                 // Ignore user cancellation error (code -5)
                 let nsError = error as NSError
@@ -317,7 +332,7 @@ struct WelcomeView: View {
                     isSigningIn = false
                     return
                 }
-                
+
                 errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
                 isSigningIn = false
             }
@@ -331,9 +346,22 @@ struct WelcomeView: View {
         Task {
             do {
                 try await supabaseManager.signInWithApple()
-                // On success, close sheet
+
+                // Login to RevenueCat and check subscription status
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
                 isSigningIn = false
                 showSignInSheet = false
+
+                // If already subscribed, complete onboarding and go to main app
+                // If not subscribed, navigate to OnboardingView (paywall shown at end)
+                if subscriptionManager.isProUser {
+                    userPreferences.completeOnboarding()
+                } else {
+                    onGetStarted()
+                }
             } catch {
                 // Ignore user cancellation error (code 1001)
                 let nsError = error as NSError

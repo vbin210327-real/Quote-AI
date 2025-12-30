@@ -121,7 +121,7 @@
 "profile.done" = "完了";
 
 /* Tones */
-"tone.gentle" = "穏やか";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "愛のムチ";
 "tone.philosophical" = "哲学的";
 "tone.realist" = "現実主義";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "アイス・ピーク";
 "background.ascent" = "シャドウ・ステアケース";
+"background.dawnRun" = "夜明けのラン";
 "background.default" = "デフォルト";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "パーソナリティ";
 "settings.background" = "外観";
 "settings.account" = "アカウント";
+"settings.subscription" = "サブスクリプション";
+"settings.renewsOn" = "更新日";
+"settings.expiresOn" = "有効期限";
 
 /* Conversation History */
 "history.search" = "検索";
@@ -183,3 +187,58 @@
 "favorites.remove" = "削除";
 "favorites.removeConfirm" = "名言を削除しますか？";
 "favorites.removeMessage" = "この名言は保存リストから削除されます。";
+
+/* Subscription Detail */
+"subscription.editTitle" = "サブスクリプションを編集";
+"subscription.done" = "完了";
+"subscription.renewsOn" = "更新日";
+"subscription.expiresOn" = "有効期限";
+"subscription.priceWeekly" = "週額 $4.99";
+"subscription.priceMonthly" = "月額 $9.99";
+"subscription.priceYearly" = "年額 $29.99";
+"subscription.pricePro" = "Proサブスクリプション";
+"subscription.cancel" = "サブスクリプションをキャンセル";
+"subscription.cancelInfo" = "今キャンセルしても、{date}までサブスクリプションにアクセスできます。";
+"subscription.aboutPrivacy" = "サブスクリプションとプライバシーについて";
+
+// Settings - Additional
+"settings.restorePurchases" = "購入を復元";
+"settings.notifications" = "通知";
+"settings.dailyQuote" = "今日の名言";
+"settings.calibrationTime" = "キャリブレーション時間";
+"settings.upgradePlan" = "プランをアップグレード";
+"settings.currentPlan" = "現在のプラン：%@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "利用可能なプラン";
+"upgrade.upgradePlan" = "プランをアップグレード";
+"upgrade.upgrade" = "アップグレード";
+"upgrade.subscribe" = "登録する";
+"upgrade.currentPlan" = "現在のプラン：%@";
+"upgrade.yearly" = "年額";
+"upgrade.monthly" = "月額";
+"upgrade.weekly" = "週額";
+"upgrade.perYear" = "年";
+"upgrade.perMonth" = "月";
+"upgrade.perWeek" = "週";
+
+// Paywall View
+"paywall.unlimitedAccess" = "無制限アクセス";
+"paywall.subtitle" = "最高のマインドセットを解放";
+"paywall.yearly" = "年額";
+"paywall.monthly" = "月額";
+"paywall.weekly" = "週額";
+"paywall.freeTrial" = "3日間無料トライアル";
+"paywall.cancelAnytime" = "いつでもキャンセル可能";
+"paywall.savingsText" = "月額より75%お得";
+"paywall.perMonth" = "$2.49/月";
+"paywall.startTrial" = "3日間トライアルを開始";
+"paywall.continue" = "続ける";
+"paywall.trialDetails" = "3日間無料トライアル、その後$29.99/年。いつでもキャンセル可能。";
+"paywall.termsOfUse" = "利用規約";
+"paywall.privacyPolicy" = "プライバシーポリシー";
+"paywall.restore" = "復元";
+"paywall.dismissTitle" = "よろしいですか？";
+"paywall.dismissStay" = "トライアルを取得";
+"paywall.dismissLeave" = "離れる";
+"paywall.dismissMessage" = "3日間の無料トライアルとQuote AIへの無制限アクセスを逃します。";

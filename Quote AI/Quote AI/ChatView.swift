@@ -624,12 +624,16 @@ struct ProfileView: View {
 // MARK: - Settings View
 struct SettingsView: View {
     @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @ObservedObject private var preferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSigningOut = false
     @State private var showingEditProfile = false
     @State private var showingSignOutAlert = false
+    @State private var showingSubscriptionDetail = false
+    @State private var showingUpgradePlan = false
+    @State private var isRestoringPurchases = false
 
     var onClose: (() -> Void)?
 
@@ -672,6 +676,12 @@ struct SettingsView: View {
                 .presentationDetents([.fraction(0.7)])
                 .presentationDragIndicator(.hidden)
                 .presentationCornerRadius(20)
+        }
+        .sheet(isPresented: $showingSubscriptionDetail) {
+            SubscriptionDetailView()
+        }
+        .sheet(isPresented: $showingUpgradePlan) {
+            UpgradePlanView()
         }
     }
 
@@ -760,6 +770,62 @@ struct SettingsView: View {
 
                 Divider().padding(.leading, 56)
 
+                // Subscription row (for subscribers - shows management sheet)
+                if subscriptionManager.isProUser {
+                    Button(action: {
+                        showingSubscriptionDetail = true
+                    }) {
+                        SettingsRow(icon: "crown", title: localization.string(for: "settings.subscription")) {
+                            HStack(spacing: 4) {
+                                Text(subscriptionManager.subscriptionPlanName ?? "Active")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+                }
+
+                // Upgrade Plan row - only show if not subscribed OR not on yearly plan
+                if !subscriptionManager.isProUser || (subscriptionManager.subscriptionPlanName?.lowercased() != "yearly") {
+                    Button(action: {
+                        showingUpgradePlan = true
+                    }) {
+                        SettingsRow(icon: "sparkles", title: localization.string(for: "settings.upgradePlan")) {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+                }
+
+                // Restore Purchases
+                Button(action: {
+                    Task {
+                        isRestoringPurchases = true
+                        _ = await subscriptionManager.restorePurchases()
+                        isRestoringPurchases = false
+                    }
+                }) {
+                    SettingsRow(icon: "arrow.clockwise", title: localization.string(for: "settings.restorePurchases")) {
+                        if isRestoringPurchases {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(isRestoringPurchases)
+
+                Divider().padding(.leading, 56)
+
                 // Personality row
                 SettingsRow(icon: "face.smiling", title: localization.string(for: "settings.personality")) {
                     Menu {
@@ -827,7 +893,7 @@ struct SettingsView: View {
 
             // Notifications section
             VStack(alignment: .leading, spacing: 0) {
-                Text("Notifications")
+                Text(localization.string(for: "settings.notifications"))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 20)
@@ -836,7 +902,7 @@ struct SettingsView: View {
 
                 VStack(spacing: 0) {
                     // Daily Toggle
-                    SettingsRow(icon: "bell.badge", title: "Daily Calibration") {
+                    SettingsRow(icon: "bell.badge", title: localization.string(for: "settings.dailyQuote")) {
                         Toggle("", isOn: $preferences.notificationsEnabled)
                             .labelsHidden()
                             .tint(.black)
@@ -846,7 +912,7 @@ struct SettingsView: View {
                         Divider().padding(.leading, 56)
 
                         // Time Picker
-                        SettingsRow(icon: "clock", title: "Calibration Time") {
+                        SettingsRow(icon: "clock", title: localization.string(for: "settings.calibrationTime")) {
                             DatePicker("", selection: Binding(
                                 get: {
                                     Calendar.current.date(bySettingHour: preferences.notificationHour, minute: preferences.notificationMinute, second: 0, of: Date()) ?? Date()
@@ -915,6 +981,148 @@ struct SettingsView: View {
                 print("Error signing out: \(error)")
             }
             isSigningOut = false
+        }
+    }
+}
+
+// MARK: - Subscription Detail View
+struct SubscriptionDetailView: View {
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var localization = LocalizationManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // App info card
+                    VStack(spacing: 16) {
+                        // App icon - using app icon from assets
+                        if let uiImage = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60") {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(14)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                                )
+                        } else {
+                            // Fallback: recreate the app icon style (white quote marks on black)
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color.black)
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    Text("❞")
+                                        .font(.system(size: 28, weight: .bold))
+                                        .foregroundColor(.white)
+                                )
+                        }
+                        
+                        // App name
+                        Text("Quote AI")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                    }
+                    .padding(.top, 20)
+                    
+                    // Subscription details card
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Price row
+                        HStack(spacing: 12) {
+                            Image(systemName: "creditcard")
+                                .font(.system(size: 16))
+                                .foregroundColor(.primary)
+                                .frame(width: 24)
+                            
+                            Text(subscriptionPriceText)
+                                .font(.body)
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        
+                        Divider().padding(.leading, 52)
+                        
+                        // Renewal date row
+                        if let expirationDate = subscriptionManager.expirationDate {
+                            HStack(spacing: 12) {
+                                Image(systemName: "calendar")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 24)
+                                
+                                Text(subscriptionManager.willRenew
+                                    ? localization.string(for: "subscription.renewsOn") + " " + expirationDate.formatted(date: .long, time: .omitted)
+                                    : localization.string(for: "subscription.expiresOn") + " " + expirationDate.formatted(date: .long, time: .omitted))
+                                    .font(.body)
+                                
+                                Spacer()
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                        }
+                    }
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 16)
+                    
+                    // Cancel subscription button
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button(action: {
+                            // Open App Store subscription management
+                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                openURL(url)
+                            }
+                        }) {
+                            Text(localization.string(for: "subscription.cancel"))
+                                .font(.body)
+                                .foregroundColor(.red)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                        }
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                        
+                        // Cancel info text
+                        if let expirationDate = subscriptionManager.expirationDate {
+                            Text(localization.string(for: "subscription.cancelInfo")
+                                .replacingOccurrences(of: "{date}", with: expirationDate.formatted(date: .long, time: .omitted)))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 4)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+            .navigationTitle(localization.string(for: "subscription.editTitle"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(localization.string(for: "subscription.done")) {
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+    
+    private var subscriptionPriceText: String {
+        switch subscriptionManager.subscriptionPlanName {
+        case "Weekly":
+            return localization.string(for: "subscription.priceWeekly")
+        case "Monthly":
+            return localization.string(for: "subscription.priceMonthly")
+        case "Yearly":
+            return localization.string(for: "subscription.priceYearly")
+        default:
+            return localization.string(for: "subscription.pricePro")
         }
     }
 }

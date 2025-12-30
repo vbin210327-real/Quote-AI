@@ -121,7 +121,7 @@
 "profile.done" = "Done";
 
 /* Tones */
-"tone.gentle" = "Gentle";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "Tough Love";
 "tone.philosophical" = "Philosophical";
 "tone.realist" = "Realist";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "Icy Peak";
 "background.ascent" = "Shadow Staircase";
+"background.dawnRun" = "Dawn Run";
 "background.default" = "Default";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "Personality";
 "settings.background" = "Appearance";
 "settings.account" = "ACCOUNT";
+"settings.subscription" = "Subscription";
+"settings.renewsOn" = "Renews";
+"settings.expiresOn" = "Expires";
 
 /* Conversation History */
 "history.search" = "Search";
@@ -181,3 +185,58 @@
 "favorites.remove" = "Remove";
 "favorites.removeConfirm" = "Remove Quote?";
 "favorites.removeMessage" = "This quote will be removed from your saved quotes.";
+
+/* Subscription Detail */
+"subscription.editTitle" = "Edit Subscription";
+"subscription.done" = "Done";
+"subscription.renewsOn" = "Renews";
+"subscription.expiresOn" = "Expires";
+"subscription.priceWeekly" = "$4.99 per week";
+"subscription.priceMonthly" = "$9.99 per month";
+"subscription.priceYearly" = "$29.99 per year";
+"subscription.pricePro" = "Pro subscription";
+"subscription.cancel" = "Cancel Subscription";
+"subscription.cancelInfo" = "If you cancel now, you can still access your subscription until {date}.";
+"subscription.aboutPrivacy" = "About Subscriptions and Privacy";
+
+// Settings - Additional
+"settings.restorePurchases" = "Restore Purchases";
+"settings.notifications" = "NOTIFICATIONS";
+"settings.dailyQuote" = "Daily Quote";
+"settings.calibrationTime" = "Calibration Time";
+"settings.upgradePlan" = "Upgrade Plan";
+"settings.currentPlan" = "Current plan: %@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "Available Plans";
+"upgrade.upgradePlan" = "Upgrade Plan";
+"upgrade.upgrade" = "Upgrade";
+"upgrade.subscribe" = "Subscribe";
+"upgrade.currentPlan" = "Current plan: %@";
+"upgrade.yearly" = "Yearly";
+"upgrade.monthly" = "Monthly";
+"upgrade.weekly" = "Weekly";
+"upgrade.perYear" = "per year";
+"upgrade.perMonth" = "per month";
+"upgrade.perWeek" = "per week";
+
+// Paywall View
+"paywall.unlimitedAccess" = "Unlimited Access to";
+"paywall.subtitle" = "Unlock your peak mindset";
+"paywall.yearly" = "Yearly";
+"paywall.monthly" = "Monthly";
+"paywall.weekly" = "Weekly";
+"paywall.freeTrial" = "3-day free trial";
+"paywall.cancelAnytime" = "Cancel anytime";
+"paywall.savingsText" = "Save 75% vs monthly";
+"paywall.perMonth" = "$2.49/mo";
+"paywall.startTrial" = "Start 3-Day Trial";
+"paywall.continue" = "Continue";
+"paywall.trialDetails" = "3-day free trial, then $29.99/year. Cancel anytime.";
+"paywall.termsOfUse" = "Terms of Use";
+"paywall.privacyPolicy" = "Privacy Policy";
+"paywall.restore" = "Restore";
+"paywall.dismissTitle" = "Are you sure?";
+"paywall.dismissStay" = "Stay & Get Trial";
+"paywall.dismissLeave" = "Leave";
+"paywall.dismissMessage" = "You'll miss your 3-day free trial and unlimited access to Quote AI.";

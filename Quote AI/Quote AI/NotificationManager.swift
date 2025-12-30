@@ -66,7 +66,7 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
             timeGreeting = "Good evening"
         }
         let greeting = userName.isEmpty ? "\(timeGreeting)." : "\(timeGreeting), \(userName)."
-        content.body = "\(greeting) Time for your daily calibration. Here's a thought for you..."
+        content.body = "\(greeting) Time for your daily quote. Here's a thought for you..."
         content.sound = .default
         
         // Store a random quote in userInfo if needed, or we pick one on launch

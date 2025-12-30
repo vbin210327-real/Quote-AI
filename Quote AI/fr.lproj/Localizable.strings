@@ -121,7 +121,7 @@
 "profile.done" = "Terminé";
 
 /* Tones */
-"tone.gentle" = "Doux";
+"tone.naval" = "Navalism";
 "tone.toughLove" = "Amour Vache";
 "tone.philosophical" = "Philosophique";
 "tone.realist" = "Réaliste";
@@ -148,6 +148,7 @@
 /* Chat Backgrounds */
 "background.summit" = "Sommet Glacé";
 "background.ascent" = "Escalier d'Ombres";
+"background.dawnRun" = "Course à l'Aube";
 "background.default" = "Par défaut";
 
 /* Settings */
@@ -156,6 +157,9 @@
 "settings.personality" = "Personnalité";
 "settings.background" = "Apparence";
 "settings.account" = "COMPTE";
+"settings.subscription" = "Abonnement";
+"settings.renewsOn" = "Renouvellement";
+"settings.expiresOn" = "Expiration";
 
 /* Conversation History */
 "history.search" = "Rechercher";
@@ -175,3 +179,58 @@
 "favorites.remove" = "Supprimer";
 "favorites.removeConfirm" = "Supprimer la citation ?";
 "favorites.removeMessage" = "Cette citation sera supprimée de vos citations sauvegardées.";
+
+/* Subscription Detail */
+"subscription.editTitle" = "Modifier l'Abonnement";
+"subscription.done" = "OK";
+"subscription.renewsOn" = "Renouvellement";
+"subscription.expiresOn" = "Expiration";
+"subscription.priceWeekly" = "$4.99 par semaine";
+"subscription.priceMonthly" = "$9.99 par mois";
+"subscription.priceYearly" = "$29.99 par an";
+"subscription.pricePro" = "Abonnement Pro";
+"subscription.cancel" = "Annuler l'Abonnement";
+"subscription.cancelInfo" = "Si vous annulez maintenant, vous pouvez continuer à utiliser votre abonnement jusqu'au {date}.";
+"subscription.aboutPrivacy" = "À propos des Abonnements et Confidentialité";
+
+// Settings - Additional
+"settings.restorePurchases" = "Restaurer les Achats";
+"settings.notifications" = "NOTIFICATIONS";
+"settings.dailyQuote" = "Citation du Jour";
+"settings.calibrationTime" = "Heure de Calibration";
+"settings.upgradePlan" = "Améliorer le Plan";
+"settings.currentPlan" = "Plan actuel : %@";
+
+// Upgrade Plan View
+"upgrade.availablePlans" = "Plans Disponibles";
+"upgrade.upgradePlan" = "Améliorer le Plan";
+"upgrade.upgrade" = "Améliorer";
+"upgrade.subscribe" = "S'abonner";
+"upgrade.currentPlan" = "Plan actuel : %@";
+"upgrade.yearly" = "Annuel";
+"upgrade.monthly" = "Mensuel";
+"upgrade.weekly" = "Hebdomadaire";
+"upgrade.perYear" = "par an";
+"upgrade.perMonth" = "par mois";
+"upgrade.perWeek" = "par semaine";
+
+// Paywall View
+"paywall.unlimitedAccess" = "Accès Illimité à";
+"paywall.subtitle" = "Libérez votre potentiel";
+"paywall.yearly" = "Annuel";
+"paywall.monthly" = "Mensuel";
+"paywall.weekly" = "Hebdomadaire";
+"paywall.freeTrial" = "3 jours d'essai gratuit";
+"paywall.cancelAnytime" = "Annulez à tout moment";
+"paywall.savingsText" = "Économisez 75% vs mensuel";
+"paywall.perMonth" = "$2.49/mois";
+"paywall.startTrial" = "Commencer l'Essai de 3 Jours";
+"paywall.continue" = "Continuer";
+"paywall.trialDetails" = "3 jours d'essai gratuit, puis $29.99/an. Annulez à tout moment.";
+"paywall.termsOfUse" = "Conditions d'Utilisation";
+"paywall.privacyPolicy" = "Politique de Confidentialité";
+"paywall.restore" = "Restaurer";
+"paywall.dismissTitle" = "Êtes-vous sûr ?";
+"paywall.dismissStay" = "Rester et Obtenir l'Essai";
+"paywall.dismissLeave" = "Quitter";
+"paywall.dismissMessage" = "Vous manquerez votre essai gratuit de 3 jours et l'accès illimité à Quote AI.";

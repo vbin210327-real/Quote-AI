@@ -153,46 +153,56 @@ final class KimiService: @unchecked Sendable {
     func generateDailyCalibration() async throws -> String {
         var tone = QuoteTone.philosophical
         var language = AppLanguage.english
+        let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
 
         // Read user's saved preferences from shared UserDefaults
-        if let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName) {
-            if let toneString = sharedDefaults.string(forKey: SharedConstants.Keys.quoteTone),
-               let savedTone = QuoteTone(rawValue: toneString) {
-                tone = savedTone
-            }
-            if let langString = sharedDefaults.string(forKey: SharedConstants.Keys.appLanguage),
-               let savedLang = AppLanguage(rawValue: langString) {
-                language = savedLang
-            }
+        if let toneString = sharedDefaults?.string(forKey: SharedConstants.Keys.quoteTone),
+           let savedTone = QuoteTone(rawValue: toneString) {
+            tone = savedTone
+        }
+        if let langString = sharedDefaults?.string(forKey: SharedConstants.Keys.appLanguage),
+           let savedLang = AppLanguage(rawValue: langString) {
+            language = savedLang
         }
 
-        // Random variety - natural topics and conversational styles
-        let topics = ["a hard truth", "something counterintuitive", "a simple reminder", "a different angle on struggle", "what matters today", "a quiet observation", "something most people forget", "a reality check", "an uncomfortable truth", "permission to rest"]
-        let styles = ["like texting a friend", "as a passing thought", "bluntly", "gently", "with dry humor", "matter-of-factly"]
+        // Get recent quotes to avoid repetition
+        let recentQuotes = sharedDefaults?.stringArray(forKey: SharedConstants.Keys.recentQuotes) ?? []
 
-        let randomTopic = topics.randomElement() ?? "a simple reminder"
-        let randomStyle = styles.randomElement() ?? "like texting a friend"
+        var avoidSection = ""
+        if !recentQuotes.isEmpty {
+            let quoteslist = recentQuotes.map { "- \"\($0)\"" }.joined(separator: "\n")
+            avoidSection = """
+
+            DO NOT repeat these recent quotes (write something completely different):
+            \(quoteslist)
+            """
+        }
 
         let prompt = """
-        Share \(randomTopic), \(randomStyle).
+        You are a world-class micro-quote writer for a lock screen widget.
+        Write ONE original quote that feels human, modern, and memorable.
 
         VOICE: \(tone.rawValue)
         LANGUAGE: \(language.promptName)
 
-        BE HUMAN:
-        - 1-2 short sentences max
-        - Talk like a smart friend, not a motivational poster
-        - No "journey", "embrace", "empower", "unlock potential"
-        - No forced positivity or generic encouragement
-        - Be specific, not vague
-        - Okay to be blunt, funny, or real
-        - Sound like something a person would actually say
-
-        BAD: "Embrace your journey and unlock your potential"
-        GOOD: "You don't have to feel ready. Just start."
+        CRITICAL - LENGTH LIMIT:
+        - MUST be under 80 characters total
+        - 1 short sentence ONLY
+        \(avoidSection)
         """
 
         // Use turbo model for faster widget response
-        return try await getQuote(for: prompt, tone: tone, useWidgetModel: true)
+        let newQuote = try await getQuote(for: prompt, tone: tone, useWidgetModel: true)
+
+        // Save to recent quotes history (keep max 5)
+        var updatedQuotes = recentQuotes
+        updatedQuotes.insert(newQuote, at: 0)
+        if updatedQuotes.count > 5 {
+            updatedQuotes = Array(updatedQuotes.prefix(5))
+        }
+        sharedDefaults?.set(updatedQuotes, forKey: SharedConstants.Keys.recentQuotes)
+        sharedDefaults?.synchronize()
+
+        return newQuote
     }
 }

@@ -51,23 +51,12 @@ struct QuoteWidgetEntryView: View {
 
     @ViewBuilder
     private var lockScreenContent: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 2) {
-                Image(systemName: "quote.opening")
-                    .font(.system(size: 7, weight: .bold))
-                Text("QUOTE AI")
-                    .font(.system(size: 7, weight: .black))
-                    .tracking(0.3)
-            }
-            .opacity(0.6)
-
-            Text(entry.quote)
-                .font(.system(size: 13, weight: .medium, design: .serif))
-                .italic()
-                .minimumScaleFactor(0.6)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Text(entry.quote)
+            .font(.system(size: 15, weight: .semibold, design: .serif))
+            .italic()
+            .minimumScaleFactor(0.7)
+            .lineLimit(4)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -123,6 +112,21 @@ struct QuoteWidgetIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
+
+        // Prevent double-tap: check if already generating
+        if sharedDefaults?.bool(forKey: SharedConstants.Keys.isGeneratingQuote) == true {
+            return .result()
+        }
+
+        // Mark as generating
+        sharedDefaults?.set(true, forKey: SharedConstants.Keys.isGeneratingQuote)
+        sharedDefaults?.synchronize()
+
+        defer {
+            // Always clear the generating flag when done
+            sharedDefaults?.set(false, forKey: SharedConstants.Keys.isGeneratingQuote)
+            sharedDefaults?.synchronize()
+        }
 
         do {
             // Using turbo model for fast response

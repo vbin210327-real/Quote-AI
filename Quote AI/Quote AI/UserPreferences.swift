@@ -16,7 +16,7 @@ extension QuoteTone {
 
     var localizedName: String {
         switch self {
-        case .gentle: return LocalizationManager.shared.string(for: "tone.gentle")
+        case .naval: return LocalizationManager.shared.string(for: "tone.naval")
         case .toughLove: return LocalizationManager.shared.string(for: "tone.toughLove")
         case .philosophical: return LocalizationManager.shared.string(for: "tone.philosophical")
         case .realist: return LocalizationManager.shared.string(for: "tone.realist")
@@ -25,7 +25,7 @@ extension QuoteTone {
     
     var icon: String {
         switch self {
-        case .gentle: return "heart.fill"
+        case .naval: return "lightbulb.fill"
         case .toughLove: return "flame.fill"
         case .philosophical: return "brain.head.profile"
         case .realist: return "chart.line.uptrend.xyaxis"
@@ -156,6 +156,7 @@ extension ChatBackground {
         switch self {
         case .summit: return "mountain.2"
         case .ascent: return "list.bullet.indent"
+        case .dawnRun: return "figure.run"
         case .defaultBackground: return "square.grid.2x2"
         }
     }
@@ -164,6 +165,7 @@ extension ChatBackground {
         switch self {
         case .summit: return "ChatBackgroundSummit"
         case .ascent: return "ChatBackgroundStairs"
+        case .dawnRun: return "ChatBackgroundDawnRun"
         case .defaultBackground: return "default_background"
         }
     }
@@ -172,6 +174,7 @@ extension ChatBackground {
         switch self {
         case .summit: return "Icy Peak"
         case .ascent: return "Shadow Staircase"
+        case .dawnRun: return "Dawn Run"
         case .defaultBackground: return "Default"
         }
     }
@@ -180,6 +183,7 @@ extension ChatBackground {
         switch self {
         case .summit: return LocalizationManager.shared.string(for: "background.summit")
         case .ascent: return LocalizationManager.shared.string(for: "background.ascent")
+        case .dawnRun: return LocalizationManager.shared.string(for: "background.dawnRun")
         case .defaultBackground: return LocalizationManager.shared.string(for: "background.default")
         }
     }
@@ -188,6 +192,7 @@ extension ChatBackground {
         switch self {
         case .summit: return ""
         case .ascent: return ""
+        case .dawnRun: return ""
         case .defaultBackground: return ""
         }
     }
@@ -313,6 +318,7 @@ class UserPreferences: ObservableObject {
     @Published var hasPlayedWelcomeIntro: Bool {
         didSet {
             UserDefaults.standard.set(hasPlayedWelcomeIntro, forKey: "hasPlayedWelcomeIntro")
+            UserDefaults.standard.synchronize() // Force immediate save
         }
     }
 
@@ -371,7 +377,7 @@ class UserPreferences: ObservableObject {
            let tone = QuoteTone(rawValue: toneString) {
             self.quoteTone = tone
         } else {
-            self.quoteTone = .gentle
+            self.quoteTone = .naval
         }
 
         if let focusString = UserDefaults.standard.string(forKey: "userFocus"),
@@ -595,9 +601,11 @@ class UserPreferences: ObservableObject {
             if let language = profile.language, let langValue = AppLanguage(rawValue: language), langValue != LocalizationManager.shared.currentLanguage {
                 LocalizationManager.shared.setLanguageFromCloud(langValue)
             }
-            if let onboarding = profile.hasCompletedOnboarding, onboarding != hasCompletedOnboarding {
-                hasCompletedOnboarding = onboarding
-            }
+            // Don't sync hasCompletedOnboarding from cloud - let local onboarding flow control this
+            // This ensures paywall is always shown to users who haven't completed local onboarding
+            // if let onboarding = profile.hasCompletedOnboarding, onboarding != hasCompletedOnboarding {
+            //     hasCompletedOnboarding = onboarding
+            // }
             if let notifEnabled = profile.notificationsEnabled, notifEnabled != notificationsEnabled {
                 notificationsEnabled = notifEnabled
             }
@@ -618,7 +626,7 @@ class UserPreferences: ObservableObject {
         userGender = ""
         profileImage = nil
         profileImageUrl = nil
-        quoteTone = .gentle
+        quoteTone = .naval
         userFocus = .innerPeace
         userBarrier = .procrastination
         userEnergyDrain = .career
@@ -626,7 +634,8 @@ class UserPreferences: ObservableObject {
         userBirthYear = 2000
         hasCompletedOnboarding = false
         hasSeenWelcome = false
-        hasPlayedWelcomeIntro = false
+        // Note: hasPlayedWelcomeIntro is intentionally NOT reset here
+        // The welcome animation should only play once ever, even after logout
         chatBackground = .defaultBackground
     }
     private func updateSharedDefaults(key: String, value: String) {
