@@ -242,3 +242,4 @@
 "paywall.dismissStay" = "トライアルを取得";
 "paywall.dismissLeave" = "離れる";
 "paywall.dismissMessage" = "3日間の無料トライアルとQuote AIへの無制限アクセスを逃します。";
+"paywall.retry" = "再試行";

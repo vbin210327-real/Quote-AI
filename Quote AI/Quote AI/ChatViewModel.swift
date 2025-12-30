@@ -20,6 +20,7 @@ class ChatViewModel: ObservableObject {
     @Published var currentTokenCount: Int = 0
     @Published var showTokenWarning: Bool = false
     @Published var isAtTokenLimit: Bool = false
+    @Published var showPaywall: Bool = false  // Show paywall when non-subscribed user tries to chat
     private var hasShownWarning: Bool = false  // Track if warning was already shown
 
     let maxTokens: Int = 32000        // ~100+ messages before block
@@ -28,6 +29,7 @@ class ChatViewModel: ObservableObject {
     private let kimiService = KimiService.shared
     private let supabaseManager = SupabaseManager.shared
     private let localization = LocalizationManager.shared
+    private let subscriptionManager = SubscriptionManager.shared
     private var languageObserver: AnyCancellable?
 
     init() {
@@ -112,6 +114,12 @@ class ChatViewModel: ObservableObject {
 
         guard !input.isEmpty else { return }
         guard !isLoading else { return }
+
+        // Check subscription status - only Pro users can use chatbot
+        guard subscriptionManager.isProUser else {
+            showPaywall = true
+            return
+        }
 
         // Check token limit
         guard !isAtTokenLimit else {

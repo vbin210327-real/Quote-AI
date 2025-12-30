@@ -113,6 +113,16 @@ struct QuoteWidgetIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
 
+        // Check subscription status - only Pro users can generate quotes
+        let isProUser = sharedDefaults?.bool(forKey: SharedConstants.Keys.isProUser) ?? false
+        if !isProUser {
+            // Show message to subscribe
+            sharedDefaults?.set("Subscribe to unlock AI quotes ✨", forKey: SharedConstants.Keys.latestQuote)
+            sharedDefaults?.synchronize()
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuoteWidget")
+            return .result()
+        }
+
         // Prevent double-tap: check if already generating
         if sharedDefaults?.bool(forKey: SharedConstants.Keys.isGeneratingQuote) == true {
             return .result()

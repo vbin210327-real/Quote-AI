@@ -234,3 +234,4 @@
 "paywall.dismissStay" = "Quedarme y Obtener Prueba";
 "paywall.dismissLeave" = "Salir";
 "paywall.dismissMessage" = "Te perderás tu prueba gratuita de 3 días y acceso ilimitado a Quote AI.";
+"paywall.retry" = "Reintentar";

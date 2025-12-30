@@ -240,3 +240,4 @@
 "paywall.dismissStay" = "留下获取试用";
 "paywall.dismissLeave" = "离开";
 "paywall.dismissMessage" = "您将错过3天免费试用和Quote AI的无限访问权限。";
+"paywall.retry" = "重试";

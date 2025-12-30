@@ -12,6 +12,10 @@ struct PaywallView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) private var openURL
+
+    private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private let privacyURL = URL(string: "https://gist.github.com/vbin210327-real/131a5d4d01c2591efa84453c78d9ba9c")!
 
     @State private var selectedPackage: Package?
     @State private var selectedFallbackPlan: String? = "yearly"
@@ -188,8 +192,9 @@ struct PaywallView: View {
                                 if success {
                                     onComplete()
                                 }
-                            } else if selectedFallbackPlan != nil {
-                                onComplete()
+                            } else {
+                                // No valid package available - retry fetching offerings
+                                await subscriptionManager.fetchOfferings()
                             }
                         }
                     }) {
@@ -197,6 +202,10 @@ struct PaywallView: View {
                             if subscriptionManager.isPurchasing {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            } else if selectedPackage == nil {
+                                // Show retry text when offerings not loaded
+                                Text(localization.string(for: "paywall.retry"))
+                                    .font(.system(size: 18, weight: .semibold))
                             } else {
                                 Text(isYearlySelected ? localization.string(for: "paywall.startTrial") : localization.string(for: "paywall.continue"))
                                     .font(.system(size: 18, weight: .semibold))
@@ -204,11 +213,11 @@ struct PaywallView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(Color.white)
+                        .background(selectedPackage != nil ? Color.white : Color.white.opacity(0.5))
                         .foregroundColor(.black)
                         .cornerRadius(28)
                     }
-                    .disabled((selectedPackage == nil && selectedFallbackPlan == nil) || subscriptionManager.isPurchasing)
+                    .disabled(subscriptionManager.isPurchasing)
                     .padding(.horizontal, 24)
                     .opacity(showContent ? 1 : 0)
                     .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3), value: showContent)
@@ -230,6 +239,7 @@ struct PaywallView: View {
                     // Footer links
                     HStack(spacing: 28) {
                         Button {
+                            openURL(termsURL)
                         } label: {
                             Text(localization.string(for: "paywall.termsOfUse"))
                                 .font(.system(size: 13))
@@ -238,6 +248,7 @@ struct PaywallView: View {
                         }
 
                         Button {
+                            openURL(privacyURL)
                         } label: {
                             Text(localization.string(for: "paywall.privacyPolicy"))
                                 .font(.system(size: 13))

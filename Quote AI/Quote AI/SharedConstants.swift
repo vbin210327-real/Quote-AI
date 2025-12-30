@@ -12,5 +12,6 @@ struct SharedConstants {
         nonisolated static let isGeneratingQuote = "isGeneratingQuote"
         nonisolated static let appLanguage = "appLanguage"
         nonisolated static let recentQuotes = "recentQuotes"  // Array of last 5 quotes to avoid repetition
+        nonisolated static let isProUser = "isProUser"  // Subscription status for widget
     }
 }

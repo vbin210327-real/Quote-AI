@@ -240,3 +240,4 @@
 "paywall.dismissStay" = "Stay & Get Trial";
 "paywall.dismissLeave" = "Leave";
 "paywall.dismissMessage" = "You'll miss your 3-day free trial and unlimited access to Quote AI.";
+"paywall.retry" = "Retry";

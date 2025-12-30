@@ -241,4 +241,5 @@
 "paywall.dismissTitle" = "확실합니까?";
 "paywall.dismissStay" = "체험 받기";
 "paywall.dismissLeave" = "나가기";
-"paywall.dismissMessage" = "3일 무료 체험과 Quote AI 무제한 이용 기회를 놓치게 됩니다.";
+"paywall.dismissMessage" = "3일 무료 체험과 Quote AI 무제한 이용 기회를 놓치게 됩니다。";
+"paywall.retry" = "다시 시도";

@@ -282,6 +282,11 @@ struct ChatView: View {
                 .zIndex(2)
             }
         }
+        .sheet(isPresented: $viewModel.showPaywall) {
+            PaywallView {
+                viewModel.showPaywall = false
+            }
+        }
     }
 }
 

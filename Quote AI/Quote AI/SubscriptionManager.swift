@@ -23,7 +23,7 @@ class SubscriptionManager: NSObject, ObservableObject {
     @Published var expirationDate: Date?
     @Published var willRenew: Bool = false
 
-    private let apiKey = "test_GmWiTWLzcBpfHrZTmMvWQQvbURJ" // RevenueCat Test Store API key
+    private let apiKey = "appl_bTdDfhcTBvjFXUATEYESBjEGamj" // RevenueCat App Store API key
 
     private override init() {
         super.init()
@@ -69,7 +69,7 @@ class SubscriptionManager: NSObject, ObservableObject {
             self.isProUser = true
             self.expirationDate = proEntitlement.expirationDate
             self.willRenew = proEntitlement.willRenew
-            
+
             // Determine plan name based on product identifier
             let productId = proEntitlement.productIdentifier
             if productId.contains("annual") || productId.contains("yearly") {
@@ -89,6 +89,11 @@ class SubscriptionManager: NSObject, ObservableObject {
             self.expirationDate = nil
             self.willRenew = false
         }
+
+        // Sync subscription status to shared UserDefaults for widget access
+        let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
+        sharedDefaults?.set(self.isProUser, forKey: SharedConstants.Keys.isProUser)
+        sharedDefaults?.synchronize()
     }
 
     @MainActor
