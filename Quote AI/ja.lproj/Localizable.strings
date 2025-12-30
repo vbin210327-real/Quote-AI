@@ -224,7 +224,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "無制限アクセス";
-"paywall.subtitle" = "最高のマインドセットを解放";
+"paywall.subtitle"= "マインドセットをリセット";
 "paywall.yearly" = "年額";
 "paywall.monthly" = "月額";
 "paywall.weekly" = "週額";

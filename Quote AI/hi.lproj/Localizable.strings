@@ -214,7 +214,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "असीमित पहुंच";
-"paywall.subtitle" = "अपनी चरम मानसिकता को अनलॉक करें";
+"paywall.subtitle"= "अपनी मानसिकता रीसेट करें";
 "paywall.yearly" = "वार्षिक";
 "paywall.monthly" = "मासिक";
 "paywall.weekly" = "साप्ताहिक";

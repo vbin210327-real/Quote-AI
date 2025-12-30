@@ -216,7 +216,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "Acceso Ilimitado a";
-"paywall.subtitle" = "Desbloquea tu máximo potencial";
+"paywall.subtitle"= "Reinicia tu mentalidad";
 "paywall.yearly" = "Anual";
 "paywall.monthly" = "Mensual";
 "paywall.weekly" = "Semanal";

@@ -222,7 +222,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "无限访问";
-"paywall.subtitle" = "解锁你的巅峰心态";
+"paywall.subtitle"= "重置你的心态";
 "paywall.yearly" = "年度";
 "paywall.monthly" = "月度";
 "paywall.weekly" = "每周";

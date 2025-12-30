@@ -224,7 +224,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "무제한 이용";
-"paywall.subtitle" = "최고의 마인드셋을 잠금 해제";
+"paywall.subtitle"= "마인드셋을 재설정하세요";
 "paywall.yearly" = "연간";
 "paywall.monthly" = "월간";
 "paywall.weekly" = "주간";

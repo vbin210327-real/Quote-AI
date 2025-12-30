@@ -222,7 +222,7 @@
 
 // Paywall View
 "paywall.unlimitedAccess" = "Unlimited Access to";
-"paywall.subtitle" = "Unlock your peak mindset";
+"paywall.subtitle"= "Reset your mindset";
 "paywall.yearly" = "Yearly";
 "paywall.monthly" = "Monthly";
 "paywall.weekly" = "Weekly";

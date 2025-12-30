@@ -19,6 +19,8 @@ struct PaywallView: View {
     @State private var showDismissAlert = false
 
     var onComplete: () -> Void
+    private let heroZoomOutScale: CGFloat = 1.2
+    private let heroBackgroundBlur: CGFloat = 18
 
     // Check if yearly/annual is selected (for free trial button text)
     private var isYearlySelected: Bool {
@@ -34,8 +36,16 @@ struct PaywallView: View {
                 // Full-bleed hero image as background
                 Image("PaywallHero")
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .aspectRatio(contentMode: .fit)
+                    .scaleEffect(heroZoomOutScale, anchor: .top)
+                    .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+                    .background(
+                        Image("PaywallHero")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .blur(radius: heroBackgroundBlur)
+                    )
                     .clipped()
                     .ignoresSafeArea()
 
