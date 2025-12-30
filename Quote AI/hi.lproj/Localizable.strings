@@ -107,6 +107,11 @@
 "chat.regenerate" = "पुनः उत्पन्न करें";
 "chat.tokenWarning" = "बातचीत की सीमा के करीब";
 "chat.tokenLimitReached" = "बातचीत की सीमा पूरी हो गई। कृपया नई चैट शुरू करें।";
+"chat.subscriptionRequired" = "सदस्यता आवश्यक";
+"chat.subscriptionExpiredMessage" = "आपकी सदस्यता समाप्त हो गई है। Quote AI की सुविधाओं का उपयोग जारी रखने के लिए अपग्रेड करें।";
+"chat.upgradePlan" = "प्लान अपग्रेड करें";
+"chat.maybeLater" = "बाद में";
+"dailyQuote.subscriptionRequired" = "व्यक्तिगत AI उद्धरण प्राप्त करने के लिए Pro में अपग्रेड करें।";
 
 /* ProfileView */
 "profile.title" = "प्रोफ़ाइल";

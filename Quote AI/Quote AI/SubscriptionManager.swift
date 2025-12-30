@@ -56,6 +56,8 @@ class SubscriptionManager: NSObject, ObservableObject {
     @MainActor
     func checkSubscriptionStatus() async {
         do {
+            // Invalidate cache to get fresh data from RevenueCat
+            Purchases.shared.invalidateCustomerInfoCache()
             let customerInfo = try await Purchases.shared.customerInfo()
             updateSubscriptionInfo(from: customerInfo)
         } catch {

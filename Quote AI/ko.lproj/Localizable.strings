@@ -107,6 +107,11 @@
 "chat.regenerate" = "재생성";
 "chat.tokenWarning" = "대화 제한에 접근 중";
 "chat.tokenLimitReached" = "대화 한도에 도달했습니다. 새 채팅을 시작해 주세요.";
+"chat.subscriptionRequired" = "구독 필요";
+"chat.subscriptionExpiredMessage" = "구독이 만료되었습니다. Quote AI 기능을 계속 사용하려면 업그레이드하세요.";
+"chat.upgradePlan" = "플랜 업그레이드";
+"chat.maybeLater" = "나중에";
+"dailyQuote.subscriptionRequired" = "맞춤형 AI 명언을 받으려면 Pro로 업그레이드하세요.";
 
 /* ProfileView */
 "profile.title" = "프로필";

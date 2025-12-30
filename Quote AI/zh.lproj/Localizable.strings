@@ -107,6 +107,11 @@
 "chat.regenerate" = "重新生成";
 "chat.tokenWarning" = "接近对话限制";
 "chat.tokenLimitReached" = "已达到对话限制。请开始新对话。";
+"chat.subscriptionRequired" = "需要订阅";
+"chat.subscriptionExpiredMessage" = "你的订阅已过期。升级以继续使用 Quote AI 的功能。";
+"chat.upgradePlan" = "升级计划";
+"chat.maybeLater" = "稍后再说";
+"dailyQuote.subscriptionRequired" = "升级到 Pro 以获取个性化 AI 语录。";
 
 /* ProfileView */
 "profile.title" = "个人资料";

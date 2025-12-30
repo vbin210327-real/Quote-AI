@@ -107,6 +107,11 @@
 "chat.regenerate" = "再生成";
 "chat.tokenWarning" = "会話の制限に近づいています";
 "chat.tokenLimitReached" = "会話制限に達しました。新しいチャットを開始してください。";
+"chat.subscriptionRequired" = "サブスクリプションが必要です";
+"chat.subscriptionExpiredMessage" = "サブスクリプションが期限切れです。Quote AI の機能を引き続き使用するにはアップグレードしてください。";
+"chat.upgradePlan" = "プランをアップグレード";
+"chat.maybeLater" = "後で";
+"dailyQuote.subscriptionRequired" = "パーソナライズされた AI 名言を受け取るには Pro にアップグレードしてください。";
 
 /* ProfileView */
 "profile.title" = "プロフィール";

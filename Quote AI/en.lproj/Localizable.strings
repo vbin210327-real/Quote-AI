@@ -107,6 +107,11 @@
 "chat.regenerate" = "Regenerate";
 "chat.tokenWarning" = "Approaching conversation limit";
 "chat.tokenLimitReached" = "Conversation limit reached. Please start a new chat.";
+"chat.subscriptionRequired" = "Subscription Required";
+"chat.subscriptionExpiredMessage" = "Your subscription has expired. Upgrade to continue using Quote AI's features.";
+"chat.upgradePlan" = "Upgrade Plan";
+"chat.maybeLater" = "Maybe Later";
+"dailyQuote.subscriptionRequired" = "Upgrade to Pro to receive personalized AI quotes.";
 
 /* ProfileView */
 "profile.title" = "Profile";

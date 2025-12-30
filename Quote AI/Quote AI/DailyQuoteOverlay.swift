@@ -6,11 +6,13 @@ struct DailyQuoteOverlay: View {
     @Binding var isPresented: Bool
     @StateObject private var favoritesManager = FavoriteQuotesManager.shared
     @StateObject private var localization = LocalizationManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var animateIn = false
     @State private var isSaved = false
     @State private var currentQuote: String = ""
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var showUpgradeSheet = false
     
     var body: some View {
         ZStack {
@@ -68,21 +70,33 @@ struct DailyQuoteOverlay: View {
                     .frame(height: 150)
                 } else if let error = errorMessage {
                     VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle.fill")
+                        Image(systemName: subscriptionManager.isProUser ? "exclamationmark.triangle.fill" : "lock.fill")
                             .font(.title)
-                            .foregroundColor(.orange)
-                        
+                            .foregroundColor(subscriptionManager.isProUser ? .orange : .blue)
+
                         Text(error)
                             .font(.system(size: 16))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
-                        
-                        Button("Use Offline Quote") {
-                            currentQuote = initialQuote
-                            errorMessage = nil
+
+                        if subscriptionManager.isProUser {
+                            Button("Use Offline Quote") {
+                                currentQuote = initialQuote
+                                errorMessage = nil
+                            }
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.blue)
+                        } else {
+                            Button(localization.string(for: "chat.upgradePlan")) {
+                                showUpgradeSheet = true
+                            }
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 12)
+                            .background(Color.blue)
+                            .cornerRadius(20)
                         }
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.blue)
                     }
                 } else {
                     // Quote Text
@@ -174,9 +188,19 @@ struct DailyQuoteOverlay: View {
                 animateIn = true
             }
         }
+        .sheet(isPresented: $showUpgradeSheet) {
+            UpgradePlanView()
+        }
     }
     
     private func fetchAIQuote() {
+        // Check subscription status first
+        guard subscriptionManager.isProUser else {
+            isLoading = false
+            errorMessage = localization.string(for: "dailyQuote.subscriptionRequired")
+            return
+        }
+
         isLoading = true
         Task {
             do {

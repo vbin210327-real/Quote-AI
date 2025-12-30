@@ -18,6 +18,8 @@ struct ChatView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var typingMessageId: UUID?
     @State private var showingProfile = false
+    @State private var showingUpgradeAlert = false
+    @State private var showingUpgradePlan = false
 
     private var isDefaultBackground: Bool {
         preferences.chatBackground == .defaultBackground
@@ -282,10 +284,22 @@ struct ChatView: View {
                 .zIndex(2)
             }
         }
-        .sheet(isPresented: $viewModel.showPaywall) {
-            PaywallView {
+        .onChange(of: viewModel.showPaywall) { _, shouldShow in
+            if shouldShow {
+                showingUpgradeAlert = true
                 viewModel.showPaywall = false
             }
+        }
+        .alert(localization.string(for: "chat.subscriptionRequired"), isPresented: $showingUpgradeAlert) {
+            Button(localization.string(for: "chat.upgradePlan")) {
+                showingUpgradePlan = true
+            }
+            Button(localization.string(for: "chat.maybeLater"), role: .cancel) { }
+        } message: {
+            Text(localization.string(for: "chat.subscriptionExpiredMessage"))
+        }
+        .sheet(isPresented: $showingUpgradePlan) {
+            UpgradePlanView()
         }
     }
 }
@@ -1115,9 +1129,15 @@ struct SubscriptionDetailView: View {
                     .fontWeight(.semibold)
                 }
             }
+            .onAppear {
+                // Refresh subscription info when view appears
+                Task {
+                    await subscriptionManager.checkSubscriptionStatus()
+                }
+            }
         }
     }
-    
+
     private var subscriptionPriceText: String {
         switch subscriptionManager.subscriptionPlanName {
         case "Weekly":
