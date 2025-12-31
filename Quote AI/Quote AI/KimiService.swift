@@ -245,7 +245,8 @@ final class KimiService: @unchecked Sendable {
         }
 
         let basePrompt = """
-        Write ONE original daily quote that feels human and memorable.
+        Write ONE original daily quote that feels simple but deep.
+        It should create a clear "aha" moment in plain language.
 
         CRITICAL - LENGTH LIMIT:
         - MUST be under 120 characters total
@@ -285,13 +286,13 @@ final class KimiService: @unchecked Sendable {
         return newQuote
     }
     func generateDailyCalibration() async throws -> String {
-        var tone = QuoteTone.philosophical
+        var tone = QuoteTone.motivational
         var language = AppLanguage.english
         let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
 
         // Read user's saved preferences from shared UserDefaults
         if let toneString = sharedDefaults?.string(forKey: SharedConstants.Keys.quoteTone),
-           let savedTone = QuoteTone(rawValue: toneString) {
+           let savedTone = QuoteTone.fromStoredValue(toneString) {
             tone = savedTone
         }
         if let langString = sharedDefaults?.string(forKey: SharedConstants.Keys.appLanguage),

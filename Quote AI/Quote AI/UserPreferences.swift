@@ -16,8 +16,8 @@ extension QuoteTone {
 
     var localizedName: String {
         switch self {
+        case .motivational: return LocalizationManager.shared.string(for: "tone.motivational")
         case .naval: return LocalizationManager.shared.string(for: "tone.naval")
-        case .toughLove: return LocalizationManager.shared.string(for: "tone.toughLove")
         case .philosophical: return LocalizationManager.shared.string(for: "tone.philosophical")
         case .realist: return LocalizationManager.shared.string(for: "tone.realist")
         }
@@ -25,8 +25,8 @@ extension QuoteTone {
     
     var icon: String {
         switch self {
+        case .motivational: return "bolt.fill"
         case .naval: return "lightbulb.fill"
-        case .toughLove: return "flame.fill"
         case .philosophical: return "brain.head.profile"
         case .realist: return "chart.line.uptrend.xyaxis"
         }
@@ -384,7 +384,7 @@ class UserPreferences: ObservableObject {
         self.userGender = UserDefaults.standard.string(forKey: "userGender") ?? ""
 
         if let toneString = UserDefaults.standard.string(forKey: "quoteTone"),
-           let tone = QuoteTone(rawValue: toneString) {
+           let tone = QuoteTone.fromStoredValue(toneString) {
             self.quoteTone = tone
         } else {
             self.quoteTone = .naval
@@ -590,7 +590,7 @@ class UserPreferences: ObservableObject {
             if let birthYear = profile.birthYear, birthYear != userBirthYear {
                 userBirthYear = birthYear
             }
-            if let tone = profile.quoteTone, let quoteToneValue = QuoteTone(rawValue: tone), quoteToneValue != quoteTone {
+            if let tone = profile.quoteTone, let quoteToneValue = QuoteTone.fromStoredValue(tone), quoteToneValue != quoteTone {
                 quoteTone = quoteToneValue
             }
             if let focus = profile.userFocus, let focusValue = UserFocus(rawValue: focus), focusValue != userFocus {

@@ -8,18 +8,25 @@
 import Foundation
 
 enum QuoteTone: String, CaseIterable, Codable {
+    case motivational = "Motivational"
     case naval = "Navalism"
-    case toughLove = "Tough Love"
     case philosophical = "Philosophical"
     case realist = "Realist"
 
     var description: String {
         switch self {
+        case .motivational: return "Uplifting, energetic, and action-oriented. Encourage forward momentum without clichés."
         case .naval: return "Speak like Naval Ravikant."
-        case .toughLove: return "Direct, no-nonsense, and challenging. Push the user to take action. Be blunt and straightforward."
         case .philosophical: return "Deep, contemplative, and thought-provoking. Reference philosophy, existentialism, stoicism. Make them think."
         case .realist: return "Practical, grounded, and honest. Focus on facts and actionable steps. Skip the fluff."
         }
+    }
+
+    static func fromStoredValue(_ value: String) -> QuoteTone? {
+        if value == "Tough Love" {
+            return .motivational
+        }
+        return QuoteTone(rawValue: value)
     }
 }
 

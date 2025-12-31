@@ -840,8 +840,8 @@ struct ToneStepView: View {
 
     private func localizedTone(_ tone: QuoteTone) -> String {
         switch tone {
+        case .motivational: return localization.string(for: "tone.motivational")
         case .naval: return localization.string(for: "tone.naval")
-        case .toughLove: return localization.string(for: "tone.toughLove")
         case .philosophical: return localization.string(for: "tone.philosophical")
         case .realist: return localization.string(for: "tone.realist")
         }
@@ -855,7 +855,7 @@ struct ToneStepView: View {
                     impact.impactOccurred()
                     selectedTone = tone
                 }) {
-                    Text(localizedTone(tone) + (tone == .naval ? " (Recommended)" : ""))
+                    Text(localizedTone(tone) + (tone == .motivational ? " (Recommended)" : ""))
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(selectedTone == tone ? .white : .black)
                         .frame(maxWidth: .infinity)
