@@ -337,17 +337,19 @@ class UserPreferences: ObservableObject {
             if notificationsEnabled {
                 NotificationManager.shared.requestPermission()
             } else {
-                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_calibration"])
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_calibration", "daily_calibration_immediate"])
             }
         }
     }
+
+    private var notificationScheduleTask: Task<Void, Never>?
 
     @Published var notificationHour: Int {
         didSet {
             UserDefaults.standard.set(notificationHour, forKey: "notificationHour")
             syncToCloudDebounced()
             if notificationsEnabled {
-                NotificationManager.shared.scheduleDailyNotification(at: notificationHour, minute: notificationMinute)
+                scheduleDailyNotificationDebounced()
             }
         }
     }
@@ -357,8 +359,16 @@ class UserPreferences: ObservableObject {
             UserDefaults.standard.set(notificationMinute, forKey: "notificationMinute")
             syncToCloudDebounced()
             if notificationsEnabled {
-                NotificationManager.shared.scheduleDailyNotification(at: notificationHour, minute: notificationMinute)
+                scheduleDailyNotificationDebounced()
             }
+        }
+    }
+
+    private func scheduleDailyNotificationDebounced() {
+        notificationScheduleTask?.cancel()
+        notificationScheduleTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            NotificationManager.shared.scheduleDailyNotification(at: notificationHour, minute: notificationMinute)
         }
     }
 

@@ -18,6 +18,10 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         "Silence is sometimes the loudest answer.",
         "Energy flows where intention goes."
     ]
+
+    private let dailyNotificationId = "daily_calibration"
+    private let dailyNotificationImmediateId = "daily_calibration_immediate"
+    private let dailyNotificationQuoteKey = "dailyNotificationQuote"
     
     override private init() {
         super.init()
@@ -48,13 +52,108 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     }
     
     func scheduleDailyNotification(at hour: Int = 8, minute: Int = 0) {
-        // Cancel existing daily notifications
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_calibration"])
-        
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [dailyNotificationId, dailyNotificationImmediateId])
+
+        let cachedQuote = cachedDailyNotificationQuote()
+        let quote = cachedQuote ?? fallbackQuotes.randomElement() ?? "Take a breath and begin again."
+        Task { @MainActor in
+            await scheduleDailyNotificationContent(quote: quote, at: hour, minute: minute)
+            await scheduleImmediateNotificationIfNeeded(quote: quote, at: hour, minute: minute)
+        }
+
+        Task {
+            await refreshDailyNotificationQuoteIfNeeded(at: hour, minute: minute)
+        }
+    }
+
+    @MainActor
+    private func scheduleDailyNotificationContent(quote: String, at hour: Int, minute: Int) async {
+        let content = makeNotificationContent(quote: quote, hour: hour, minute: minute)
+
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(identifier: dailyNotificationId, content: content, trigger: trigger)
+
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            print("[NotificationManager] Failed to schedule daily notification: \(error)")
+        }
+    }
+
+    @MainActor
+    private func scheduleImmediateNotificationIfNeeded(quote: String, at hour: Int, minute: Int) async {
+        let calendar = Calendar.current
+        let now = Date()
+        var components = calendar.dateComponents([.year, .month, .day], from: now)
+        components.hour = hour
+        components.minute = minute
+        components.second = 0
+
+        guard let selectedToday = calendar.date(from: components) else { return }
+        let delta = selectedToday.timeIntervalSince(now)
+
+        guard delta <= 0, delta > -60 else { return }
+
+        let content = makeNotificationContent(quote: quote, hour: hour, minute: minute)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        let request = UNNotificationRequest(identifier: dailyNotificationImmediateId, content: content, trigger: trigger)
+
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            print("[NotificationManager] Failed to schedule immediate notification: \(error)")
+        }
+    }
+
+    private func refreshDailyNotificationQuoteIfNeeded(at hour: Int, minute: Int) async {
+        guard isProUser() else { return }
+
+        let nextTrigger = nextTriggerDate(hour: hour, minute: minute)
+        let timeUntilTrigger = nextTrigger.timeIntervalSinceNow
+
+        do {
+            let newQuote = try await KimiService.shared.generateGeneralDailyQuote()
+            cacheDailyNotificationQuote(newQuote)
+
+            if timeUntilTrigger > 60 {
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [dailyNotificationId])
+                await scheduleDailyNotificationContent(quote: newQuote, at: hour, minute: minute)
+            }
+        } catch {
+            // Keep the existing scheduled quote if AI fetch fails.
+        }
+    }
+
+    private func nextTriggerDate(hour: Int, minute: Int) -> Date {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = hour
+        components.minute = minute
+
+        let todayTrigger = calendar.date(from: components) ?? Date()
+        if todayTrigger > Date() {
+            return todayTrigger
+        }
+        return calendar.date(byAdding: .day, value: 1, to: todayTrigger) ?? todayTrigger
+    }
+
+    private func cachedDailyNotificationQuote() -> String? {
+        UserDefaults.standard.string(forKey: dailyNotificationQuoteKey)
+    }
+
+    private func cacheDailyNotificationQuote(_ quote: String) {
+        UserDefaults.standard.set(quote, forKey: dailyNotificationQuoteKey)
+    }
+
+    @MainActor
+    private func makeNotificationContent(quote: String, hour: Int, minute: Int) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = "Quote AI"
-        
-        // Use appropriate greeting based on scheduled time
+
         let userName = UserPreferences.shared.userName
         let timeGreeting: String
         switch hour {
@@ -66,21 +165,15 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
             timeGreeting = "Good evening"
         }
         let greeting = userName.isEmpty ? "\(timeGreeting)." : "\(timeGreeting), \(userName)."
-        content.body = "\(greeting) Time for your daily quote. Here's a thought for you..."
+        content.body = "\(greeting) Time for your daily quotes."
         content.sound = .default
-        
-        // Store a random quote in userInfo if needed, or we pick one on launch
-        let randomQuote = fallbackQuotes.randomElement() ?? ""
-        content.userInfo = ["quote": randomQuote]
-        
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = minute
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "daily_calibration", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request)
+        content.userInfo = ["quote": quote]
+        return content
+    }
+
+    private func isProUser() -> Bool {
+        let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
+        return sharedDefaults?.bool(forKey: SharedConstants.Keys.isProUser) ?? false
     }
     
     // MARK: - UNUserNotificationCenterDelegate

@@ -150,6 +150,140 @@ final class KimiService: @unchecked Sendable {
             throw KimiServiceError.decodingError(decodingError)
         }
     }
+
+    private func getGeneralQuote(
+        for userMessage: String,
+        languageName: String,
+        languageCode: String,
+        useWidgetModel: Bool = false
+    ) async throws -> String {
+        guard let url = URL(string: Config.kimiAPIEndpoint) else {
+            throw KimiServiceError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(Config.kimiAPIKey)", forHTTPHeaderField: "Authorization")
+
+        let systemPrompt = """
+        You are Quote AI. You write short, original quotes.
+
+        CRITICAL RULES:
+        - 1 sentence only.
+        - Neutral tone, no persona, no named authors or attributions.
+        - No fluff, no filler, no clichés.
+        - Respond in \(languageName) (\(languageCode)).
+        """
+
+        let apiMessages: [KimiMessage] = [
+            KimiMessage(role: "system", content: systemPrompt),
+            KimiMessage(role: "user", content: userMessage)
+        ]
+
+        let modelToUse = useWidgetModel ? Config.widgetModelName : Config.modelName
+        let kimiRequest = KimiRequest(
+            model: modelToUse,
+            messages: apiMessages,
+            temperature: useWidgetModel ? 1.0 : 0.7,
+            maxTokens: 120
+        )
+
+        do {
+            request.httpBody = try JSONEncoder().encode(kimiRequest)
+        } catch {
+            throw KimiServiceError.decodingError(error)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw KimiServiceError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let errorMessage = errorDict["error"] as? String {
+                throw KimiServiceError.apiError(errorMessage)
+            }
+            throw KimiServiceError.apiError("HTTP \(httpResponse.statusCode)")
+        }
+
+        do {
+            let kimiResponse = try JSONDecoder().decode(KimiResponse.self, from: data)
+            guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
+                throw KimiServiceError.invalidResponse
+            }
+            return quote
+        } catch let decodingError {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Raw API response: \(responseString)")
+            }
+            throw KimiServiceError.decodingError(decodingError)
+        }
+    }
+
+    func generateGeneralDailyQuote() async throws -> String {
+        let language: AppLanguage
+        #if !WIDGET
+        language = LocalizationManager.shared.currentLanguage
+        #else
+        language = .english
+        #endif
+
+        let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
+        let recentQuotes = sharedDefaults?.stringArray(forKey: SharedConstants.Keys.recentQuotes) ?? []
+
+        var avoidSection = ""
+        if !recentQuotes.isEmpty {
+            let quotesList = recentQuotes.map { "- \"\($0)\"" }.joined(separator: "\n")
+            avoidSection = """
+
+            DO NOT repeat these recent quotes (write something completely different):
+            \(quotesList)
+            """
+        }
+
+        let basePrompt = """
+        Write ONE original daily quote that feels human and memorable.
+
+        CRITICAL - LENGTH LIMIT:
+        - MUST be under 120 characters total
+        - 1 short sentence ONLY
+        \(avoidSection)
+        """
+
+        var newQuote = try await getGeneralQuote(
+            for: basePrompt,
+            languageName: language.promptName,
+            languageCode: language.rawValue,
+            useWidgetModel: true
+        )
+
+        if recentQuotes.contains(newQuote) {
+            let retryPrompt = """
+            \(basePrompt)
+
+            CRITICAL: The quote MUST NOT match any of the lines above.
+            """
+            newQuote = try await getGeneralQuote(
+                for: retryPrompt,
+                languageName: language.promptName,
+                languageCode: language.rawValue,
+                useWidgetModel: true
+            )
+        }
+
+        var updatedQuotes = recentQuotes
+        updatedQuotes.insert(newQuote, at: 0)
+        if updatedQuotes.count > 5 {
+            updatedQuotes = Array(updatedQuotes.prefix(5))
+        }
+        sharedDefaults?.set(updatedQuotes, forKey: SharedConstants.Keys.recentQuotes)
+        sharedDefaults?.synchronize()
+
+        return newQuote
+    }
     func generateDailyCalibration() async throws -> String {
         var tone = QuoteTone.philosophical
         var language = AppLanguage.english

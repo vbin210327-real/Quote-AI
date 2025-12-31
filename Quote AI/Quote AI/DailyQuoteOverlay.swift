@@ -38,7 +38,13 @@ struct DailyQuoteOverlay: View {
                 HStack {
                     Image(systemName: "sparkles")
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color(hex: "FFB347"), Color(hex: "FF7A59")],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                     
                     Text(localization.string(for: "settings.dailyQuote"))
                         .font(.system(size: 16, weight: .bold, design: .serif))
@@ -72,7 +78,17 @@ struct DailyQuoteOverlay: View {
                     VStack(spacing: 16) {
                         Image(systemName: subscriptionManager.isProUser ? "exclamationmark.triangle.fill" : "lock.fill")
                             .font(.title)
-                            .foregroundColor(subscriptionManager.isProUser ? .orange : .blue)
+                            .foregroundStyle(
+                                subscriptionManager.isProUser
+                                ? AnyShapeStyle(Color.orange)
+                                : AnyShapeStyle(
+                                    LinearGradient(
+                                        colors: [Color(hex: "F7B733"), Color(hex: "FC4A1A")],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                            )
 
                         Text(error)
                             .font(.system(size: 16))
@@ -94,8 +110,15 @@ struct DailyQuoteOverlay: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 12)
-                            .background(Color.blue)
-                            .cornerRadius(20)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(hex: "111111"), Color(hex: "3A3A3A")],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .clipShape(Capsule())
+                            .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
                         }
                     }
                 } else {
@@ -188,6 +211,16 @@ struct DailyQuoteOverlay: View {
                 animateIn = true
             }
         }
+        .onChange(of: subscriptionManager.isProUser) { _, isPro in
+            guard isPro, !isLoading else { return }
+            errorMessage = nil
+            fetchAIQuote()
+        }
+        .onChange(of: showUpgradeSheet) { _, isPresented in
+            guard !isPresented, subscriptionManager.isProUser, !isLoading else { return }
+            errorMessage = nil
+            fetchAIQuote()
+        }
         .sheet(isPresented: $showUpgradeSheet) {
             UpgradePlanView()
         }
@@ -204,7 +237,7 @@ struct DailyQuoteOverlay: View {
         isLoading = true
         Task {
             do {
-                let aiQuote = try await KimiService.shared.generateDailyCalibration()
+                let aiQuote = try await KimiService.shared.generateGeneralDailyQuote()
 
                 await MainActor.run {
                     withAnimation(.easeInOut(duration: 0.5)) {

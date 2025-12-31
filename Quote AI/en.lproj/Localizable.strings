@@ -111,7 +111,7 @@
 "chat.subscriptionExpiredMessage" = "Your subscription has expired. Upgrade to continue using Quote AI's features.";
 "chat.upgradePlan" = "Upgrade Plan";
 "chat.maybeLater" = "Maybe Later";
-"dailyQuote.subscriptionRequired" = "Upgrade to Pro to receive personalized AI quotes.";
+"dailyQuote.subscriptionRequired" = "Upgrade to Pro to receive daliy quotes.";
 
 /* ProfileView */
 "profile.title" = "Profile";
@@ -207,7 +207,7 @@
 // Settings - Additional
 "settings.restorePurchases" = "Restore Purchases";
 "settings.notifications" = "NOTIFICATIONS";
-"settings.dailyQuote" = "Daily Quote";
+"settings.dailyQuote" = "Daily Quotes";
 "settings.calibrationTime" = "Calibration Time";
 "settings.upgradePlan" = "Upgrade Plan";
 "settings.currentPlan" = "Current plan: %@";
