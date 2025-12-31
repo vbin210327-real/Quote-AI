@@ -611,11 +611,14 @@ class UserPreferences: ObservableObject {
             if let language = profile.language, let langValue = AppLanguage(rawValue: language), langValue != LocalizationManager.shared.currentLanguage {
                 LocalizationManager.shared.setLanguageFromCloud(langValue)
             }
-            // Don't sync hasCompletedOnboarding from cloud - let local onboarding flow control this
-            // This ensures paywall is always shown to users who haven't completed local onboarding
-            // if let onboarding = profile.hasCompletedOnboarding, onboarding != hasCompletedOnboarding {
-            //     hasCompletedOnboarding = onboarding
-            // }
+            if let onboarding = profile.hasCompletedOnboarding {
+                if onboarding != hasCompletedOnboarding {
+                    hasCompletedOnboarding = onboarding
+                }
+            } else if !hasCompletedOnboarding {
+                // Legacy profiles without this flag should skip onboarding.
+                hasCompletedOnboarding = true
+            }
             if let notifEnabled = profile.notificationsEnabled, notifEnabled != notificationsEnabled {
                 notificationsEnabled = notifEnabled
             }
