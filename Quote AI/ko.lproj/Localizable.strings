@@ -162,6 +162,7 @@
 "settings.personality" = "성격";
 "settings.background" = "디자인";
 "settings.account" = "계정";
+"settings.about" = "정보";
 "settings.subscription" = "구독";
 "settings.renewsOn" = "갱신일";
 "settings.expiresOn" = "만료일";
@@ -213,6 +214,8 @@
 "settings.calibrationTime" = "캘리브레이션 시간";
 "settings.upgradePlan" = "플랜 업그레이드";
 "settings.currentPlan" = "현재 플랜: %@";
+"settings.version" = "버전";
+"settings.rateApp" = "Rate Us";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "이용 가능한 플랜";

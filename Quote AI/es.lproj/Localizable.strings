@@ -162,6 +162,7 @@
 "settings.personality" = "Personalidad";
 "settings.background" = "Apariencia";
 "settings.account" = "CUENTA";
+"settings.about" = "ACERCA DE";
 "settings.subscription" = "Suscripción";
 "settings.renewsOn" = "Se renueva";
 "settings.expiresOn" = "Vence";
@@ -205,6 +206,8 @@
 "settings.calibrationTime" = "Hora de Calibración";
 "settings.upgradePlan" = "Mejorar Plan";
 "settings.currentPlan" = "Plan actual: %@";
+"settings.version" = "Versión";
+"settings.rateApp" = "Rate Us";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "Planes Disponibles";

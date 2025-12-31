@@ -162,6 +162,7 @@
 "settings.personality" = "パーソナリティ";
 "settings.background" = "外観";
 "settings.account" = "アカウント";
+"settings.about" = "情報";
 "settings.subscription" = "サブスクリプション";
 "settings.renewsOn" = "更新日";
 "settings.expiresOn" = "有効期限";
@@ -213,6 +214,8 @@
 "settings.calibrationTime" = "キャリブレーション時間";
 "settings.upgradePlan" = "プランをアップグレード";
 "settings.currentPlan" = "現在のプラン：%@";
+"settings.version" = "バージョン";
+"settings.rateApp" = "Rate Us";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "利用可能なプラン";

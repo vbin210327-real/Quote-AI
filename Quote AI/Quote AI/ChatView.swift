@@ -9,6 +9,7 @@ import SwiftUI
 import Auth
 import UIKit
 import PhotosUI
+import StoreKit
 
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
@@ -20,6 +21,7 @@ struct ChatView: View {
     @State private var showingProfile = false
     @State private var showingUpgradeAlert = false
     @State private var showingUpgradePlan = false
+    @Environment(\.requestReview) private var requestReview
 
     private var isDefaultBackground: Bool {
         preferences.chatBackground == .defaultBackground
@@ -96,16 +98,19 @@ struct ChatView: View {
                             }
                             .padding()
                         }
-                        .scrollDismissesKeyboard(.interactively)
-                        .scrollContentBackground(.hidden)
-                        .background(Color.clear)
-                        .onTapGesture {
-                            isInputFocused = false
-                        }
-                        .onChange(of: viewModel.messages.count) { _, _ in
-                            // Scroll to bottom when new message arrives
-                            if let lastMessage = viewModel.messages.last {
-                                if lastMessage.shouldAnimate {
+                .scrollDismissesKeyboard(.interactively)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+                .onTapGesture {
+                    isInputFocused = false
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .quoteReviewRequest)) { _ in
+                    requestReview()
+                }
+                .onChange(of: viewModel.messages.count) { _, _ in
+                    // Scroll to bottom when new message arrives
+                    if let lastMessage = viewModel.messages.last {
+                        if lastMessage.shouldAnimate {
                                     typingMessageId = lastMessage.id
                                 }
                                 withAnimation {
@@ -647,12 +652,16 @@ struct SettingsView: View {
     @ObservedObject private var preferences = UserPreferences.shared
     @StateObject private var localization = LocalizationManager.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
     @State private var isSigningOut = false
     @State private var showingEditProfile = false
     @State private var showingSignOutAlert = false
     @State private var showingSubscriptionDetail = false
     @State private var showingUpgradePlan = false
     @State private var isRestoringPurchases = false
+    private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private let privacyURL = URL(string: "https://gist.github.com/vbin210327-real/131a5d4d01c2591efa84453c78d9ba9c")!
 
     var onClose: (() -> Void)?
 
@@ -662,6 +671,18 @@ struct SettingsView: View {
         case "female": return Color.pink
         default: return Color.gray
         }
+    }
+
+    private var appVersionText: String {
+        let raw = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
+        let parts = raw.split(separator: ".")
+        if parts.count == 1 {
+            return "\(raw).0.0"
+        }
+        if parts.count == 2 {
+            return "\(raw).0"
+        }
+        return raw
     }
 
     var body: some View {
@@ -944,6 +965,53 @@ struct SettingsView: View {
                             ), displayedComponents: .hourAndMinute)
                             .labelsHidden()
                         }
+                    }
+                }
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .padding(.horizontal, 16)
+            }
+
+            // About section
+            VStack(alignment: .leading, spacing: 0) {
+                Text(localization.string(for: "settings.about"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+                    .padding(.top, 24)
+
+                VStack(spacing: 0) {
+                    Button(action: { requestReview() }) {
+                        SettingsRow(icon: "star", title: localization.string(for: "settings.rateApp")) {
+                            EmptyView()
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+
+                    Button(action: { openURL(termsURL) }) {
+                        SettingsRow(icon: "doc.text", title: localization.string(for: "paywall.termsOfUse")) {
+                            EmptyView()
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+
+                    Button(action: { openURL(privacyURL) }) {
+                        SettingsRow(icon: "hand.raised", title: localization.string(for: "paywall.privacyPolicy")) {
+                            EmptyView()
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+
+                    SettingsRow(icon: "info.circle", title: localization.string(for: "settings.version")) {
+                        Text(appVersionText)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .background(Color(UIColor.secondarySystemGroupedBackground))

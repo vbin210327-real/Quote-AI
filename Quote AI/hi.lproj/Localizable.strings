@@ -162,6 +162,7 @@
 "settings.personality" = "व्यक्तित्व";
 "settings.background" = "दिखावट";
 "settings.account" = "खाता";
+"settings.about" = "के बारे में";
 "settings.subscription" = "सदस्यता";
 "settings.renewsOn" = "नवीनीकरण";
 "settings.expiresOn" = "समाप्ति";
@@ -203,6 +204,8 @@
 "settings.calibrationTime" = "कैलिब्रेशन समय";
 "settings.upgradePlan" = "प्लान अपग्रेड करें";
 "settings.currentPlan" = "वर्तमान प्लान: %@";
+"settings.version" = "संस्करण";
+"settings.rateApp" = "Rate Us";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "उपलब्ध प्लान";

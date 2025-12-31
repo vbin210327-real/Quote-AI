@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import NotificationCenter
 
 struct SavedQuote: Identifiable, Codable, Equatable {
     let id: UUID
@@ -26,6 +27,8 @@ class FavoriteQuotesManager: ObservableObject {
     @Published private(set) var savedQuotes: [SavedQuote] = []
 
     private let userDefaultsKey = "savedQuotes"
+    private let reviewSaveCountKey = "reviewSaveCount"
+    private let reviewRequestedKey = "reviewRequested"
     private var isSyncingFromCloud = false
 
     private init() {
@@ -41,6 +44,7 @@ class FavoriteQuotesManager: ObservableObject {
         let quote = SavedQuote(content: content)
         savedQuotes.insert(quote, at: 0) // Add to beginning
         persistQuotes()
+        recordSaveForReviewPrompt()
 
         // Sync to cloud
         if !isSyncingFromCloud {
@@ -132,6 +136,8 @@ class FavoriteQuotesManager: ObservableObject {
     func clearLocalData() {
         savedQuotes.removeAll()
         persistQuotes()
+        UserDefaults.standard.removeObject(forKey: reviewSaveCountKey)
+        UserDefaults.standard.removeObject(forKey: reviewRequestedKey)
     }
 
     // MARK: - Private Methods
@@ -156,6 +162,20 @@ class FavoriteQuotesManager: ObservableObject {
         }
     }
 
+    private func recordSaveForReviewPrompt() {
+        let defaults = UserDefaults.standard
+        let hasRequested = defaults.bool(forKey: reviewRequestedKey)
+        guard !hasRequested else { return }
+
+        let newCount = defaults.integer(forKey: reviewSaveCountKey) + 1
+        defaults.set(newCount, forKey: reviewSaveCountKey)
+
+        if newCount >= 3 {
+            defaults.set(true, forKey: reviewRequestedKey)
+            NotificationCenter.default.post(name: .quoteReviewRequest, object: nil)
+        }
+    }
+
     @MainActor
     private func saveQuoteToCloud(content: String) async {
         guard SupabaseManager.shared.isAuthenticated else { return }
@@ -177,4 +197,8 @@ class FavoriteQuotesManager: ObservableObject {
             print("Failed to delete quote from cloud: \(error)")
         }
     }
+}
+
+extension Notification.Name {
+    static let quoteReviewRequest = Notification.Name("quoteReviewRequest")
 }

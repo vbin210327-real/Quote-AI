@@ -162,6 +162,7 @@
 "settings.personality" = "个性";
 "settings.background" = "外观";
 "settings.account" = "账号";
+"settings.about" = "关于";
 "settings.subscription" = "订阅";
 "settings.renewsOn" = "续订日期";
 "settings.expiresOn" = "到期日期";
@@ -211,6 +212,8 @@
 "settings.calibrationTime" = "校准时间";
 "settings.upgradePlan" = "升级计划";
 "settings.currentPlan" = "当前计划：%@";
+"settings.version" = "版本";
+"settings.rateApp" = "Rate Us";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "可用计划";
