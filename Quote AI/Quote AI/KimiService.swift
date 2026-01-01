@@ -6,11 +6,17 @@
 //
 
 import Foundation
+#if !WIDGET
+import Supabase
+import Auth
+#endif
 
 enum KimiServiceError: Error, LocalizedError {
     case invalidURL
     case networkError(Error)
     case invalidResponse
+    case authRequired
+    case subscriptionRequired
     case apiError(String)
     case decodingError(Error)
 
@@ -22,6 +28,10 @@ enum KimiServiceError: Error, LocalizedError {
             return "Network error: \(error.localizedDescription)"
         case .invalidResponse:
             return "Invalid response from server"
+        case .authRequired:
+            return "Sign-in required"
+        case .subscriptionRequired:
+            return "Subscription required"
         case .apiError(let message):
             return "API error: \(message)"
         case .decodingError(let error):
@@ -30,10 +40,101 @@ enum KimiServiceError: Error, LocalizedError {
     }
 }
 
+private struct ProxyErrorResponse: Decodable {
+    let error: String?
+}
+
 final class KimiService: @unchecked Sendable {
     nonisolated static let shared = KimiService()
 
     private init() {}
+
+    private func resolveAccessToken() async throws -> String {
+        #if !WIDGET
+        do {
+            let session = try await SupabaseManager.shared.client.auth.session
+            return session.accessToken
+        } catch {
+            throw KimiServiceError.authRequired
+        }
+        #else
+        guard let token = UserDefaults(suiteName: SharedConstants.suiteName)?
+            .string(forKey: SharedConstants.Keys.supabaseAccessToken),
+            !token.isEmpty
+        else {
+            throw KimiServiceError.authRequired
+        }
+        return token
+        #endif
+    }
+
+    private func sendKimiRequest(_ requestPayload: KimiRequest) async throws -> KimiResponse {
+        guard let url = URL(
+            string: "\(SupabaseConfig.supabaseURL)/functions/v1/kimi-proxy"
+        ) else {
+            throw KimiServiceError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(SupabaseConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+
+        let accessToken = try await resolveAccessToken()
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        do {
+            request.httpBody = try JSONEncoder().encode(requestPayload)
+        } catch {
+            throw KimiServiceError.decodingError(error)
+        }
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw KimiServiceError.networkError(error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw KimiServiceError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            try throwProxyError(data: data, statusCode: httpResponse.statusCode)
+        }
+
+        do {
+            return try JSONDecoder().decode(KimiResponse.self, from: data)
+        } catch let decodingError {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Raw API response: \(responseString)")
+            }
+            throw KimiServiceError.decodingError(decodingError)
+        }
+    }
+
+    private func throwProxyError(data: Data, statusCode: Int) throws -> Never {
+        if statusCode == 401 {
+            throw KimiServiceError.authRequired
+        }
+        if statusCode == 402 {
+            throw KimiServiceError.subscriptionRequired
+        }
+
+        if let errorResponse = try? JSONDecoder().decode(ProxyErrorResponse.self, from: data),
+           let message = errorResponse.error {
+            if message == "auth_required" {
+                throw KimiServiceError.authRequired
+            }
+            if message == "subscription_required" {
+                throw KimiServiceError.subscriptionRequired
+            }
+            throw KimiServiceError.apiError(message)
+        }
+
+        throw KimiServiceError.apiError("HTTP \(statusCode)")
+    }
 
     func getQuote(
         for userMessage: String,
@@ -44,16 +145,6 @@ final class KimiService: @unchecked Sendable {
         languageCode: String? = nil,
         useWidgetModel: Bool = false
     ) async throws -> String {
-        guard let url = URL(string: Config.kimiAPIEndpoint) else {
-            throw KimiServiceError.invalidURL
-        }
-
-        // Prepare request
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.kimiAPIKey)", forHTTPHeaderField: "Authorization")
-
         // Determine context values (passed in vs singletons)
         var finalUserName = userName ?? "User"
         var finalLanguageName = languageName ?? "English"
@@ -110,45 +201,11 @@ final class KimiService: @unchecked Sendable {
             temperature: useWidgetModel ? 1.0 : 0.7,
             maxTokens: 300
         )
-
-        do {
-            request.httpBody = try JSONEncoder().encode(kimiRequest)
-        } catch {
-            throw KimiServiceError.decodingError(error)
-        }
-
-        // Make API call
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        // Check HTTP response
-        guard let httpResponse = response as? HTTPURLResponse else {
+        let kimiResponse = try await sendKimiRequest(kimiRequest)
+        guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
             throw KimiServiceError.invalidResponse
         }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            // Try to decode error message
-            if let errorDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let errorMessage = errorDict["error"] as? String {
-                throw KimiServiceError.apiError(errorMessage)
-            }
-            throw KimiServiceError.apiError("HTTP \(httpResponse.statusCode)")
-        }
-
-        // Decode response
-        do {
-            let kimiResponse = try JSONDecoder().decode(KimiResponse.self, from: data)
-            // For thinking models, content contains the final answer
-            guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
-                throw KimiServiceError.invalidResponse
-            }
-            return quote
-        } catch let decodingError {
-            // Print raw response for debugging
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Raw API response: \(responseString)")
-            }
-            throw KimiServiceError.decodingError(decodingError)
-        }
+        return quote
     }
 
     private func getGeneralQuote(
@@ -157,15 +214,6 @@ final class KimiService: @unchecked Sendable {
         languageCode: String,
         useWidgetModel: Bool = false
     ) async throws -> String {
-        guard let url = URL(string: Config.kimiAPIEndpoint) else {
-            throw KimiServiceError.invalidURL
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.kimiAPIKey)", forHTTPHeaderField: "Authorization")
-
         let systemPrompt = """
         You are Quote AI. You write short, original quotes.
 
@@ -188,39 +236,11 @@ final class KimiService: @unchecked Sendable {
             temperature: useWidgetModel ? 1.0 : 0.7,
             maxTokens: 120
         )
-
-        do {
-            request.httpBody = try JSONEncoder().encode(kimiRequest)
-        } catch {
-            throw KimiServiceError.decodingError(error)
-        }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
+        let kimiResponse = try await sendKimiRequest(kimiRequest)
+        guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
             throw KimiServiceError.invalidResponse
         }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let errorMessage = errorDict["error"] as? String {
-                throw KimiServiceError.apiError(errorMessage)
-            }
-            throw KimiServiceError.apiError("HTTP \(httpResponse.statusCode)")
-        }
-
-        do {
-            let kimiResponse = try JSONDecoder().decode(KimiResponse.self, from: data)
-            guard let quote = kimiResponse.choices.first?.message.content, !quote.isEmpty else {
-                throw KimiServiceError.invalidResponse
-            }
-            return quote
-        } catch let decodingError {
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Raw API response: \(responseString)")
-            }
-            throw KimiServiceError.decodingError(decodingError)
-        }
+        return quote
     }
 
     func generateGeneralDailyQuote() async throws -> String {

@@ -196,6 +196,22 @@ class ChatViewModel: ObservableObject {
                 }
 
             } catch {
+                if let kimiError = error as? KimiServiceError {
+                    switch kimiError {
+                    case .subscriptionRequired:
+                        showPaywall = true
+                        errorMessage = nil
+                        isLoading = false
+                        return
+                    case .authRequired:
+                        errorMessage = localization.string(for: "chat.errorMessage")
+                        isLoading = false
+                        return
+                    default:
+                        break
+                    }
+                }
+
                 // Handle error
                 errorMessage = error.localizedDescription
 

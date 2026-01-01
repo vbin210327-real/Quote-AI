@@ -87,6 +87,7 @@ class SupabaseManager: ObservableObject {
             let session = try await client.auth.session
             self.currentUser = session.user
             self.isAuthenticated = true
+            syncSharedSession(session)
 
             print("[SupabaseManager] Active session found, syncing from cloud...")
             // Sync data from cloud on app launch to ensure cross-device consistency
@@ -95,6 +96,7 @@ class SupabaseManager: ObservableObject {
             print("[SupabaseManager] No active session found: \(error)")
             self.currentUser = nil
             self.isAuthenticated = false
+            syncSharedSession(nil)
         }
     }
     
@@ -129,6 +131,7 @@ class SupabaseManager: ObservableObject {
 
         self.currentUser = session.user
         self.isAuthenticated = true
+        syncSharedSession(session)
 
         // Sync data from cloud after login
         await syncFromCloud()
@@ -174,6 +177,7 @@ class SupabaseManager: ObservableObject {
 
         self.currentUser = session.user
         self.isAuthenticated = true
+        syncSharedSession(session)
 
         // Sync data from cloud after login
         await syncFromCloud()
@@ -190,6 +194,7 @@ class SupabaseManager: ObservableObject {
         GIDSignIn.sharedInstance.signOut()
         self.currentUser = nil
         self.isAuthenticated = false
+        syncSharedSession(nil)
 
         // Clear local data on logout
         clearLocalData()
@@ -207,6 +212,16 @@ class SupabaseManager: ObservableObject {
     private func clearLocalData() {
         UserPreferences.shared.clearLocalData()
         FavoriteQuotesManager.shared.clearLocalData()
+    }
+
+    private func syncSharedSession(_ session: Session?) {
+        let sharedDefaults = UserDefaults(suiteName: SharedConstants.suiteName)
+        if let session = session {
+            sharedDefaults?.set(session.accessToken, forKey: SharedConstants.Keys.supabaseAccessToken)
+        } else {
+            sharedDefaults?.removeObject(forKey: SharedConstants.Keys.supabaseAccessToken)
+        }
+        sharedDefaults?.synchronize()
     }
     
     // MARK: - Conversation Management

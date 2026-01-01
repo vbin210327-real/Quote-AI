@@ -13,6 +13,7 @@ struct DailyQuoteOverlay: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showUpgradeSheet = false
+    @State private var needsSubscription = false
     
     var body: some View {
         ZStack {
@@ -76,18 +77,18 @@ struct DailyQuoteOverlay: View {
                     .frame(height: 150)
                 } else if let error = errorMessage {
                     VStack(spacing: 16) {
-                        Image(systemName: subscriptionManager.isProUser ? "exclamationmark.triangle.fill" : "lock.fill")
+                        Image(systemName: needsSubscription ? "lock.fill" : "exclamationmark.triangle.fill")
                             .font(.title)
                             .foregroundStyle(
-                                subscriptionManager.isProUser
-                                ? AnyShapeStyle(Color.orange)
-                                : AnyShapeStyle(
+                                needsSubscription
+                                ? AnyShapeStyle(
                                     LinearGradient(
                                         colors: [Color(hex: "F7B733"), Color(hex: "FC4A1A")],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
+                                : AnyShapeStyle(Color.orange)
                             )
 
                         Text(error)
@@ -95,7 +96,7 @@ struct DailyQuoteOverlay: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
-                        if subscriptionManager.isProUser {
+                        if !needsSubscription {
                             Button("Use Offline Quote") {
                                 currentQuote = initialQuote
                                 errorMessage = nil
@@ -230,10 +231,12 @@ struct DailyQuoteOverlay: View {
         // Check subscription status first
         guard subscriptionManager.isProUser else {
             isLoading = false
+            needsSubscription = true
             errorMessage = localization.string(for: "dailyQuote.subscriptionRequired")
             return
         }
 
+        needsSubscription = false
         isLoading = true
         Task {
             do {
@@ -243,12 +246,19 @@ struct DailyQuoteOverlay: View {
                     withAnimation(.easeInOut(duration: 0.5)) {
                         self.currentQuote = aiQuote
                         self.isLoading = false
+                        self.needsSubscription = false
                         self.isSaved = favoritesManager.isSaved(aiQuote)
                     }
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Unable to reach the AI, but here's a thought for you anyway."
+                    if let kimiError = error as? KimiServiceError,
+                       case .subscriptionRequired = kimiError {
+                        self.needsSubscription = true
+                        self.errorMessage = localization.string(for: "dailyQuote.subscriptionRequired")
+                    } else {
+                        self.errorMessage = "Unable to reach the AI, but here's a thought for you anyway."
+                    }
                     self.isLoading = false
                 }
             }

@@ -96,14 +96,15 @@
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		ABB3AFAD2EFD3FCF00D89F9F /* Exceptions for "Quote AI" folder in "QuoteWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Assets.xcassets,
-				CommonTypes.swift,
-				Config.swift,
-				KimiService.swift,
-				Models.swift,
-				SharedConstants.swift,
-			);
+				membershipExceptions = (
+					Assets.xcassets,
+					CommonTypes.swift,
+					Config.swift,
+					KimiService.swift,
+					Models.swift,
+					SupabaseConfig.swift,
+					SharedConstants.swift,
+				);
 			target = ABB3AF882EFD3D1200D89F9F /* QuoteWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
