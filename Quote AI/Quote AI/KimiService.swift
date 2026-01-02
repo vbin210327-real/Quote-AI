@@ -53,7 +53,6 @@ final class KimiService: @unchecked Sendable {
         #if !WIDGET
         do {
             let session = try await SupabaseManager.shared.client.auth.session
-            print("🔍 [KimiService] Supabase User ID: \(session.user.id)")
             return session.accessToken
         } catch {
             throw KimiServiceError.authRequired
@@ -108,9 +107,6 @@ final class KimiService: @unchecked Sendable {
         do {
             return try JSONDecoder().decode(KimiResponse.self, from: data)
         } catch let decodingError {
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Raw API response: \(responseString)")
-            }
             throw KimiServiceError.decodingError(decodingError)
         }
     }

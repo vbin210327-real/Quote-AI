@@ -290,9 +290,7 @@ struct ChatView: View {
             }
         }
         .onChange(of: viewModel.showPaywall) { _, shouldShow in
-            print("🔍 [ChatView] showPaywall changed to: \(shouldShow)")
             if shouldShow {
-                print("⚠️ [ChatView] Showing upgrade alert!")
                 showingUpgradeAlert = true
                 viewModel.showPaywall = false
             }
@@ -610,13 +608,13 @@ struct ProfileView: View {
                 do {
                     conversations = try await supabaseManager.searchConversations(query: searchText)
                 } catch {
-                    print("Server search failed, falling back to local title search: \(error)")
+                    // Server search failed, falling back to local title search
                     let allConversations = try await supabaseManager.fetchConversations()
                     conversations = allConversations.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
                 }
             }
         } catch {
-            print("Error loading conversations: \(error)")
+            // Error loading conversations
         }
         isLoading = false
     }
@@ -647,7 +645,7 @@ struct ProfileView: View {
             try await supabaseManager.deleteConversation(conversationId: conversation.id)
             conversations.removeAll { $0.id == conversation.id }
         } catch {
-            print("Error deleting conversation: \(error)")
+            // Error deleting conversation
         }
     }
 }
@@ -1072,7 +1070,7 @@ struct SettingsView: View {
                 dismiss()
                 onClose?()
             } catch {
-                print("Error signing out: \(error)")
+                // Error signing out
             }
             isSigningOut = false
         }

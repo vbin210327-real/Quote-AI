@@ -116,13 +116,10 @@ class ChatViewModel: ObservableObject {
         guard !isLoading else { return }
 
         // Check subscription status - only Pro users can use chatbot
-        print("🔍 [ChatViewModel] Checking isProUser: \(subscriptionManager.isProUser)")
         guard subscriptionManager.isProUser else {
-            print("❌ [ChatViewModel] Not Pro - showing paywall")
             showPaywall = true
             return
         }
-        print("✅ [ChatViewModel] User is Pro - proceeding")
 
         // Check token limit
         guard !isAtTokenLimit else {
@@ -202,7 +199,6 @@ class ChatViewModel: ObservableObject {
                 if let kimiError = error as? KimiServiceError {
                     switch kimiError {
                     case .subscriptionRequired:
-                        print("❌ [ChatViewModel] SERVER returned subscription_required!")
                         showPaywall = true
                         errorMessage = nil
                         isLoading = false
@@ -271,7 +267,7 @@ class ChatViewModel: ObservableObject {
                 try await supabaseManager.deleteMessage(messageId: aiMessageId)
                 try await supabaseManager.deleteMessage(messageId: userMessageId)
             } catch {
-                print("Error deleting messages for regeneration: \(error)")
+                // Error deleting messages for regeneration
             }
             
             // Resend the original question to generate a new answer at the bottom
