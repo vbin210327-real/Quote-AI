@@ -89,7 +89,14 @@ class SupabaseManager: ObservableObject {
             self.isAuthenticated = true
             syncSharedSession(session)
 
-            print("[SupabaseManager] Active session found, syncing from cloud...")
+            print("[SupabaseManager] Active session found for user: \(session.user.id.uuidString)")
+            print("[SupabaseManager] Linking RevenueCat to Supabase user ID...")
+
+            // Link RevenueCat to Supabase user ID (ensures purchases are linked)
+            await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
+
+            print("[SupabaseManager] RevenueCat login complete, syncing from cloud...")
+
             // Sync data from cloud on app launch to ensure cross-device consistency
             await syncFromCloud()
         } catch {
@@ -132,6 +139,9 @@ class SupabaseManager: ObservableObject {
         self.currentUser = session.user
         self.isAuthenticated = true
         syncSharedSession(session)
+
+        // Link RevenueCat to Supabase user ID
+        await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
 
         // Sync data from cloud after login
         await syncFromCloud()
@@ -179,6 +189,9 @@ class SupabaseManager: ObservableObject {
         self.isAuthenticated = true
         syncSharedSession(session)
 
+        // Link RevenueCat to Supabase user ID
+        await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
+
         // Sync data from cloud after login
         await syncFromCloud()
     }
@@ -190,8 +203,12 @@ class SupabaseManager: ObservableObject {
         } catch {
             print("[SupabaseManager] Sign out error (safe to ignore if session missing): \(error)")
         }
-        
+
         GIDSignIn.sharedInstance.signOut()
+
+        // Logout from RevenueCat
+        await SubscriptionManager.shared.logout()
+
         self.currentUser = nil
         self.isAuthenticated = false
         syncSharedSession(nil)

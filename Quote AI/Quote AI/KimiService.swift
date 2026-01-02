@@ -53,6 +53,7 @@ final class KimiService: @unchecked Sendable {
         #if !WIDGET
         do {
             let session = try await SupabaseManager.shared.client.auth.session
+            print("🔍 [KimiService] Supabase User ID: \(session.user.id)")
             return session.accessToken
         } catch {
             throw KimiServiceError.authRequired

@@ -111,7 +111,7 @@
 "chat.subscriptionExpiredMessage" = "Your subscription has expired. Upgrade to continue using Quote AI's features.";
 "chat.upgradePlan" = "Upgrade Plan";
 "chat.maybeLater" = "Maybe Later";
-"dailyQuote.subscriptionRequired" = "Upgrade to Pro to receive daliy quotes.";
+"dailyQuote.subscriptionRequired" = "Upgrade to Pro to receive daily quotes.";
 
 /* ProfileView */
 "profile.title" = "Profile";

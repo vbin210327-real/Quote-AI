@@ -70,8 +70,18 @@ serve(async (req) => {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }
 
-  if (!supabaseUrl || !supabaseServiceKey || !kimiApiKey || !revenueCatSecret) {
-    return jsonResponse({ error: "server_misconfigured" }, 500);
+  const missingEnv: string[] = [];
+  if (!supabaseUrl) missingEnv.push("SUPABASE_URL");
+  if (!supabaseServiceKey) missingEnv.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (!kimiApiKey) missingEnv.push("KIMI_API_KEY");
+  if (!revenueCatSecret) missingEnv.push("REVENUECAT_SECRET_KEY");
+
+  if (missingEnv.length > 0) {
+    console.error("Missing env vars:", missingEnv);
+    return jsonResponse(
+      { error: "server_misconfigured", missing: missingEnv },
+      500,
+    );
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -96,9 +106,14 @@ serve(async (req) => {
     new Set([userId, userId.toLowerCase(), userId.toUpperCase()]),
   );
 
+  console.log("[kimi-proxy] Supabase user ID:", userId);
+  console.log("[kimi-proxy] Checking candidate IDs:", candidateIds);
+
   let hasActiveEntitlement = false;
 
   for (const candidateId of candidateIds) {
+    console.log("[kimi-proxy] Checking RevenueCat for:", candidateId);
+
     const rcResponse = await fetch(
       `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(
         candidateId,
@@ -111,22 +126,34 @@ serve(async (req) => {
       },
     );
 
+    console.log("[kimi-proxy] RevenueCat response status:", rcResponse.status);
+
     if (!rcResponse.ok) {
       if (rcResponse.status === 404) {
+        console.log("[kimi-proxy] User not found in RevenueCat, trying next...");
         continue;
       }
+      console.log("[kimi-proxy] RevenueCat error:", rcResponse.status);
       return jsonResponse({ error: "subscription_required" }, 402);
     }
 
     const rcData = await rcResponse.json();
+    console.log("[kimi-proxy] RevenueCat entitlements:", JSON.stringify(rcData?.subscriber?.entitlements));
+
     const entitlement = rcData?.subscriber?.entitlements?.pro ?? null;
+    console.log("[kimi-proxy] Pro entitlement:", JSON.stringify(entitlement));
+
     if (isEntitlementActive(entitlement)) {
+      console.log("[kimi-proxy] ✅ Active entitlement found!");
       hasActiveEntitlement = true;
       break;
+    } else {
+      console.log("[kimi-proxy] ❌ Entitlement not active");
     }
   }
 
   if (!hasActiveEntitlement) {
+    console.log("[kimi-proxy] No active subscription found for any candidate ID");
     return jsonResponse({ error: "subscription_required" }, 402);
   }
 

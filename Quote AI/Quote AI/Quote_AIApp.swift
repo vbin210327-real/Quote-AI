@@ -81,7 +81,12 @@ struct Quote_AIApp: App {
                 }
             }
             .onChange(of: scenePhase) { _, newPhase in
-                if newPhase == .background {
+                if newPhase == .active {
+                    // Refresh subscription status when app becomes active
+                    Task {
+                        await subscriptionManager.checkSubscriptionStatus()
+                    }
+                } else if newPhase == .background {
                     // Flush any pending cloud syncs before app goes to background
                     Task {
                         await userPreferences.flushPendingSync()

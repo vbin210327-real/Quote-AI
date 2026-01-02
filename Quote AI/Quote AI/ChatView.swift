@@ -290,7 +290,9 @@ struct ChatView: View {
             }
         }
         .onChange(of: viewModel.showPaywall) { _, shouldShow in
+            print("🔍 [ChatView] showPaywall changed to: \(shouldShow)")
             if shouldShow {
+                print("⚠️ [ChatView] Showing upgrade alert!")
                 showingUpgradeAlert = true
                 viewModel.showPaywall = false
             }
@@ -303,7 +305,12 @@ struct ChatView: View {
         } message: {
             Text(localization.string(for: "chat.subscriptionExpiredMessage"))
         }
-        .sheet(isPresented: $showingUpgradePlan) {
+        .sheet(isPresented: $showingUpgradePlan, onDismiss: {
+            // Refresh subscription status after upgrade sheet closes
+            Task {
+                await SubscriptionManager.shared.checkSubscriptionStatus()
+            }
+        }) {
             UpgradePlanView()
         }
     }
