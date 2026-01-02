@@ -29,6 +29,7 @@ struct SplashScreenView: View {
                         // App Icon
                         Image("WidgetBrandIcon")
                             .resizable()
+                            .renderingMode(.original)
                             .scaledToFit()
                             .frame(width: 64, height: 64)
                         
