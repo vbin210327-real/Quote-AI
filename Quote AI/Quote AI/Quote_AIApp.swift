@@ -86,6 +86,13 @@ struct Quote_AIApp: App {
                     Task {
                         await subscriptionManager.checkSubscriptionStatus()
                     }
+                    // Reschedule notifications if enabled (in case they were cleared)
+                    if userPreferences.notificationsEnabled {
+                        NotificationManager.shared.scheduleDailyNotification(
+                            at: userPreferences.notificationHour,
+                            minute: userPreferences.notificationMinute
+                        )
+                    }
                 } else if newPhase == .background {
                     // Flush any pending cloud syncs before app goes to background
                     Task {

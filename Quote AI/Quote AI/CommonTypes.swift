@@ -15,7 +15,7 @@ enum QuoteTone: String, CaseIterable, Codable {
 
     var description: String {
         switch self {
-        case .motivational: return "Hopeful, uplifting, and action-oriented. Encourage forward momentum without clichés."
+        case .motivational: return "Hopeful, uplifting."
         case .naval: return "Speak like Naval Ravikant."
         case .philosophical: return "Deep, contemplative, and thought-provoking. Reference philosophy, existentialism, stoicism. Make them think."
         case .realist: return "Practical, grounded, and honest. Focus on facts and actionable steps. Skip the fluff."

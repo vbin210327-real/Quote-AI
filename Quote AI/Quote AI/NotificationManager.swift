@@ -179,11 +179,17 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     // MARK: - UNUserNotificationCenterDelegate
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner, .sound])
+        // Don't show notification banner when app is in foreground
+        // This prevents the notification from appearing again if the user is already in the app
+        completionHandler([])
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
+        
+        // Remove the delivered notification from Notification Center to prevent it from appearing again
+        let notificationId = response.notification.request.identifier
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [notificationId])
         
         if let quote = userInfo["quote"] as? String {
             DispatchQueue.main.async {

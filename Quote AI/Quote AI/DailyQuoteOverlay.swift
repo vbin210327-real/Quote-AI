@@ -39,13 +39,7 @@ struct DailyQuoteOverlay: View {
                 HStack {
                     Image(systemName: "sparkles")
                         .font(.title2)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color(hex: "FFB347"), Color(hex: "FF7A59")],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .foregroundColor(.gray)
                     
                     Text(localization.string(for: "settings.dailyQuote"))
                         .font(.system(size: 16, weight: .bold, design: .serif))
