@@ -179,9 +179,8 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
     // MARK: - UNUserNotificationCenterDelegate
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Don't show notification banner when app is in foreground
-        // This prevents the notification from appearing again if the user is already in the app
-        completionHandler([])
+        // Show notification banner and play sound even when app is in foreground
+        completionHandler([.banner, .sound])
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {

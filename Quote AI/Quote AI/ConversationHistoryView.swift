@@ -48,6 +48,7 @@ struct ConversationHistoryView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .task {
             await loadConversations()
         }

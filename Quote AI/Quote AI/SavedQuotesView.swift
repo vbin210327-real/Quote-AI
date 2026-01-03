@@ -31,6 +31,7 @@ struct SavedQuotesView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                     }
+                    .frame(maxWidth: 500) // Constrain width for iPad
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
@@ -46,7 +47,7 @@ struct SavedQuotesView: View {
                                 }
                         }
                     }
-                    .listStyle(.plain)
+                    .listStyle(.insetGrouped) // Better style for iPad
                 }
             }
             .navigationTitle(localization.string(for: "favorites.title"))
@@ -72,6 +73,7 @@ struct SavedQuotesView: View {
                 Text(localization.string(for: "favorites.removeMessage"))
             }
         }
+        .navigationViewStyle(.stack)
         .environment(\.locale, localization.currentLanguage.locale)
     }
 }

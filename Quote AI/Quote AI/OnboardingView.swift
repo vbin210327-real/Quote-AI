@@ -194,11 +194,12 @@ struct OnboardingView: View {
                             .font(.system(size: 18, weight: .semibold))
                             .italic()
                             .foregroundColor(.white)
-                            .frame(width: UIScreen.main.bounds.width - 40)
+                            .frame(maxWidth: 500)
                             .frame(height: 60)
                             .background(Color.black)
                             .cornerRadius(30)
                     }
+                    .padding(.horizontal, 20)
                     .disabled(isContinueDisabled)
                     .opacity(isContinueDisabled ? 0.5 : 1.0)
                     .padding(.bottom, 20)
@@ -222,11 +223,12 @@ struct OnboardingView: View {
                         Text(localization.string(for: "onboarding.letsGetStarted"))
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: UIScreen.main.bounds.width - 40)
+                            .frame(maxWidth: 500)
                             .frame(height: 60)
                             .background(Color.black)
                             .cornerRadius(30)
                     }
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }

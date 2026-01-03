@@ -238,6 +238,7 @@ struct ChatView: View {
                 )
                 .navigationBarHidden(true)
             }
+            .navigationViewStyle(.stack) // Force stack navigation on iPad
             .blur(radius: showingProfile ? 3 : 0)
             .disabled(showingProfile) // Disable interaction with chat when profile is open
             .onChange(of: showingProfile) { _, isOpen in
@@ -283,7 +284,7 @@ struct ChatView: View {
                         viewModel.clearChat()
                     }
                 )
-                .frame(width: UIScreen.main.bounds.width * 0.85)
+                .frame(width: min(UIScreen.main.bounds.width * 0.85, 400)) // Max 400pt on iPad
                 .background(Color(UIColor.systemBackground))
                 .transition(.move(edge: .leading))
                 .zIndex(2)
@@ -591,7 +592,7 @@ struct ProfileView: View {
         } message: {
             Text(localization.string(for: "history.deleteMessage"))
         }
-        .sheet(isPresented: $showingSavedQuotes) {
+        .fullScreenCover(isPresented: $showingSavedQuotes) {
             SavedQuotesView()
         }
         .sheet(isPresented: $showingSettings) {
@@ -714,6 +715,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .environment(\.locale, localization.currentLanguage.locale)
         .id(localization.currentLanguage)
         .sheet(isPresented: $showingEditProfile) {
@@ -1209,6 +1211,7 @@ struct SubscriptionDetailView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var subscriptionPriceText: String {

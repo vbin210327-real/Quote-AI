@@ -262,7 +262,7 @@ final class KimiService: @unchecked Sendable {
         }
 
         let basePrompt = """
-        Write ONE original daily quote that feels simple motivational and deep.
+        Write ONE original daily quote that feels pure motivational.
         It should create a clear "aha" moment in plain language.
 
         CRITICAL - LENGTH LIMIT:

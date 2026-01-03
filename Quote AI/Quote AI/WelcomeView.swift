@@ -37,8 +37,9 @@ struct WelcomeView: View {
                     if let uiImage = Self.backgroundUIImage {
                         Image(uiImage: uiImage)
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .ignoresSafeArea()
+                            .scaledToFill()
+                            .frame(width: proxy.size.width, height: proxy.size.height)
+                            .clipped()
                     } else {
                         // Fallback gradient if image fails
                         LinearGradient(
@@ -46,9 +47,9 @@ struct WelcomeView: View {
                             startPoint: .top,
                             endPoint: .bottom
                         )
-                        .ignoresSafeArea()
                     }
                 }
+                .ignoresSafeArea()
                 // Prevent background from participating in text animations (avoids flicker/flash).
                 .transaction { transaction in
                     transaction.animation = nil
@@ -82,11 +83,12 @@ struct WelcomeView: View {
                                 .font(.system(size: 18, weight: .semibold))
                                 .italic()
                                 .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width - 40)
+                                .frame(maxWidth: 500) // Max width for iPad
                                 .frame(height: 60)
                                 .background(Color.black)
                                 .cornerRadius(30)
                         }
+                        .padding(.horizontal, 20)
                         
                         // Already have an account text
                         HStack(spacing: 4) {
@@ -113,9 +115,12 @@ struct WelcomeView: View {
                     .allowsHitTesting(showRestOfContent)
                     .accessibilityHidden(!showRestOfContent)
                 }
+                .frame(maxWidth: 600) // Constrain content width on iPad
+                .padding(.bottom, proxy.safeAreaInsets.bottom > 0 ? 0 : 20) // Add padding when no safe area
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
+        .ignoresSafeArea()
         .overlay(alignment: .topTrailing) {
             Menu {
                 ForEach(AppLanguage.allCases, id: \.self) { language in
@@ -292,6 +297,7 @@ struct WelcomeView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
     
     private func handleGoogleSignIn() {

@@ -190,6 +190,7 @@ struct DailyQuoteOverlay: View {
                 }
             }
             .padding(32)
+            .frame(maxWidth: 500) // Max width for iPad
             .background(
                 RoundedRectangle(cornerRadius: 32)
                     .fill(Color(UIColor.systemBackground).opacity(0.95))

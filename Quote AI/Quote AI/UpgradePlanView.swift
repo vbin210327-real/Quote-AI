@@ -186,6 +186,7 @@ struct UpgradePlanView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             // Pre-select the next tier up, or yearly if not subscribed
             if let offering = subscriptionManager.currentOffering {
