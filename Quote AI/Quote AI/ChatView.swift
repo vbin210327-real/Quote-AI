@@ -10,6 +10,7 @@ import Auth
 import UIKit
 import PhotosUI
 import StoreKit
+import AuthenticationServices
 
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
@@ -665,7 +666,9 @@ struct SettingsView: View {
     @State private var showingSignOutAlert = false
     @State private var showingSubscriptionDetail = false
     @State private var showingUpgradePlan = false
+    @State private var showingDeleteAccount = false
     @State private var isRestoringPurchases = false
+    @State private var showingSignInSheet = false
     private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     private let privacyURL = URL(string: "https://gist.github.com/vbin210327-real/131a5d4d01c2591efa84453c78d9ba9c")!
 
@@ -729,6 +732,17 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingUpgradePlan) {
             UpgradePlanView()
+        }
+        .sheet(isPresented: $showingDeleteAccount) {
+            DeleteAccountView {
+                dismiss()
+                onClose?()
+            }
+        }
+        .sheet(isPresented: $showingSignInSheet) {
+            SignInSheetView(onComplete: {
+                showingSignInSheet = false
+            })
         }
     }
 
@@ -816,6 +830,21 @@ struct SettingsView: View {
                 }
 
                 Divider().padding(.leading, 56)
+
+                if supabaseManager.isCurrentUserAnonymous {
+                    Button(action: {
+                        showingSignInSheet = true
+                    }) {
+                        SettingsRow(icon: "person.crop.circle.badge.checkmark", title: localization.string(for: "settings.signInToSync")) {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider().padding(.leading, 56)
+                }
 
                 // Subscription row (for subscribers - shows management sheet)
                 if subscriptionManager.isProUser {
@@ -1026,7 +1055,38 @@ struct SettingsView: View {
                 .padding(.horizontal, 16)
             }
 
-            // Separate Logout section to prevent accidental taps
+            // Data control section
+            VStack(alignment: .leading, spacing: 0) {
+                Text(localization.string(for: "settings.dataControl"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+                    .padding(.top, 24)
+
+                VStack(spacing: 0) {
+                    Button(action: { showingDeleteAccount = true }) {
+                        HStack(spacing: 16) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 18))
+                                .foregroundColor(.red)
+                                .frame(width: 24)
+
+                            Text(localization.string(for: "settings.deleteAccount"))
+                                .foregroundColor(.red)
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                    }
+                }
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+                .padding(.horizontal, 16)
+            }
+
+            // Separate Sign Out section to prevent accidental taps
             VStack(spacing: 0) {
                 Button(action: { showingSignOutAlert = true }) {
                     HStack(spacing: 16) {
@@ -1075,6 +1135,285 @@ struct SettingsView: View {
                 // Error signing out
             }
             isSigningOut = false
+        }
+    }
+}
+
+// MARK: - Delete Account View
+struct DeleteAccountView: View {
+    @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var localization = LocalizationManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmationText = ""
+    @State private var isDeleting = false
+    @State private var errorMessage: String?
+
+    var onDeleted: (() -> Void)?
+
+    private var isConfirmEnabled: Bool {
+        confirmationText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "delete"
+    }
+
+    var body: some View {
+        NavigationView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(localization.string(for: "deleteAccount.warning"))
+                    .font(.body)
+                    .foregroundColor(.primary)
+
+                Text(localization.string(for: "deleteAccount.subscriptionNote"))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+
+                Text(localization.string(for: "deleteAccount.typeToConfirm"))
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+
+                TextField(localization.string(for: "deleteAccount.placeholder"), text: $confirmationText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .padding(12)
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(10)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+
+                Button(action: { deleteAccount() }) {
+                    HStack {
+                        Spacer()
+                        if isDeleting {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text(localization.string(for: "deleteAccount.confirm"))
+                                .fontWeight(.semibold)
+                        }
+                        Spacer()
+                    }
+                    .frame(height: 52)
+                    .background(isConfirmEnabled ? Color.red : Color.red.opacity(0.5))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(!isConfirmEnabled || isDeleting)
+
+                Button(action: { dismiss() }) {
+                    Text(localization.string(for: "deleteAccount.cancel"))
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+            }
+            .padding(20)
+            .navigationTitle(localization.string(for: "deleteAccount.title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+
+    private func deleteAccount() {
+        guard isConfirmEnabled else { return }
+        errorMessage = nil
+        isDeleting = true
+
+        Task {
+            do {
+                try await supabaseManager.deleteAccount()
+                await MainActor.run {
+                    isDeleting = false
+                    dismiss()
+                    onDeleted?()
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isDeleting = false
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Sign In Sheet
+struct SignInSheetView: View {
+    @StateObject private var supabaseManager = SupabaseManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var localization = LocalizationManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var isSigningIn = false
+    @State private var errorMessage: String?
+
+    var onComplete: (() -> Void)?
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 16) {
+                Spacer()
+
+                Button(action: {
+                    handleAppleSignIn()
+                }) {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
+                        Image(systemName: "applelogo")
+                            .font(.system(size: 24, weight: .semibold))
+                            .frame(width: 24, height: 24)
+
+                        Text(localization.string(for: "welcome.signInWithApple"))
+                            .font(.system(size: 18, weight: .semibold))
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(16)
+                }
+                .disabled(isSigningIn)
+                .padding(.horizontal, 32)
+
+                Button(action: {
+                    handleGoogleSignIn()
+                }) {
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
+                        if let logoPath = Bundle.main.path(forResource: "google_logo", ofType: "png"),
+                           let uiImage = UIImage(contentsOfFile: logoPath) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .renderingMode(.original)
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                        } else {
+                            GoogleLogoView(size: 24)
+                                .frame(width: 24, height: 24)
+                        }
+
+                        Text(localization.string(for: "welcome.signInWithGoogle"))
+                            .font(.system(size: 18, weight: .semibold))
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 64)
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                }
+                .disabled(isSigningIn)
+                .padding(.horizontal, 32)
+
+                if isSigningIn {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                }
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                        .padding(8)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(8)
+                }
+
+                Spacer()
+            }
+            .navigationTitle(localization.string(for: "settings.signInToSync"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        dismiss()
+                        onComplete?()
+                    }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+
+    private func handleGoogleSignIn() {
+        isSigningIn = true
+        errorMessage = nil
+
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            errorMessage = localization.string(for: "welcome.unableToSignIn")
+            isSigningIn = false
+            return
+        }
+
+        Task {
+            do {
+                try await supabaseManager.signInWithGoogle(presentingViewController: rootViewController)
+
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
+                isSigningIn = false
+                dismiss()
+                onComplete?()
+            } catch {
+                let nsError = error as NSError
+                if nsError.code == -5 {
+                    isSigningIn = false
+                    return
+                }
+
+                errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
+                isSigningIn = false
+            }
+        }
+    }
+
+    private func handleAppleSignIn() {
+        isSigningIn = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await supabaseManager.signInWithApple()
+
+                if let userId = supabaseManager.currentUser?.id.uuidString {
+                    await subscriptionManager.login(userId: userId)
+                }
+
+                isSigningIn = false
+                dismiss()
+                onComplete?()
+            } catch {
+                let nsError = error as NSError
+                if nsError.code == 1001 || nsError.domain == ASAuthorizationError.errorDomain {
+                    isSigningIn = false
+                    return
+                }
+
+                errorMessage = "\(localization.string(for: "welcome.signInFailed")) \(error.localizedDescription)"
+                isSigningIn = false
+            }
         }
     }
 }

@@ -163,6 +163,7 @@
 "settings.background" = "外観";
 "settings.account" = "アカウント";
 "settings.about" = "情報";
+"settings.dataControl" = "データ管理";
 "settings.subscription" = "サブスクリプション";
 "settings.renewsOn" = "更新日";
 "settings.expiresOn" = "有効期限";
@@ -216,6 +217,7 @@
 "settings.currentPlan" = "現在のプラン：%@";
 "settings.version" = "バージョン";
 "settings.rateApp" = "Rate Us";
+"settings.signInToSync" = "Sign In to Sync";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "利用可能なプラン";
@@ -251,3 +253,21 @@
 "paywall.dismissLeave" = "離れる";
 "paywall.dismissMessage" = "3日間の無料トライアルとQuote AIへの無制限アクセスを逃します。";
 "paywall.retry" = "再試行";
+
+/* OnboardingView - Skip */
+"onboarding.skip" = "Skip";
+
+/* Sign In */
+"signIn.skipForNow" = "Skip for now";
+
+/* Settings - Account */
+"settings.deleteAccount" = "Delete Account";
+
+/* Delete Account */
+"deleteAccount.title" = "Delete Account";
+"deleteAccount.warning" = "This permanently deletes your account and all data. This cannot be undone.";
+"deleteAccount.subscriptionNote" = "Subscriptions are managed by Apple. Deleting your account does not cancel your subscription.";
+"deleteAccount.typeToConfirm" = "Type delete to confirm.";
+"deleteAccount.placeholder" = "delete";
+"deleteAccount.confirm" = "Delete";
+"deleteAccount.cancel" = "Cancel";

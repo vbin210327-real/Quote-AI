@@ -97,6 +97,7 @@ extension UserEnergyDrain {
 
 
 enum UserGeneration: String, CaseIterable, Codable {
+    case unknown = "Unknown"
     case genAlpha = "Gen Alpha"       // 2013-2024
     case genZ = "Gen Z"               // 1997-2012
     case millennial = "Millennial"    // 1981-1996
@@ -106,6 +107,9 @@ enum UserGeneration: String, CaseIterable, Codable {
 
     static func from(birthYear: Int) -> UserGeneration {
         let currentYear = Calendar.current.component(.year, from: Date())
+        if birthYear <= 0 {
+            return .unknown
+        }
         switch birthYear {
         case 2013...currentYear:
             return .genAlpha
@@ -124,6 +128,8 @@ enum UserGeneration: String, CaseIterable, Codable {
 
     var toneModifier: String {
         switch self {
+        case .unknown:
+            return "Keep the language broadly accessible and neutral."
         case .genAlpha:
             return "Use simple, encouraging language. Keep it positive and relatable for young minds. Avoid complex philosophical concepts."
         case .genZ:
@@ -141,6 +147,7 @@ enum UserGeneration: String, CaseIterable, Codable {
 
     var yearRange: String {
         switch self {
+        case .unknown: return "Unknown"
         case .genAlpha: return "2013-present"
         case .genZ: return "1997-2012"
         case .millennial: return "1981-1996"
@@ -309,6 +316,8 @@ class UserPreferences: ObservableObject {
         }
     }
 
+    @Published var shouldSkipOnboardingSignIn: Bool = false
+
     @Published var hasSeenWelcome: Bool {
         didSet {
             UserDefaults.standard.set(hasSeenWelcome, forKey: "hasSeenWelcome")
@@ -419,11 +428,7 @@ class UserPreferences: ObservableObject {
         }
 
         let savedBirthYear = UserDefaults.standard.integer(forKey: "userBirthYear")
-        if savedBirthYear == 0 {
-            self.userBirthYear = 2000 // Default birth year
-        } else {
-            self.userBirthYear = savedBirthYear
-        }
+        self.userBirthYear = savedBirthYear
 
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         self.hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
@@ -522,7 +527,7 @@ class UserPreferences: ObservableObject {
                 name: userName.isEmpty ? nil : userName,
                 gender: userGender.isEmpty ? nil : userGender,
                 profileImageUrl: profileImageUrl,
-                birthYear: userBirthYear,
+                birthYear: userBirthYear == 0 ? nil : userBirthYear,
                 quoteTone: quoteTone.rawValue,
                 userFocus: userFocus.rawValue,
                 userBarrier: userBarrier.rawValue,
@@ -644,8 +649,9 @@ class UserPreferences: ObservableObject {
         userBarrier = .procrastination
         userEnergyDrain = .career
         mentalEnergy = 0.5
-        userBirthYear = 2000
+        userBirthYear = 0
         hasCompletedOnboarding = false
+        shouldSkipOnboardingSignIn = false
         hasSeenWelcome = false
         // Note: hasPlayedWelcomeIntro is intentionally NOT reset here
         // The welcome animation should only play once ever, even after logout

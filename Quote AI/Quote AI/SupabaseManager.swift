@@ -62,6 +62,10 @@ class SupabaseManager: ObservableObject {
     @Published var currentUser: User?
     @Published var isAuthenticated = false
 
+    var isCurrentUserAnonymous: Bool {
+        currentUser?.isAnonymous ?? false
+    }
+
     let client: SupabaseClient
     private var appleSignInCoordinator: AppleSignInCoordinator?
 
@@ -103,6 +107,7 @@ class SupabaseManager: ObservableObject {
     
     // Sign in with Google
     func signInWithGoogle(presentingViewController: UIViewController) async throws {
+        let previousUser = currentUser
         // Initialize Google Sign-In with iOS Client ID only
         let config = GIDConfiguration(clientID: SupabaseConfig.googleIOSClientID)
         GIDSignIn.sharedInstance.configuration = config
@@ -137,12 +142,17 @@ class SupabaseManager: ObservableObject {
         // Link RevenueCat to Supabase user ID
         await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
 
+        if previousUser?.isAnonymous == true {
+            await migrateAnonymousData(from: previousUser?.id.uuidString)
+        }
+
         // Sync data from cloud after login
         await syncFromCloud()
     }
 
     // Sign in with Apple
     func signInWithApple() async throws {
+        let previousUser = currentUser
         // Get the key window for presenting the Apple Sign In sheet
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
@@ -186,6 +196,25 @@ class SupabaseManager: ObservableObject {
         // Link RevenueCat to Supabase user ID
         await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
 
+        if previousUser?.isAnonymous == true {
+            await migrateAnonymousData(from: previousUser?.id.uuidString)
+        }
+
+        // Sync data from cloud after login
+        await syncFromCloud()
+    }
+
+    // Sign in anonymously (optional account creation)
+    func signInAnonymously() async throws {
+        let session = try await client.auth.signInAnonymously()
+
+        self.currentUser = session.user
+        self.isAuthenticated = true
+        syncSharedSession(session)
+
+        // Link RevenueCat to Supabase user ID
+        await SubscriptionManager.shared.login(userId: session.user.id.uuidString)
+
         // Sync data from cloud after login
         await syncFromCloud()
     }
@@ -211,12 +240,42 @@ class SupabaseManager: ObservableObject {
         clearLocalData()
     }
 
+    // Delete account and all associated data
+    func deleteAccount() async throws {
+        try await client.functions.invoke(
+            "delete-account",
+            options: FunctionInvokeOptions(method: .post)
+        )
+
+        try? await signOut()
+    }
+
     // MARK: - Data Sync
 
     /// Sync all user data from cloud after login
     private func syncFromCloud() async {
         await UserPreferences.shared.syncFromCloud()
         await FavoriteQuotesManager.shared.syncFromCloud()
+    }
+
+    private func migrateAnonymousData(from oldUserId: String?) async {
+        guard let oldUserId else { return }
+
+        struct MigrationRequest: Encodable {
+            let oldUserId: String
+        }
+
+        do {
+            try await client.functions.invoke(
+                "migrate-account",
+                options: FunctionInvokeOptions(
+                    method: .post,
+                    body: MigrationRequest(oldUserId: oldUserId)
+                )
+            )
+        } catch {
+            // Ignore migration errors to avoid blocking sign-in
+        }
     }
 
     /// Clear all local user data on logout

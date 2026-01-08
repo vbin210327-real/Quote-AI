@@ -163,6 +163,7 @@
 "settings.background" = "디자인";
 "settings.account" = "계정";
 "settings.about" = "정보";
+"settings.dataControl" = "데이터 관리";
 "settings.subscription" = "구독";
 "settings.renewsOn" = "갱신일";
 "settings.expiresOn" = "만료일";
@@ -216,6 +217,7 @@
 "settings.currentPlan" = "현재 플랜: %@";
 "settings.version" = "버전";
 "settings.rateApp" = "Rate Us";
+"settings.signInToSync" = "Sign In to Sync";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "이용 가능한 플랜";
@@ -251,3 +253,21 @@
 "paywall.dismissLeave" = "나가기";
 "paywall.dismissMessage" = "3일 무료 체험과 Quote AI 무제한 이용 기회를 놓치게 됩니다。";
 "paywall.retry" = "다시 시도";
+
+/* OnboardingView - Skip */
+"onboarding.skip" = "Skip";
+
+/* Sign In */
+"signIn.skipForNow" = "Skip for now";
+
+/* Settings - Account */
+"settings.deleteAccount" = "Delete Account";
+
+/* Delete Account */
+"deleteAccount.title" = "Delete Account";
+"deleteAccount.warning" = "This permanently deletes your account and all data. This cannot be undone.";
+"deleteAccount.subscriptionNote" = "Subscriptions are managed by Apple. Deleting your account does not cancel your subscription.";
+"deleteAccount.typeToConfirm" = "Type delete to confirm.";
+"deleteAccount.placeholder" = "delete";
+"deleteAccount.confirm" = "Delete";
+"deleteAccount.cancel" = "Cancel";

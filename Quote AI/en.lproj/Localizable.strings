@@ -163,6 +163,7 @@
 "settings.background" = "Appearance";
 "settings.account" = "ACCOUNT";
 "settings.about" = "ABOUT";
+"settings.dataControl" = "DATA CONTROL";
 "settings.subscription" = "Subscription";
 "settings.renewsOn" = "Renews";
 "settings.expiresOn" = "Expires";
@@ -214,6 +215,7 @@
 "settings.currentPlan" = "Current plan: %@";
 "settings.version" = "Version";
 "settings.rateApp" = "Rate Us";
+"settings.signInToSync" = "Sign In to Sync";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "Available Plans";
@@ -249,3 +251,21 @@
 "paywall.dismissLeave" = "Leave";
 "paywall.dismissMessage" = "You'll miss your 3-day free trial and unlimited access to Quote AI.";
 "paywall.retry" = "Retry";
+
+/* OnboardingView - Skip */
+"onboarding.skip" = "Skip";
+
+/* Sign In */
+"signIn.skipForNow" = "Skip for now";
+
+/* Settings - Account */
+"settings.deleteAccount" = "Delete Account";
+
+/* Delete Account */
+"deleteAccount.title" = "Delete Account";
+"deleteAccount.warning" = "This permanently deletes your account and all data. This cannot be undone.";
+"deleteAccount.subscriptionNote" = "Subscriptions are managed by Apple. Deleting your account does not cancel your subscription.";
+"deleteAccount.typeToConfirm" = "Type delete to confirm.";
+"deleteAccount.placeholder" = "delete";
+"deleteAccount.confirm" = "Delete";
+"deleteAccount.cancel" = "Cancel";

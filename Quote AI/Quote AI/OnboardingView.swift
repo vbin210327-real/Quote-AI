@@ -35,6 +35,10 @@ struct OnboardingView: View {
     @State private var selectedNotificationTime: NotificationTime?
 
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) private var openURL
+
+    private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private let privacyURL = URL(string: "https://gist.github.com/vbin210327-real/131a5d4d01c2591efa84453c78d9ba9c")!
     
     var body: some View {
         ZStack {
@@ -185,23 +189,19 @@ struct OnboardingView: View {
                 // Continue Button - Same position as Get Started in WelcomeView
                 // Hide for setup loading step (12) which shows its own button, and sign-in step (14)
                 if currentStep < 12 {
-                    Button(action: {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        nextStep()
-                    }) {
-                        Text(localization.string(for: "onboarding.continue"))
-                            .font(.system(size: 18, weight: .semibold))
-                            .italic()
-                            .foregroundColor(.white)
+                    Group {
+                        if shouldShowSkipButton {
+                            HStack(spacing: 12) {
+                                continueButton
+                                skipInlineButton
+                            }
                             .frame(maxWidth: 500)
-                            .frame(height: 60)
-                            .background(Color.black)
-                            .cornerRadius(30)
+                        } else {
+                            continueButton
+                                .frame(maxWidth: 500)
+                        }
                     }
                     .padding(.horizontal, 20)
-                    .disabled(isContinueDisabled)
-                    .opacity(isContinueDisabled ? 0.5 : 1.0)
                     .padding(.bottom, 20)
                 }
 
@@ -211,7 +211,10 @@ struct OnboardingView: View {
                         impact.impactOccurred()
                         // If user is already authenticated (signed in from WelcomeView), show paywall directly
                         // Otherwise, go to sign-in step
-                        if supabaseManager.isAuthenticated {
+                        if preferences.shouldSkipOnboardingSignIn,
+                           supabaseManager.isAuthenticated,
+                           !supabaseManager.isCurrentUserAnonymous {
+                            preferences.shouldSkipOnboardingSignIn = false
                             showPaywall = true
                         } else {
                             withAnimation {
@@ -260,7 +263,7 @@ struct OnboardingView: View {
         switch currentStep {
         case 0: return selectedGender.isEmpty
         case 1: return nameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case 2: return false // Birth year always has a value
+        case 2: return false // Birth year is optional
         case 3: return false // Mental energy always has a initial value
         case 4: return selectedEnergyDrain == nil
         case 5: return selectedFocus == nil
@@ -270,6 +273,45 @@ struct OnboardingView: View {
         case 10: return selectedNotificationTime == nil
         default: return false
         }
+    }
+
+    private var shouldShowSkipButton: Bool {
+        currentStep == 0 || currentStep == 1 || currentStep == 2
+    }
+
+    private var continueButton: some View {
+        Button(action: {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
+            nextStep()
+        }) {
+            Text(localization.string(for: "onboarding.continue"))
+                .font(.system(size: 18, weight: .semibold))
+                .italic()
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 60)
+                .background(Color.black)
+                .cornerRadius(30)
+        }
+        .disabled(isContinueDisabled)
+        .opacity(isContinueDisabled ? 0.5 : 1.0)
+    }
+
+    private var skipInlineButton: some View {
+        Button(action: {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+            skipCurrentStep()
+        }) {
+            Text(localization.string(for: "onboarding.skip"))
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.black)
+                .frame(width: 110, height: 60)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(30)
+        }
+        .buttonStyle(.plain)
     }
 
     // Dynamic title based on current step
@@ -540,14 +582,7 @@ struct OnboardingView: View {
     // Step 14: Sign In
     var signInStep: some View {
         VStack(spacing: 30) {
-            Text(localization.string(for: "signIn.oneLastStep"))
-                .font(.title2)
-                .foregroundColor(.white.opacity(0.8))
-
-            Text(localization.string(for: "signIn.saveProfile"))
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
+            Spacer(minLength: 0)
 
             VStack(spacing: 16) {
                 // Apple Sign In Button (Custom button with localized text)
@@ -630,13 +665,47 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 32)
 
-            Text(localization.string(for: "signIn.termsAgreement"))
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.6))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            VStack(spacing: 4) {
+                Text(localization.string(for: "welcome.termsPrefix"))
+                    .font(.caption)
+                    .foregroundColor(.black.opacity(0.6))
+
+                HStack(spacing: 4) {
+                    Button(action: { openURL(termsURL) }) {
+                        Text(localization.string(for: "welcome.termsAndConditions"))
+                            .font(.caption)
+                            .foregroundColor(.black.opacity(0.6))
+                    }
+                    .buttonStyle(.plain)
+
+                    Text(localization.string(for: "welcome.and"))
+                        .font(.caption)
+                        .foregroundColor(.black.opacity(0.6))
+
+                    Button(action: { openURL(privacyURL) }) {
+                        Text(localization.string(for: "welcome.privacyPolicy"))
+                            .font(.caption)
+                            .foregroundColor(.black.opacity(0.6))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 40)
+
+            Button(action: {
+                handleSkipSignIn()
+            }) {
+                Text(localization.string(for: "signIn.skipForNow"))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.black.opacity(0.8))
+                    .underline()
+            }
+            .buttonStyle(.plain)
+            .disabled(isSigningIn)
+
+            Spacer(minLength: 0)
         }
-        .padding(.top, 56)
     }
     private func nextStep() {
         withAnimation {
@@ -698,6 +767,15 @@ struct OnboardingView: View {
                     NotificationManager.shared.requestPermission()
                 }
             } else if currentStep < 12 {
+                currentStep += 1
+                navigationCounter += 1
+            }
+        }
+    }
+
+    private func skipCurrentStep() {
+        withAnimation {
+            if currentStep < 12 {
                 currentStep += 1
                 navigationCounter += 1
             }
@@ -780,6 +858,40 @@ struct OnboardingView: View {
 
                 errorMessage = "Sign-in failed: \(error.localizedDescription)"
                 isSigningIn = false
+            }
+        }
+    }
+
+    private func handleSkipSignIn() {
+        guard !isSigningIn else { return }
+        isSigningIn = true
+        errorMessage = nil
+
+        Task {
+            do {
+                if supabaseManager.isAuthenticated {
+                    await MainActor.run {
+                        isSigningIn = false
+                        showPaywall = true
+                    }
+                    return
+                }
+
+                try await supabaseManager.signInAnonymously()
+
+                await MainActor.run {
+                    isSigningIn = false
+                    if subscriptionManager.isProUser {
+                        preferences.completeOnboarding()
+                    } else {
+                        showPaywall = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Sign-in failed: \(error.localizedDescription)"
+                    isSigningIn = false
+                }
             }
         }
     }
@@ -1670,7 +1782,7 @@ struct BirthYearStepView: View {
                 selection: Binding(
                     get: {
                         var components = DateComponents()
-                        components.year = birthYear
+                        components.year = birthYear == 0 ? 2000 : birthYear
                         components.month = selectedMonth
                         components.day = selectedDay
                         return Calendar.current.date(from: components) ?? Date()

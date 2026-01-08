@@ -163,6 +163,7 @@
 "settings.background" = "दिखावट";
 "settings.account" = "खाता";
 "settings.about" = "के बारे में";
+"settings.dataControl" = "डेटा नियंत्रण";
 "settings.subscription" = "सदस्यता";
 "settings.renewsOn" = "नवीनीकरण";
 "settings.expiresOn" = "समाप्ति";
@@ -206,6 +207,7 @@
 "settings.currentPlan" = "वर्तमान प्लान: %@";
 "settings.version" = "संस्करण";
 "settings.rateApp" = "Rate Us";
+"settings.signInToSync" = "Sign In to Sync";
 
 // Upgrade Plan View
 "upgrade.availablePlans" = "उपलब्ध प्लान";
@@ -241,3 +243,21 @@
 "paywall.dismissLeave" = "छोड़ें";
 "paywall.dismissMessage" = "आप अपना 3 दिन का मुफ्त ट्रायल और Quote AI की असीमित पहुंच खो देंगे।";
 "paywall.retry" = "पुनः प्रयास करें";
+
+/* OnboardingView - Skip */
+"onboarding.skip" = "Skip";
+
+/* Sign In */
+"signIn.skipForNow" = "Skip for now";
+
+/* Settings - Account */
+"settings.deleteAccount" = "Delete Account";
+
+/* Delete Account */
+"deleteAccount.title" = "Delete Account";
+"deleteAccount.warning" = "This permanently deletes your account and all data. This cannot be undone.";
+"deleteAccount.subscriptionNote" = "Subscriptions are managed by Apple. Deleting your account does not cancel your subscription.";
+"deleteAccount.typeToConfirm" = "Type delete to confirm.";
+"deleteAccount.placeholder" = "delete";
+"deleteAccount.confirm" = "Delete";
+"deleteAccount.cancel" = "Cancel";

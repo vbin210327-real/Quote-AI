@@ -323,6 +323,7 @@ struct WelcomeView: View {
 
                 isSigningIn = false
                 showSignInSheet = false
+                userPreferences.shouldSkipOnboardingSignIn = true
 
                 // If already subscribed, complete onboarding and go to main app
                 // If not subscribed, navigate to OnboardingView (paywall shown at end)
@@ -360,6 +361,7 @@ struct WelcomeView: View {
 
                 isSigningIn = false
                 showSignInSheet = false
+                userPreferences.shouldSkipOnboardingSignIn = true
 
                 // If already subscribed, complete onboarding and go to main app
                 // If not subscribed, navigate to OnboardingView (paywall shown at end)
